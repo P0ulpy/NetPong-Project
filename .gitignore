@@ -6,7 +6,6 @@
 # local project
 
 vcpkg_installed/
-src/
 
 # User-specific files
 *.rsuser
