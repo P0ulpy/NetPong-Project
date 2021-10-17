@@ -37,6 +37,7 @@ sudo apt install g++ gdb make ninja-build rsync zip
 
 ```cmd
 ./vcpkg/vcpkg.exe --feature-flags=versions install
+# si une réinstallation est nécessaire 
 ./vcpkg/vcpkg.exe install
 ```
 
