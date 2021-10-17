@@ -11,24 +11,36 @@ Sous windows le plus simple reste d'installé [Visual studio](https://visualstudi
 
 *Linux*
 ```bash
-sudo apt update
-sudo apt install g++ gdb make ninja-build rsync zip
+> sudo apt update
+> sudo apt install g++ gdb make ninja-build rsync zip
 ```
 
 ### Lancer bootstrap-vcpkg pour initialiser vcpkg
 
 *Windows*
-```bash
-./vcpkg/bootstrap-vcpkg.bat
+```cmd
+> ./vcpkg/bootstrap-vcpkg.bat
 ```
 
 *Linux*
 ```bash
-./vcpkg/bootstrap-vcpkg.sh
+> ./vcpkg/bootstrap-vcpkg.sh
+```
+
+### a
+
+```cmd
+./vcpkg/vcpkg.exe --feature-flags=versions install
+```
+
+### b
+
+```cmd
+./vcpkg/vcpkg.exe install
 ```
 
 ### Rajouté le toolchain file de vcpkg
 
 ```bash
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
+> cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
