@@ -37,6 +37,7 @@ sudo apt install g++ gdb make ninja-build rsync zip
 
 ```cmd
 ./vcpkg/vcpkg.exe --feature-flags=versions install
+
 # si une réinstallation est nécessaire 
 ./vcpkg/vcpkg.exe install
 ```
@@ -45,7 +46,7 @@ sudo apt install g++ gdb make ninja-build rsync zip
 
 *Sous Visual Studio*
 
-
+////////////////
 
 ```bash
 cmake -B out -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
