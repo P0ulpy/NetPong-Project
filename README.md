@@ -30,7 +30,7 @@ sudo apt install g++ gdb make ninja-build rsync zip
 
 *Linux*
 ```bash
-> ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 ```
 
 ### Installer les dépandances
