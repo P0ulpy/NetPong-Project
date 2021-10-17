@@ -1,31 +1,31 @@
 # NetPong Project
 
-## Mise en place de l'environnement et des dépandances
+## Mise en place de l'environnement et des dÃ©pandances
 
-La première étape est d'installer le sous module vcpkg
+La premiÃ¨re Ã©tape est d'installer le sous module vcpkg
 
 ```bash
-> git submodule update --init --recursive
+git submodule update --init --recursive
 ```
 
-Cmake est requis pour construire le projet il est téléchargable [ici](https://cmake.org/download/)
+Cmake est requis pour construire le projet il est tÃ©lÃ©chargable [ici](https://cmake.org/download/)
 
-il est aussi nécéssaire d'installé un compilateur et plusieurs autres outils
+il est aussi nÃ©cÃ©ssaire d'installÃ© un compilateur et plusieurs autres outils
 
 *Windows*
-Sous windows le plus simple reste d'installé [Visual studio](https://visualstudio.microsoft.com/fr/downloads/) avec les addons développement multiplateforme en C++
+Sous windows le plus simple reste d'installÃ© [Visual studio](https://visualstudio.microsoft.com/fr/downloads/) avec les addons dÃ©veloppement multiplateforme en C++
 
 *Linux*
 ```bash
-> sudo apt update
-> sudo apt install g++ gdb make ninja-build rsync zip
+sudo apt update
+sudo apt install g++ gdb make ninja-build rsync zip
 ```
 
 ### Lancer bootstrap-vcpkg pour initialiser vcpkg
 
 *Windows*
 ```cmd
-> ./vcpkg/bootstrap-vcpkg.bat -disableMetrics
+./vcpkg/bootstrap-vcpkg.bat -disableMetrics
 ```
 
 *Linux*
@@ -33,7 +33,7 @@ Sous windows le plus simple reste d'installé [Visual studio](https://visualstudi
 > ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 ```
 
-### Installer les dépandances
+### Installer les dÃ©pandances
 
 ```cmd
 ./vcpkg/vcpkg.exe --feature-flags=versions install
@@ -47,5 +47,5 @@ Sous windows le plus simple reste d'installé [Visual studio](https://visualstudi
 
 
 ```bash
-> cmake -B out -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake -B out -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
