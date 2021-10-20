@@ -30,7 +30,7 @@ else()
     add_compile_definitions(NDEBUG=1)
 endif(${CMAKE_BUILD_TYPE} MATCHES Debug)
 
-add_executable (NetPong-Project "src/NetPong Project.cpp" "src/NetPong Project.h")
+add_executable (NetPong-Project "src/main.cpp" "src/main.h")
 
 target_link_libraries(NetPong-Project sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
 
