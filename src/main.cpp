@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-
+#define PI 3.14159265
 #define         SPRITE_SPEED        5
 
 int main()
@@ -20,8 +20,15 @@ int main()
     // Create a window with the same pixel depth as the desktop
 
     sf::RenderWindow window(sf::VideoMode(1200, 900), "PONG");
+    sf::Text text;
+    sf::Font font;
+    if (!font.loadFromFile("./Assets/arial.ttf"))
+    {
+        std::cerr << "Error while loading font" << std::endl;
 
-
+        return -1;
+    }
+    
 
     // Enable vertical sync. (vsync)
 
@@ -42,6 +49,7 @@ int main()
     // Create texture from PNG file
 
     sf::Texture texture;
+    sf::Texture bouclier;
 
     if (!texture.loadFromFile("./Assets/Rond_rouge.png"))
 
@@ -53,9 +61,20 @@ int main()
 
     }
 
+    if (!bouclier.loadFromFile("./Assets/Bouclier.jpg"))
+
+    {
+
+        std::cerr << "Error while loading bouclier texture" << std::endl;
+
+        return -1;
+
+    }
+
     // Enable the smooth filter. The texture appears smoother so that pixels are less noticeable.
 
     texture.setSmooth(true);
+    bouclier.setSmooth(true);
 
 
 
@@ -68,13 +87,20 @@ int main()
     // Create the sprite and apply the texture
 
     sf::Sprite sprite;
+    sf::Sprite bouclierSPRITE;
 
     sprite.setTexture(texture);
     sprite.setScale(0.2,0.2);
 
+    bouclierSPRITE.setTexture(bouclier);
+    bouclierSPRITE.setScale(0.5,0.5);
+
     sf::FloatRect spriteSize = sprite.getGlobalBounds();
+    sf::FloatRect bouclierSize = bouclierSPRITE.getGlobalBounds();
 
     sprite.setOrigin(spriteSize.width, -1500);
+    bouclierSPRITE.setOrigin((spriteSize.width)-35, -550);
+
 
 
 
@@ -87,10 +113,12 @@ int main()
 // Sprite coordinates
 
     int x = window.getSize().x / 2.;
+    int xb = window.getSize().x / 2.;
 
     int y = window.getSize().y / 2.;
+    int yb = window.getSize().y / 2.;
 
-
+  
 
     // Flags for key pressed
 
@@ -117,6 +145,7 @@ int main()
         while (window.pollEvent(event))
 
         {
+           
 
             // Close the window if a key is pressed or if requested
 
@@ -191,8 +220,10 @@ int main()
         // Update coordinates
 
         if (leftFlag) x -= SPRITE_SPEED;
+        if (leftFlag) xb -= SPRITE_SPEED;
 
         if (rightFlag) x += SPRITE_SPEED;
+        if (rightFlag) xb += SPRITE_SPEED;
 
         //   if (upFlag) y -= SPRITE_SPEED;
 
@@ -206,9 +237,12 @@ int main()
 
         if (x > (int)window.getSize().x) x = window.getSize().x;
 
-        if (y < 0) y = 0;
+        if (xb < 0) xb = 0;
 
-        if (y > (int)window.getSize().y) y = window.getSize().y;
+        if (xb > (int)window.getSize().x) xb = window.getSize().x;
+       // if (y < 0) y = 0;
+
+      //  if (y > (int)window.getSize().y) y = window.getSize().y;
 
 
 
@@ -219,14 +253,50 @@ int main()
 
 
         // Rotate and draw the sprite
+        
+
+      
+
+
 
         sprite.setPosition(x, y);
+        bouclierSPRITE.setPosition(xb, yb);
 
-        //sprite.setRotation(timer.getElapsedTime().asSeconds() / M_PI * 90.f);
+        // Produit vectoriel
+        float xm = sf::Mouse::getPosition().x;
+        float ym = sf::Mouse::getPosition().y;
+        float xbouclier = bouclierSPRITE.getPosition().x;
+        float ybouclier = bouclierSPRITE.getPosition().y;
 
+
+        float Na = sqrt(xm * xm + ym * ym);
+        float Nb = sqrt(xbouclier * xbouclier + ybouclier * ybouclier);
+        float C = (xm * xbouclier + ym * ybouclier)/(Na*Nb);
+        float S = (xm * ybouclier - ym * xbouclier);
+
+        int sign = 0;
+        if (S > 0) sign = 1;
+        if (S < 0) sign = -1;
+
+        float angle = acos(C) * 180.0 / PI;
+
+        text.setFont(font);
+        text.setPosition(window.getSize().x/2, window.getSize().y/2);
+
+        text.setString(std::to_string(angle));
+        text.setCharacterSize(24);
+        text.setFillColor(sf::Color::Red);
+        window.draw(text);
+       // std::cout << xm << std::endl;;
+
+
+       bouclierSPRITE.setRotation(angle);
+      // sprite.setRotation(angle);
+       
         window.draw(sprite);
-
-
+        window.draw(bouclierSPRITE);
+       
+        
 
         // Update display and wait for vsync
 
