@@ -34,4 +34,4 @@ add_executable (NetPong-Project "src/main.cpp" "src/main.h")
 
 target_link_libraries(NetPong-Project sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
 
-file(COPY src/Assets DESTINATION /)
+file(COPY src/Assets DESTINATION /) 
