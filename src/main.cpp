@@ -1,11 +1,18 @@
-﻿#include <SFML/Audio.hpp>
-#include <SFML/Graphics.hpp>    
-#include <SFML/Network.hpp>
-#include <SFML/Window.hpp>
+﻿#include "Game.h"
+#include "main.h"
 
-int main()
-{
-    system("echo %cd% && pause");
+int main(int argc, char ** argv) {
 
-    return EXIT_SUCCESS;
+	//Init game engine
+	Game game;
+
+	//Game loop
+	while(game.isRunning())
+	{
+		game.updateDeltaTime();
+		game.update();
+		game.render();
+	}
+
+	return 0;
 }
