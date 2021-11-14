@@ -1,12 +1,10 @@
 #include "PoPossibEngin.h"
 
-#include "Game.h"
-
-
 //--- Constructors - Destructors ---
 PoPossibEngin::PoPossibEngin()
 {
 	initWindow();
+	initScenes();
 }
 
 PoPossibEngin::~PoPossibEngin()
@@ -18,15 +16,25 @@ PoPossibEngin::~PoPossibEngin()
 void PoPossibEngin::initWindow()
 {
 	_videoMode = sf::VideoMode(1200, 900);
-
 	_window = std::make_unique<sf::RenderWindow>(_videoMode, "Net-Pong Project", sf::Style::Close | sf::Style::Titlebar);
 	_window->setFramerateLimit(60);
+}
+
+void PoPossibEngin::initScenes()
+{
+	_scenes.push(std::make_unique<MainGameScene>(_window.get()));
+	int prout = 6;
 }
 
 //--- Update - Render ---
 void PoPossibEngin::update()
 {
 	pollEvents();
+
+	if (!_scenes.empty())
+	{
+		_scenes.top()->update(_deltaTime);
+	}
 }
 
 void PoPossibEngin::updateDeltaTime()
@@ -37,6 +45,11 @@ void PoPossibEngin::updateDeltaTime()
 void PoPossibEngin::render()
 {
 	_window->clear();
+
+	if(!_scenes.empty())
+	{
+		_scenes.top()->render(_window.get());
+	}
 
 	_window->display();
 }
@@ -51,6 +64,11 @@ void PoPossibEngin::run()
 	}
 }
 
+void PoPossibEngin::quitApplication() const
+{
+	_window->close();
+}
+
 //--- Methods ---
 void PoPossibEngin::pollEvents()
 {
@@ -59,7 +77,7 @@ void PoPossibEngin::pollEvents()
 		switch (_sfmlEvent.type)
 		{
 		case sf::Event::Closed:
-			_window->close();
+			quitApplication();
 			break;
 		case sf::Event::KeyPressed:
 			handleKeyPressed(_sfmlEvent.key.code);
@@ -75,7 +93,7 @@ void PoPossibEngin::handleKeyPressed(const sf::Keyboard::Key& keyPressed) const
 	switch (keyPressed)
 	{
 		case sf::Keyboard::Escape:
-			_window->close();
+			quitApplication();
 			break;
 		default:
 			break;

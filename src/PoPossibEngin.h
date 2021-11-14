@@ -1,13 +1,20 @@
 #pragma once
 
-#include "SFML/Graphics.hpp"
+#include "MainGameScene.h"
+
+class Scene;
+class MainGainScene;
 
 class PoPossibEngin
 {
+private:
 	//Window and SFML stuff
 	sf::VideoMode _videoMode;
 	std::unique_ptr<sf::RenderWindow> _window;
 	sf::Event _sfmlEvent;
+
+	//Scenes
+	std::stack<std::unique_ptr<Scene>> _scenes;//On utilise une stack, c'est bien ?
 
 	//Time - DeltaTime
 	sf::Clock _dtClock;
@@ -15,6 +22,7 @@ class PoPossibEngin
 
 	//Initializers
 	void initWindow();
+	void initScenes();
 
 public:
 	//Constructors - Destructors
@@ -32,4 +40,6 @@ public:
 	void updateDeltaTime();
 	void render();
 	void run();
+
+	void quitApplication() const;
 };
