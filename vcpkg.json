@@ -5,7 +5,8 @@
   "builtin-baseline": "050ee6cce0ea11b57cd2ae60857af839dfbe4be6",
   "dependencies": [
     "freetype",
-    "sfml"
+    "sfml",
+    "imgui-sfml"
   ],
   "overrides": [
     {
