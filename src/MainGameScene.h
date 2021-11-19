@@ -4,10 +4,11 @@
 #include "Terrain.h"
 #include "PongBall.h"
 
+class PoPossibEngin;
+
 class MainGameScene : public Scene
 {
 private:
-	std::unique_ptr<sf::RenderWindow*> _window;
 	std::vector<sf::Texture> _textures;
 
 	//Game objects
@@ -20,7 +21,7 @@ private:
 	void initValues();
 	void initFonts();
 public:
-	MainGameScene(sf::RenderWindow* window);
+	MainGameScene(PoPossibEngin& poPossibEngin);
 	virtual ~MainGameScene();
 
 	void updateInputs();

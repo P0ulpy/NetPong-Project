@@ -1,25 +1,23 @@
 #pragma once
 
-#include <iostream>
 #include <vector>
-#include <stack>
 
-#include "SFML/System.hpp"
-#include "SFML/Window.hpp"
+#include "PoPossibEngin.h"
+
 #include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
-#include "SFML/Network.hpp"
+
+class PoPossibEngin;
 
 class Scene
 {
 private:
 
 protected:
-	std::unique_ptr<sf::RenderWindow*> _window;
+	PoPossibEngin* _poPossibEngin;
 	std::vector<sf::Texture> _textures;
 
 public:
-	Scene(sf::RenderWindow* window);
+	Scene(PoPossibEngin& poPossibEngin);
 	virtual ~Scene();
 
 	virtual void update(const float& deltaTime) = 0;

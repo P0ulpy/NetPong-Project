@@ -34,7 +34,7 @@ void PongBall::initShape(const sf::RenderWindow& window)
 	_ballShape.setFillColor(_ballColor);
 	_ballShape.setOutlineColor(sf::Color::White);
 	_ballShape.setOutlineThickness(2);
-	_ballShape.setPosition(sf::Vector2f(window.getSize().x / 2, window.getSize().y / 2));
+	_ballShape.setPosition(sf::Vector2f(static_cast<float>(window.getSize().x) / 2.f, static_cast<float>(window.getSize().y) / 2.f));
 }
 
 void PongBall::initBoost()
@@ -49,7 +49,7 @@ void PongBall::initPhantomEffect()
 
 	_timeBetweenPhantomBalls = 0.05f;
 	_phantomBallEffectDuration = 1.f;
-	_hasPhantomEffect = false;
+	_hasPhantomEffect = true;
 
 	_currentTimePhantomBallEffect = 0;
 	_currentTimePhantomBallCooldown = 0;
@@ -110,11 +110,6 @@ void PongBall::updateMovement(const float& deltaTime)
 
 void PongBall::updatePhantomEffect(const float& deltaTime)
 {
-	/*if (_needErasePhantomBall)
-	{
-		eraseLastPhantomBall();
-	}*/
-
 	if(_hasPhantomEffect)
 	{
 		_currentTimePhantomBallCooldown += deltaTime;

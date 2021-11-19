@@ -2,6 +2,8 @@
 
 #include "Game.h"
 
+class MainGameScene;
+
 class Terrain
 {
 public:

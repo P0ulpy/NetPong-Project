@@ -1,10 +1,8 @@
 #include "MainGameScene.h"
 
-MainGameScene::MainGameScene(sf::RenderWindow* window)
-	: Scene(window)
+MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
+	: Scene(poPossibEngin)
 {
-	_window = std::make_unique<sf::RenderWindow*>(window);
-
 	initValues();
 	initFonts();
 }
@@ -16,13 +14,8 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs()
 {
-	//C'EST DEGEULASSE
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		_pongBall->resetSpeedBonusRatio();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad0))
-		_pongBall->createPhantomBalls();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad1))
-		_pongBall->activatedErasingLastPhantomBall();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad2))
 		_pongBall->startPhantomBallEffect();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad3))
@@ -31,8 +24,8 @@ void MainGameScene::updateInputs()
 
 void MainGameScene::initValues()
 {
-	_terrain = std::make_unique<Terrain>(**_window);//QUELLE HORREUR
-	_pongBall = std::make_unique<PongBall>(**_window, _terrain->getPlayableArea());
+	_terrain = std::make_unique<Terrain>(_poPossibEngin->getRenderWindow());
+	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _terrain->getPlayableArea());
 }
 
 void MainGameScene::initFonts()
@@ -46,7 +39,7 @@ void MainGameScene::initFonts()
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs();
-	_pongBall->update(**_window, deltaTime);
+	_pongBall->update(_poPossibEngin->getRenderWindow(), deltaTime);
 }
 
 void MainGameScene::render(sf::RenderTarget* target)

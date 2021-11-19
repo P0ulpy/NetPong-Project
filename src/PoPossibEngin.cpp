@@ -1,4 +1,5 @@
 #include "PoPossibEngin.h"
+#include "MainGameScene.h"
 
 //--- Constructors - Destructors ---
 PoPossibEngin::PoPossibEngin()
@@ -22,8 +23,7 @@ void PoPossibEngin::initWindow()
 
 void PoPossibEngin::initScenes()
 {
-	_scenes.push(std::make_unique<MainGameScene>(_window.get()));
-	int prout = 6;
+	_scenes.push(std::make_unique<MainGameScene>(*this));
 }
 
 //--- Update - Render ---
@@ -104,4 +104,9 @@ void PoPossibEngin::handleKeyPressed(const sf::Keyboard::Key& keyPressed) const
 bool PoPossibEngin::isRunning() const
 {
 	return _window->isOpen();
+}
+
+sf::RenderWindow& PoPossibEngin::getRenderWindow() const
+{
+	return *_window;
 }

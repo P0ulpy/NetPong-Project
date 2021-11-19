@@ -1,9 +1,11 @@
 #pragma once
 
-#include "MainGameScene.h"
+#include <stack>
+
+#include "SFML/Graphics.hpp"
 
 class Scene;
-class MainGainScene;
+class MainGameScene;
 
 class PoPossibEngin
 {
@@ -14,7 +16,7 @@ private:
 	sf::Event _sfmlEvent;
 
 	//Scenes
-	std::stack<std::unique_ptr<Scene>> _scenes;//On utilise une stack, c'est bien ?
+	std::stack<std::unique_ptr<Scene>> _scenes;
 
 	//Time - DeltaTime
 	sf::Clock _dtClock;
@@ -31,6 +33,7 @@ public:
 
 	//Accessors
 	bool isRunning() const;
+	sf::RenderWindow& getRenderWindow() const;
 
 	//Functions
 	void pollEvents();

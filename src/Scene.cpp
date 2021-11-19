@@ -1,8 +1,10 @@
 #include "Scene.h"
+#include "PoPossibEngin.h"
 
-Scene::Scene(sf::RenderWindow* window)
+Scene::Scene(PoPossibEngin& poPossibEngin)
+	: _poPossibEngin(&poPossibEngin)
 {
-	_window = std::make_unique<sf::RenderWindow*>(window);
+
 }
 
 Scene::~Scene()
