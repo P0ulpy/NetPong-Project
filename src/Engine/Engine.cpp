@@ -1,3 +1,4 @@
+
 #ifndef ENGINE_CPP
 #define ENGINE_CPP
 
@@ -8,14 +9,15 @@
 
 #include "Engine.hpp"
 
-using namespace std;
-using namespace sf;
+// Scenes
+#include "Scenes/MainGameScene.hpp"
 
-Engine::Engine(const EngineConfig& engineConfig)
+PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
 // Threads Init
-: _renderThread(Thread(&Engine::renderThreadEntry, this)), _logicThread(Thread(&Engine::logicThreadEntry, this))
+	: _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this)),
+		_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
 {
-	_renderWindow = new RenderWindow(
+	_renderWindow = new sf::RenderWindow(
 		engineConfig.windowConfig.videoMode, 
 		engineConfig.windowConfig.title, 
 		engineConfig.windowConfig.style
@@ -30,30 +32,96 @@ Engine::Engine(const EngineConfig& engineConfig)
 		_renderWindow->setVerticalSyncEnabled(true);
 	}
 
-	if(engineConfig.windowConfig.enableIMGUI)
+	if(engineConfig.windowConfig.enableImgui)
 	{
-		ImGui::SFML::Init(*_renderWindow);
+		//ImGui::SFML::Init(*_renderWindow);
+	}
+
+	std::cout << "Engine Initilized" << std::endl;
+	_engineState = INITIALIZED;
+
+	// TEMPORAIRE
+	loadScene(MainGame);
+
+	// Threads Init
+
+	//_renderThread.launch();
+	//_logicThread.launch();
+}
+
+PoPossibEngin::~PoPossibEngin()
+{
+	delete _renderWindow;
+	delete _currScene;
+}
+
+sf::RenderWindow& PoPossibEngin::getRenderWindow() const { return *_renderWindow; }
+EngineState PoPossibEngin::getEngineState() const { return _engineState; }
+
+sf::Thread& PoPossibEngin::getRenderThread() { return _logicThread; }
+sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
+
+void PoPossibEngin::refreshDeltaTime()
+{
+	_deltaTime = _deltaClock.restart().asSeconds();
+}
+
+void PoPossibEngin::renderThreadEntry()
+{
+	std::cout << "Render Thread Entry" << std::endl;
+
+	while(_renderWindow->isOpen())
+	{
+		if(_engineState == RUNNING)
+		{
+			refreshDeltaTime();
+			std::cout << "Delta Time : " << _deltaTime << std::endl;
+
+			_renderWindow->clear();
+
+			_currScene->update(_deltaTime);
+
+			// TEMPORAIRE
+			_currScene->render(_renderWindow);
+			// TEMPORAIRE
+
+			_renderWindow->display();
+		}
 	}
 }
 
-Engine::~Engine()
+void PoPossibEngin::logicThreadEntry()
 {
-	delete _renderWindow;
+	std::cout << "Render Thread Entry" << std::endl;
+
+	/*while (_renderWindow->isOpen())
+	{
+		if (_engineState == RUNNING)
+		{
+			// A REMPLIR
+		}
+	}*/
 }
 
-sf::RenderWindow& Engine::getRenderWindow() const
+void PoPossibEngin::loadScene(SceneType sceneType)
 {
-	return *_renderWindow;
-}
+	{
+		_engineState = PAUSE;
 
-void Engine::renderThreadEntry()
-{
+		Scene* newScene;
 
-}
+		switch (sceneType)
+		{
+		case MainGame: 
+			newScene = new MainGameScene(*this);
+			break;
+		}
 
-void Engine::logicThreadEntry()
-{
+		delete _currScene;
+		_currScene = newScene;
 
+		_engineState = RUNNING;
+	}
 }
 
 #endif //ENGINE_CPP

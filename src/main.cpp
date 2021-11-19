@@ -1,6 +1,5 @@
-﻿#include <iostream>
+﻿#include "Engine/Engine.hpp"
 
-#include "Engine/Engine.hpp"
 /*
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
@@ -15,16 +14,22 @@ void server();
 
 int main(int argc, char** argv)
 {
-    auto engine = Engine(
+    PoPossibEngin engine = PoPossibEngin(
         EngineConfig(
             EngineConfig::WindowConfig(
-                VideoMode(900, 900),
+	            sf::VideoMode(900, 900),
                 "oui"
             )
         )
     );
 
-    system("pause");
+    engine.renderThreadEntry();
+    engine.getRenderThread().wait();
+
+    std::cin.get();
+
+    /*std::cout << "c'est la fin" << std::endl;
+    std::cin.get();*/
 
     /*
     sf::Thread client_thread(&client);
