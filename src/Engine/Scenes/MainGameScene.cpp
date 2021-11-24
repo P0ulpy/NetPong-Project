@@ -1,6 +1,7 @@
 #include "MainGameScene.hpp"
 #include "../../Game/Entities/PongBall.hpp"
 #include "../../Game/Entities/Terrain.hpp"
+#include "../../Game/Entities/Character.hpp"
 
 MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -33,6 +34,7 @@ void MainGameScene::initValues()
 {
 	_terrain = std::make_unique<Terrain>(_poPossibEngin->getRenderWindow());
 	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _terrain->getPlayableArea());
+	_character = std::make_unique<Character>();
 }
 
 void MainGameScene::initFonts()

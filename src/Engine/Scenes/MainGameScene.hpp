@@ -5,6 +5,7 @@
 class Terrain;
 class PongBall;
 class PoPossibEngin;
+class Character;
 
 class MainGameScene : public Scene
 {
@@ -22,6 +23,8 @@ private:
 	//Game objects
 	std::unique_ptr<Terrain> _terrain;
 	std::unique_ptr<PongBall> _pongBall;
+	std::unique_ptr<Character> _character;
+
 
 	//Font and texts
 	sf::Font _font;

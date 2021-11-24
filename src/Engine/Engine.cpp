@@ -69,14 +69,19 @@ void PoPossibEngin::refreshDeltaTime()
 void PoPossibEngin::renderThreadEntry()
 {
 	std::cout << "Render Thread Entry" << std::endl;
-
+	sf::Event event;
 	while(_renderWindow->isOpen())
 	{
 		if(_engineState == RUNNING)
 		{
 			refreshDeltaTime();
+		
 			std::cout << "Delta Time : " << _deltaTime << std::endl;
+			while (_renderWindow->pollEvent(event))
+			{
 
+
+			}
 			_renderWindow->clear();
 
 			_currScene->update(_deltaTime);
