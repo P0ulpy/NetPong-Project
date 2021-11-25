@@ -17,14 +17,13 @@ struct EngineConfig
 		sf::VideoMode videoMode = sf::VideoMode(800, 800);
 		std::string title = "Render Window";
 		unsigned int style = sf::Style::Default;
-		bool enableImgui = true;
 		unsigned int framerateLimit = 0; // 0 mean automatic (verticalSyncEnabled = true)
 	};
 
 	WindowConfig windowConfig;
 };
 
-enum EngineState { INITIALIZING, INITIALIZED, RUNNING, PAUSE, STOP };
+enum EngineState { STOP, INITIALIZING, INITIALIZED, RUNNING, PAUSE };
 
 enum SceneType { MainGame };
 
@@ -34,33 +33,53 @@ public:
 	PoPossibEngin(const EngineConfig& engineConfig);
 	~PoPossibEngin();
 
+	void start();
+
 	// get / set
 
 	[[nodiscard]] sf::RenderWindow& getRenderWindow() const;
 	[[nodiscard]] EngineState getEngineState() const;
+	[[nodiscard]] EngineConfig& getEngineConfig();
 
 	[[nodiscard]] sf::Thread& getRenderThread();
 	[[nodiscard]] sf::Thread& getLogicThread();
 
+	[[nodiscard]] float getDeltaTime() const;
+
 private:
 
 	EngineState _engineState = STOP;
+	EngineConfig _engineConfig;
 
 	sf::RenderWindow* _renderWindow = nullptr;
-	sf::Thread _renderThread;
-	sf::Thread _logicThread;
+
+	Scene* _currScene = nullptr;
 
 	sf::Clock _deltaClock;
 	float _deltaTime = 0;
-	void refreshDeltaTime();
 
-	Scene* _currScene = nullptr;
-public:
+	void pollEvents();
+
+	// Threads
+
+	sf::Thread _renderThread;
 	void renderThreadEntry();
-private:
+	void renderThread_InitWindow();
+	void renderThreadUpdate();
+
+	sf::Thread _logicThread;
 	void logicThreadEntry();
+	void logicThreadUpdate();
 
 	void loadScene(SceneType sceneType);
+
+	// DEBUG
+
+	void renderThreadDebugInfo();
+
+	float _currFrameTimeCount = 0;
+	int _currFrameCount = 0;
+	int _currFrameRate = 0;
 };
 
 #endif //ENGINE_HPP

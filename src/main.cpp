@@ -18,15 +18,12 @@ int main(int argc, char** argv)
         EngineConfig(
             EngineConfig::WindowConfig(
 	            sf::VideoMode(900, 900),
-                "oui"
+                "Netpong"
             )
         )
     );
 
-    engine.renderThreadEntry();
-    engine.getRenderThread().wait();
-
-    std::cin.get();
+    engine.start();
 
     /*std::cout << "c'est la fin" << std::endl;
     std::cin.get();*/
