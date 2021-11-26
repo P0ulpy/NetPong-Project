@@ -1,17 +1,5 @@
 ﻿#include "Engine/Engine.hpp"
 
-/*
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-#include <SFML/Network.hpp>
-
-#include <imgui.h>
-#include <imgui-SFML.h>
-*/
-
-void client();
-void server();
-
 int main(int argc, char** argv)
 {
     PoPossibEngin engine = PoPossibEngin(
@@ -24,9 +12,6 @@ int main(int argc, char** argv)
     );
 
     engine.start();
-
-    /*std::cout << "c'est la fin" << std::endl;
-    std::cin.get();*/
 
     /*
     sf::Thread client_thread(&client);

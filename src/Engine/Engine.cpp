@@ -13,9 +13,9 @@
 #include "Scenes/MainGameScene.hpp"
 
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
-	: _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this)),
-	_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this)),
-	_engineConfig(engineConfig)
+	: _engineConfig(engineConfig),
+	_renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this)),
+	_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
 {
 
 }
@@ -31,6 +31,18 @@ void PoPossibEngin::start()
 	_logicThread.wait();
 }
 
+void PoPossibEngin::stop()
+{
+	_engineState = STOP;
+
+	delete _currScene;
+	_currScene = nullptr;
+
+	_renderThread.terminate();
+	_logicThread.terminate();
+
+	_renderWindow->close();
+}
 
 PoPossibEngin::~PoPossibEngin()
 {
@@ -52,26 +64,24 @@ EngineConfig& PoPossibEngin::getEngineConfig() { return _engineConfig; }
 sf::Thread& PoPossibEngin::getRenderThread() { return _logicThread; }
 sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
 
-float PoPossibEngin::getDeltaTime() const { return _deltaTime; }
+float PoPossibEngin::getDeltaTime() const { return _deltaClock.getElapsedTime().asSeconds(); }
 
 #pragma endregion GET/SET
 
 
 void PoPossibEngin::pollEvents()
 {
-	// IMPLEMENTATION TEMPORAIRE
+	_inputManager.updateEvents(*_renderWindow);
+
+	if(_inputManager.getEvent(sf::Event::Closed))
+	{
+		stop();
+	}
 
 	sf::Event event;
-	while(_renderWindow->pollEvent(event))
+	if (_inputManager.getEvent(sf::Event::KeyPressed, event))
 	{
-		ImGui::SFML::ProcessEvent(event);
-
-		switch (event.type)
-		{
-		case sf::Event::Closed: 
-			_renderWindow->close();
-			break;
-		}
+		std::cout << event.key.code << std::endl;
 	}
 }
 
@@ -108,6 +118,9 @@ void PoPossibEngin::renderThread_InitWindow()
 	else
 	{
 		_renderWindow->setVerticalSyncEnabled(true);
+
+		// DEBUG permet de déclancher le bug de collision
+		//_renderWindow->setFramerateLimit(300);
 	}
 
 	ImGui::SFML::Init(*_renderWindow);
@@ -124,8 +137,6 @@ void PoPossibEngin::renderThreadUpdate()
 	{
 		if (_engineState == RUNNING)
 		{
-			pollEvents();
-
 			sf::Time _deltaTime_Time = _deltaClock.restart();
 			_deltaTime = _deltaTime_Time.asSeconds();
 			ImGui::SFML::Update(*_renderWindow, _deltaTime_Time);
@@ -143,6 +154,8 @@ void PoPossibEngin::renderThreadUpdate()
 			ImGui::SFML::Render(*_renderWindow);
 
 			_renderWindow->display();
+
+			pollEvents();
 		}
 	}
 }
@@ -152,6 +165,7 @@ void PoPossibEngin::renderThreadDebugInfo()
 	ImGui::Begin("PoPosibEngin Info");
 
 	_currFrameCount++;
+	// TEMP : utilisation de _deltaTime pour le fix du soucis de la valeur de la clock incorecte lors de l'appel de .restart()
 	_currFrameTimeCount += _deltaTime;
 
 	if (_currFrameTimeCount >= 1)
@@ -196,6 +210,8 @@ void PoPossibEngin::logicThreadUpdate()
 
 void PoPossibEngin::loadScene(SceneType sceneType)
 {
+	// IMPLEMENTATION TEMPORAIRE
+
 	_engineState = PAUSE;
 
 	Scene* newScene;

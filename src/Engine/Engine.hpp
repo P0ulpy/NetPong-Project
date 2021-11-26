@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+#include "InputsManager/InputsManager.hpp"
 #include "Scenes/Scene.hpp"
 
 class Scene;
@@ -25,6 +26,7 @@ struct EngineConfig
 
 enum EngineState { STOP, INITIALIZING, INITIALIZED, RUNNING, PAUSE };
 
+// TEMP
 enum SceneType { MainGame };
 
 class PoPossibEngin
@@ -34,6 +36,7 @@ public:
 	~PoPossibEngin();
 
 	void start();
+	void stop();
 
 	// get / set
 
@@ -56,9 +59,15 @@ private:
 	Scene* _currScene = nullptr;
 
 	sf::Clock _deltaClock;
+
+	// TEMP : utilisation de _deltaTime pour le fix du soucis de la valeur de la clock incorecte lors de l'appel de .restart()
 	float _deltaTime = 0;
 
 	void pollEvents();
+
+	// InputManager
+
+	InputsManager _inputManager;
 
 	// Threads
 
