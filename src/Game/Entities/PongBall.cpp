@@ -1,6 +1,7 @@
 #include "PongBall.hpp"
 #include "PhantomBall.hpp"
 
+
 //--- Constructors - Destructor ---
 PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain)
 	: _terrainArea(terrain)
@@ -18,7 +19,7 @@ PongBall::~PongBall()
 
 //--- Initializers ---
 void PongBall::initVariables()
-{
+{	
 	_ballSize = 20;
 	_ballColor = sf::Color(0, 200, 0, 255);
 

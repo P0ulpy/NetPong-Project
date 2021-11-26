@@ -2,110 +2,11 @@
 #include "iostream"
 #include "math.h"
 
-Character::Character()
+Character::Character(sf::RenderWindow& window)
 {
+
+	initParam(window);
 	
-	
-
-
-	if (!ch.loadFromFile("./Assets/Rond_rouge.png")) {
-		std::cerr << "Error while loading texture" << std::endl;
-	}
-	if (!sh.loadFromFile("./Assets/Barre.jpg")) {
-		std::cerr << "Error while loading bouclier texture" << std::endl;
-	}
-
-	window.setVerticalSyncEnabled(true);
-	window.setKeyRepeatEnabled(false);
-
-
-	charac.setTexture(ch);
-	shield.setTexture(sh);
-
-	charac.setScale(0.2,0.2);
-	shield.setScale(0.1,0.1);
-
-	sf::FloatRect characSize = charac.getGlobalBounds();
-	sf::FloatRect shieldSize = shield.getGlobalBounds();
-
-	charac.setOrigin((characSize.width / 2) / charac.getScale().x, (characSize.height / 2) / charac.getScale().y);
-	shield.setOrigin((shieldSize.width / 2) / shield.getScale().x, (shieldSize.height / 2) / shield.getScale().y);
-
-	int xChar = window.getSize().x / 2.;
-	int yChar = window.getSize().y / 2.;
-	int xShie = window.getSize().x / 1.2;
-	int yShie = window.getSize().y / 1.2;
-
-	bool leftFlag = false;
-	bool rightFlag = false;
-
-
-	while (window.isOpen())
-	{
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::KeyPressed)
-			{
-				std::cout << "JAPPUIE LA" << std::endl;
-
-				switch (event.key.code)
-				{
-
-					case sf::Keyboard::Escape: window.close(); break;
-					case sf::Keyboard::Left: leftFlag = true; break;
-					case sf::Keyboard::Right: rightFlag = true; break;
-					default:break;
-
-				}
-
-				
-
-			}
-
-			if (event.type == sf::Event::KeyReleased)
-			{
-
-				switch (event.key.code)
-				{
-
-				case sf::Keyboard::Left: leftFlag = false; break;
-				case sf::Keyboard::Right: rightFlag = false; break;
-				default:break;
-
-				}
-
-
-
-			}
-		}
-	}
-
-	
-
-	if (leftFlag) xChar -= SPEED;
-	if (rightFlag) xChar += SPEED;
-	if (leftFlag) xShie -= SPEED;
-	if (rightFlag) xShie += SPEED;
-
-
-	if (xChar < 0) xChar = 0;
-	if (xChar > (int)window.getSize().x) xChar = window.getSize().x;
-	if (xShie < 0) xShie = 0;
-	if (xShie > (int)window.getSize().x) xShie = window.getSize().x;
-
-
-
-	setCharacterPosition(xChar,yChar);
-	setShieldPosition(xShie,yShie);
-	setCharacterRotation();
-	setShieldRotation();
-
-	window.draw(charac);
-	window.draw(shield);
-
-
-
 }
 
 Character::~Character()
@@ -113,30 +14,75 @@ Character::~Character()
 
 }
 
+void Character::updateMouvement(sf::RenderTarget& target, sf::RenderWindow& window)
+{
+
+	setCharacterPosition(xChar, yChar);
+	setShieldPosition(xShie, yShie);
+	
+	setCharacterRotation(mousePosition(window));
+	setShieldRotation(mousePosition(window));
+	
+}
+
+void Character::render(sf::RenderTarget& target)
+{
+	target.draw(charac);
+	target.draw(shield);
+}
 
 
+void Character::initParam(sf::RenderWindow& window) {
+
+
+
+	// Ajout des assets
+	if (!ch.loadFromFile("./Assets/Rond_rouge.png")) {
+		std::cerr << "Error while loading texture" << std::endl;
+	}
+	if (!sh.loadFromFile("./Assets/Bouclier.jpg")) {
+		std::cerr << "Error while loading bouclier texture" << std::endl;
+	}
+
+	//Préparation des sprites
+	charac.setTexture(ch);
+	shield.setTexture(sh);
+	charac.setScale(0.15, 0.15);
+	shield.setScale(0.3, 0.3);
+	sf::FloatRect characSize = charac.getGlobalBounds();
+	sf::FloatRect shieldSize = shield.getGlobalBounds();
+	charac.setOrigin((characSize.width / 2) / charac.getScale().x, (characSize.height / 2) / charac.getScale().y);
+	shield.setOrigin((shieldSize.width / 2) / shield.getScale().x, (shieldSize.height / 2) / shield.getScale().y);
+
+
+}
 
 
 
 void Character::setCharacterPosition( int x,int y)
 {
-	
-	charac.setPosition(x, y);
 
+	charac.setPosition(x, y);
 
 }
 
 void Character::setShieldPosition( int x, int y)
 {
-	sf::Vector2f p = charac.getTransform().transformPoint(sf::Vector2f(charac.getOrigin().x, charac.getOrigin().y - (charac.getGlobalBounds().width) * 2.5));
-	shield.setPosition(p.x, p.y);
+	//sf::Vector2f p = charac.getTransform().transformPoint(sf::Vector2f(charac.getOrigin().x -( (charac.getGlobalBounds().width / charac.getScale().y) / 2), charac.getOrigin().y));
+	float px = charac.getTransform().transformPoint(sf::Vector2f(charac.getOrigin().x, charac.getOrigin().y - ((charac.getGlobalBounds().width / charac.getScale().y) / 2))).x;
+	float py = charac.getTransform().transformPoint(sf::Vector2f(charac.getOrigin().x , charac.getOrigin().y - ((charac.getGlobalBounds().width / charac.getScale().y) / 2))).y;
+	
+
+	
+	
+	shield.setPosition(px, py);
+//	std::cout << charac.getTransform().transformPoint(1,2).x << std::endl;
 
 }
 
-void Character::setCharacterRotation()
+void Character::setCharacterRotation(sf::Vector2i mousePos)
 {
 	sf::Vector2f curPos = charac.getPosition();
-	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 	float dx = curPos.x - mousePos.x;
 	float dy = curPos.y - mousePos.y;
 
@@ -148,10 +94,9 @@ void Character::setCharacterRotation()
 
 
 
-void Character::setShieldRotation()
+void Character::setShieldRotation(sf::Vector2i mousePos)
 {
 	sf::Vector2f curPos = charac.getPosition();
-	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 	float dx = curPos.x - mousePos.x;
 	float dy = curPos.y - mousePos.y;
 
@@ -160,4 +105,31 @@ void Character::setShieldRotation()
 
 
 }
+
+void Character::direction(bool isleft, bool isright, const sf::Rect<float>& terrain)
+{
+	
+	leftFlag = isleft;
+	rightFlag = isright;
+	if (leftFlag) xChar -= SPEED;
+	if (rightFlag) xChar += SPEED;
+	if (leftFlag) xShie -= SPEED;
+	if (rightFlag) xShie += SPEED;
+	
+	
+	if (xChar > terrain.width - (charac.getGlobalBounds().width / 2)) xChar = terrain.width - (charac.getGlobalBounds().width / 2);
+	if (xChar < terrain.left + (charac.getGlobalBounds().width / 2)) xChar = terrain.left + (charac.getGlobalBounds().width / 2);
+	
+
+}
+
+sf::Vector2i Character::mousePosition(sf::RenderWindow& window) {
+
+	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+	return mousePos;
+}
+
+
+
+
 

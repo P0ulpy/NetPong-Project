@@ -76,7 +76,7 @@ void PoPossibEngin::renderThreadEntry()
 		{
 			refreshDeltaTime();
 		
-			std::cout << "Delta Time : " << _deltaTime << std::endl;
+		//	std::cout << "Delta Time : " << _deltaTime << std::endl;
 			while (_renderWindow->pollEvent(event))
 			{
 
