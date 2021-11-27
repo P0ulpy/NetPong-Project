@@ -75,7 +75,6 @@ void PoPossibEngin::renderThreadEntry()
 		if(_engineState == RUNNING)
 		{
 			refreshDeltaTime();
-			std::cout << "Delta Time : " << _deltaTime << std::endl;
 
 			_renderWindow->clear();
 

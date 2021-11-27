@@ -23,7 +23,6 @@ private:
 
 	sf::Vector2f _terrainSize{ 500, 700 };
 
-	void initVariables();
 	void initShape(const sf::RenderWindow& window);
 	void initPlayableArea();
 };

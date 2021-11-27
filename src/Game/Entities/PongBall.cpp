@@ -1,13 +1,18 @@
 #include "PongBall.hpp"
+
+#include <iostream>
+
 #include "PhantomBall.hpp"
+#include "../PolygonTerrain.hpp"
+#include "../PolygonCollisionResult.hpp"
 
 //--- Constructors - Destructor ---
-PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain)
-	: _terrainArea(terrain)
+PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain)
+	: _terrainArea(terrain), _polygonTerrain(&polyTerrain)
 {
 	initVariables();
+	initShapes(window);
 	initBoost();
-	initShape(window);
 	initPhantomEffect();
 }
 
@@ -19,27 +24,37 @@ PongBall::~PongBall()
 //--- Initializers ---
 void PongBall::initVariables()
 {
-	_ballSize = 20;
-	_ballColor = sf::Color(0, 200, 0, 255);
-
-	_velocity = sf::Vector2f(0.75f, 1.f);
+	_velocity = sf::Vector2f(1.f, 1.f);
 	_initialSpeed = 220.f;
 	_currentSpeed = _initialSpeed;
 	_maxSpeed = 2000.f;
-	_speedBonusRatio = 1.f;
+
+	_texture = std::make_unique<sf::Texture>();
+	_sprite = std::make_unique<sf::Sprite>();
+
+	_ballSize = BALL_SIZE;
+	_ballColor = sf::Color(0, 200, 0, 255);
+
+	_speedMultiplierBonus = 1.f;
 }
 
-void PongBall::initShape(const sf::RenderWindow& window)
+void PongBall::initShapes(const sf::RenderWindow& window)
 {
 	_ballShape.setRadius(static_cast<float>(_ballSize));
 	_ballShape.setFillColor(_ballColor);
 	_ballShape.setOutlineColor(sf::Color::White);
 	_ballShape.setOutlineThickness(2);
 	_ballShape.setPosition(sf::Vector2f(static_cast<float>(window.getSize().x) / 2.f, static_cast<float>(window.getSize().y) / 2.f));
+
+	_ballHitboxShape.setFillColor(sf::Color(0,0,0,0));
+	_ballHitboxShape.setOutlineColor(sf::Color::Red);
+	_ballHitboxShape.setOutlineThickness(2);
+	_ballHitboxShape.setPosition(_ballShape.getPosition());
 }
 
 void PongBall::initBoost()
 {
+	_isBoosted = false;
 	_boostDuration = 2.f;
 	_currentTimeBoost = 0.f;
 }
@@ -47,84 +62,111 @@ void PongBall::initBoost()
 void PongBall::initPhantomEffect()
 {
 	_phantomBallsMax = 15;
-
-	_timeBetweenPhantomBalls = 0.05f;
-	_phantomBallEffectDuration = 1.f;
-	_hasPhantomEffect = true;
-
-	_currentTimePhantomBallEffect = 0;
-	_currentTimePhantomBallCooldown = 0;
+	_durationBetweenPhantomBalls = 0.05f;
 
 	createPhantomBalls();
+
+	startPhantomBallEffect();
 }
 
 //--- Updating ---
-void PongBall::update(sf::RenderTarget& target, const float deltaTime)
+void PongBall::update(const float& deltaTime)
 {
+	updateBoost(deltaTime);
 	updateMovement(deltaTime);
 	updatePhantomEffect(deltaTime);
 }
 
 void PongBall::updateMovement(const float& deltaTime)
 {
-	//LEFT
-	if (_ballShape.getGlobalBounds().left + 1 <= _terrainArea.left)
+	if(_hasHit)
 	{
-		_velocity.x = -_velocity.x;
-		_ballShape.setPosition(_terrainArea.left, _ballShape.getGlobalBounds().top);
+		_currentTimeStopCollisionTests += deltaTime;
+
+		if (_currentTimeStopCollisionTests > _durationStopCollisionTests)
+		{
+			_hasHit = false;
+			_currentTimeStopCollisionTests = 0;
+		}
+		else
+		{
+			return;
+		}
 	}
 
-	//RIGHT
-	if (_ballShape.getGlobalBounds().left + _ballShape.getGlobalBounds().width >= _terrainArea.width)
+	for(int i  = 0 ; i < _polygonTerrain->getShape().getPointCount() ; i++)
 	{
-		_velocity.x = -_velocity.x;
-		_ballShape.setPosition(_terrainArea.width - _ballShape.getGlobalBounds().width, _ballShape.getGlobalBounds().top);
+		if(i != _polygonTerrain->getShape().getPointCount()-1)
+		{
+			float xA = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(i).x, _polygonTerrain->getShape().getPoint(i).y)).x;
+			float yA = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(i).x, _polygonTerrain->getShape().getPoint(i).y)).y;
+			float xB = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(i + 1).x, _polygonTerrain->getShape().getPoint(i + 1).y)).x;
+			float yB = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(i + 1).x, _polygonTerrain->getShape().getPoint(i + 1).y)).y;
+
+			sf::Vector2f circleCenter = sf::Vector2f(_ballShape.getGlobalBounds().left + _ballShape.getGlobalBounds().width / 2.f,
+				_ballShape.getGlobalBounds().top + _ballShape.getGlobalBounds().height / 2.f);
+
+			bool hit = lineCircleCollision(xA, yA, xB, yB, circleCenter.x, circleCenter.y, _ballShape.getRadius());
+
+			if (hit)
+			{
+				const sf::Vector2f surfaceVector = (sf::Vector2f(xB - xA, yB - yA));
+
+				_velocity = _polygonTerrain->getVectorReflection(_velocity, normalize(surfaceVector));
+				_hasHit = true;
+				break;
+			}
+		}
+		else
+		{
+			float xA = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(_polygonTerrain->getShape().getPointCount() - 1).x, _polygonTerrain->getShape().getPoint(_polygonTerrain->getShape().getPointCount() - 1).y)).x;
+			float yA = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(_polygonTerrain->getShape().getPointCount() - 1).x, _polygonTerrain->getShape().getPoint(_polygonTerrain->getShape().getPointCount() - 1).y)).y;
+			float xB = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(0).x, _polygonTerrain->getShape().getPoint(0).y)).x;
+			float yB = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(0).x, _polygonTerrain->getShape().getPoint(0).y)).y;
+
+			sf::Vector2f circleCenter = sf::Vector2f(_ballShape.getGlobalBounds().left + _ballShape.getGlobalBounds().width / 2.f,
+				_ballShape.getGlobalBounds().top + _ballShape.getGlobalBounds().height / 2.f);
+
+			bool hit = lineCircleCollision(xA, yA, xB, yB, circleCenter.x, circleCenter.y, _ballShape.getRadius());
+
+			if (hit)
+			{
+				const sf::Vector2f surfaceVector = (sf::Vector2f(xB - xA, yB - yA));
+
+				_velocity = _polygonTerrain->getVectorReflection(_velocity, normalize(surfaceVector));
+				_hasHit = true;
+				break;
+			}
+		}
 	}
 
-	//TOP
-	if (_ballShape.getGlobalBounds().top + 1 <= _terrainArea.top)
-	{
-		_velocity.y = -_velocity.y;
-		_ballShape.setPosition(_ballShape.getGlobalBounds().left, _terrainArea.top);
-	}
+	moveEntity(_velocity, deltaTime);
+	_ballHitboxShape.setPosition(_ballShape.getPosition());
+}
 
-	//BOTTOM
-	if (_ballShape.getGlobalBounds().top + _ballShape.getGlobalBounds().height >= _terrainArea.height)
-	{
-		_velocity.y = -_velocity.y;
-		_ballShape.setPosition(_ballShape.getGlobalBounds().left, _terrainArea.height - _ballShape.getGlobalBounds().height);
-	}
-
-	//Update boost
+void PongBall::updateBoost(const float& deltaTime)
+{
 	if (_isBoosted)
 	{
 		_currentTimeBoost += deltaTime;
 		if (_currentTimeBoost >= _boostDuration)
 		{
 			_isBoosted = false;
-			resetSpeedBonusRatio();
+			resetSpeedMultiplierBonus();
 		}
 	}
-
-	moveBall(deltaTime);
 }
 
 void PongBall::updatePhantomEffect(const float& deltaTime)
 {
-	if (_hasPhantomEffect)
+	if(_hasPhantomEffect)
 	{
 		_currentTimePhantomBallCooldown += deltaTime;
-		_currentTimePhantomBallEffect += deltaTime;
 
-		if (_currentTimePhantomBallCooldown > _timeBetweenPhantomBalls)
+		if (_currentTimePhantomBallCooldown > _durationBetweenPhantomBalls)
 		{
 			displayPhantomBall();
 			_currentTimePhantomBallCooldown = 0;
-		}
-
-		if (_currentTimePhantomBallEffect > _phantomBallEffectDuration)
-		{
-			//_hasPhantomEffect = false;
 		}
 	}
 
@@ -142,6 +184,7 @@ void PongBall::render(sf::RenderTarget& target) const
 {
 	renderPhantomEffect(target);
 	target.draw(_ballShape);
+	target.draw(_ballHitboxShape);
 }
 
 void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
@@ -155,38 +198,40 @@ void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
 	}
 }
 
+void PongBall::updateAndRenderPhantomEffect(sf::RenderTarget& target, const float& deltaTime)
+{
+	for (const auto& phantomBall : _phantomBalls)
+	{
+		if (phantomBall->isDisplayed())
+		{
+			phantomBall->update(deltaTime);
+			phantomBall->render(target);
+		}
+	}
+}
+
 //--- Getters - Setters ---
-void PongBall::setTerrainArea(const sf::Rect<float>& terrain)
+void PongBall::setSpeedMultiplierBonus(float pSpeedMultiplierBonus)
 {
-	_terrainArea = terrain;
-}
-
-float PongBall::getCurrentBoostTimeStamp() const
-{
-	return (_currentTimeBoost / _boostDuration) * 2;
-}
-
-void PongBall::setSpeedBonusRatio(float pSpeedBonusRatio)
-{
-	if (pSpeedBonusRatio * _currentSpeed < _maxSpeed)
+	if (pSpeedMultiplierBonus * _currentSpeed < _maxSpeed)
 	{
-		_speedBonusRatio = pSpeedBonusRatio;
-		setSpeed(_initialSpeed * _speedBonusRatio);
+		_speedMultiplierBonus = pSpeedMultiplierBonus;
+		setSpeed(_initialSpeed * _speedMultiplierBonus);
 	}
 }
 
-void PongBall::addSpeedBonusRatio(float pSpeedBonusRatio)
+void PongBall::addSpeedMultiplierBonus(float pSpeedMultiplierBonus)
 {
-	if ((_speedBonusRatio + pSpeedBonusRatio) * _currentSpeed < _maxSpeed)
+	if ((_speedMultiplierBonus + pSpeedMultiplierBonus) * _currentSpeed < _maxSpeed)
 	{
-		_speedBonusRatio += pSpeedBonusRatio;
-		setSpeed(_initialSpeed * _speedBonusRatio);
+		_speedMultiplierBonus += pSpeedMultiplierBonus;
+		setSpeed(_initialSpeed * _speedMultiplierBonus);
 	}
 }
 
-void PongBall::resetSpeedBonusRatio()
+void PongBall::resetSpeedMultiplierBonus()
 {
-	_speedBonusRatio = 1;
+	_speedMultiplierBonus = 1;
 	setSpeed(_initialSpeed);
 }
 
@@ -201,29 +246,28 @@ sf::CircleShape PongBall::getShape() const
 }
 
 //--- Methods ---
-void PongBall::moveBall(const float& deltaTime)
+void PongBall::moveEntity(const sf::Vector2f& velocity, const float& deltaTime)
 {
 	if (_isBoosted)
 	{
-		const float newSpeedRatio = deceleration(_speedBonusRatio, 1.f, _currentTimeBoost);
+		const float newSpeedRatio = deceleration(_speedMultiplierBonus, 1.f, _currentTimeBoost);
 		setSpeed(newSpeedRatio * _initialSpeed);
 	}
 
-	_ballShape.move(normalize(_velocity) * _currentSpeed * deltaTime);
+	_ballShape.move(normalize(velocity) * _currentSpeed * deltaTime);
 }
 
 //--- Boost ---
-void PongBall::boostBall(float speedBoost)
+void PongBall::startBoostBall(float speedBoostBonus)
 {
-	_currentTimeBoost = 0;
 	_isBoosted = true;
-	_speedBonusRatio = speedBoost;
+	_currentTimeBoost = 0;
 
-	setSpeedBonusRatio(_speedBonusRatio);
-	startPhantomBallEffect();
+	_speedMultiplierBonus = speedBoostBonus;
+	setSpeedMultiplierBonus(_speedMultiplierBonus);
 }
 
-float PongBall::deceleration(float initial, float target, float time) const
+float PongBall::deceleration(const float initial, const float target, const float time) const
 {
 	//Linear(Y0,Y1,t) = Y0 + t(Y1 - Y0)
 	//Deceleration(Y0,Y1,t) = Linear( Y0, Y1, 1 - pow(1 - t,2) )
@@ -232,12 +276,12 @@ float PongBall::deceleration(float initial, float target, float time) const
 	return initial + (1 - std::pow(1 - time / 2, 2)) * (target - initial);
 }
 
-sf::Vector2f PongBall::normalize(const sf::Vector2f& originalVector) const
+sf::Vector2f PongBall::normalize(const sf::Vector2f& originalVector)
 {
 	const float norm = std::sqrt((originalVector.x * originalVector.x) + (originalVector.y * originalVector.y));
 
 	// Prevent division by zero
-	if (norm <= std::numeric_limits<float>::epsilon() * norm * 2 //2 -> units_in_last_place
+	if (norm <= std::numeric_limits<float>::epsilon() * norm * 2 //2 -> constexpr units_in_last_place
 		|| norm < std::numeric_limits<float>::min())
 	{
 		return sf::Vector2f{};
@@ -246,14 +290,12 @@ sf::Vector2f PongBall::normalize(const sf::Vector2f& originalVector) const
 	return originalVector / norm;
 }
 
-//--- Phantom balls effect ---
-void PongBall::startPhantomBallEffect()
+float PongBall::dot(const sf::Vector2f& lhs, const sf::Vector2f& rhs)
 {
-	_currentTimePhantomBallEffect = 0;
-	_currentTimePhantomBallCooldown = 0;
-	_hasPhantomEffect = true;
+	return lhs.x * rhs.x + lhs.y * rhs.y;
 }
 
+//--- Phantom balls effect ---
 void PongBall::createPhantomBalls()
 {
 	for (int i = 0; i < _phantomBallsMax; i++)
@@ -264,26 +306,105 @@ void PongBall::createPhantomBalls()
 
 void PongBall::displayPhantomBall()
 {
+	//Recherche de la premiere PhantomBall qui n'est pas affichée dans la liste
 	for (const auto& phantomBall : _phantomBalls)
 	{
 		if (!phantomBall->isDisplayed())
 		{
-			phantomBall->displayPhantomBall();
+			phantomBall->show();
 			break;
 		}
 	}
 }
 
-void PongBall::activatedErasingLastPhantomBall()
+void PongBall::startPhantomBallEffect()
 {
-	_needErasePhantomBall = true;
+	_hasPhantomEffect = true;
+	_currentTimePhantomBallCooldown = 0;
 }
 
-void PongBall::eraseLastPhantomBall()
+void PongBall::stopPhantomBallEffect()
 {
-	_needErasePhantomBall = false;
-	if (!_phantomBalls.empty())
-	{
-		_phantomBalls.erase(_phantomBalls.begin());
-	}
+	_hasPhantomEffect = false;
 }
+
+// LINE/CIRCLE
+bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r) {
+
+	// is either end INSIDE the circle?
+	// if so, return true immediately
+	bool inside1 = pointCircleCollision(x1, y1, cx, cy, r);
+	bool inside2 = pointCircleCollision(x2, y2, cx, cy, r);
+	if (inside1 || inside2) return true;
+
+	// get length of the line
+	float len = getDistance(x1, y1, x2, y2);
+
+	// get dot product of the line and circle
+	float dot = (((cx - x1)*(x2 - x1)) + ((cy - y1)*(y2 - y1))) / std::pow(len, 2);
+
+	// find the closest point on the line
+	float closestX = x1 + (dot * (x2 - x1));
+	float closestY = y1 + (dot * (y2 - y1));
+
+	// is this point actually on the line segment?
+	// if so keep going, but if not, return false
+	bool onSegment = linePointCollision(x1, y1, x2, y2, closestX, closestY);
+	if (!onSegment) return false;
+
+	// get distance to closest point
+	float distance = getDistance(closestX, closestY, cx, cy);
+
+	if (distance <= r) {
+		return true;
+	}
+	return false;
+}
+
+// LINE/POINT
+bool PongBall::linePointCollision(float x1, float y1, float x2, float y2, float px, float py) {
+
+	// get distance from the point to the two ends of the line
+	float d1 = getDistance(px, py, x1, y1);
+	float d2 = getDistance(px, py, x2, y2);
+
+	// get the length of the line
+	float lineLen = getDistance(x1, y1, x2, y2);
+
+	// since floats are so minutely accurate, add
+	// a little buffer zone that will give collision
+	float buffer = 10.f;    // higher # = less accurate
+
+	// if the two distances are equal to the line's 
+	// length, the point is on the line!
+	// note we use the buffer here to give a range, 
+	// rather than one #
+	if (d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer) {
+		return true;
+	}
+	return false;
+}
+
+// POINT/CIRCLE
+bool PongBall::pointCircleCollision(float px, float py, float cx, float cy, float r) {
+
+	// get distance between the point and circle's center
+	// using the Pythagorean Theorem
+	float distance = getDistance(px, py, cx, cy);
+
+	// if the distance is less than the circle's
+	// radius the point is inside!
+	if (distance <= r) {
+		return true;
+	}
+	return false;
+}
+
+float PongBall::getDistance (float x1, float y1, float x2, float y2)
+{
+	float distX = x1 - x2;
+	float distY = y1 - y2;
+	return std::sqrt(distX*distX + distY*distY);
+}
+
+
