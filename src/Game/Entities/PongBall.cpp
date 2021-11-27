@@ -79,7 +79,7 @@ void PongBall::update(const float& deltaTime)
 
 void PongBall::updateMovement(const float& deltaTime)
 {
-	if(_hasHit)
+	/*if(_hasHit)
 	{
 		_currentTimeStopCollisionTests += deltaTime;
 
@@ -92,51 +92,30 @@ void PongBall::updateMovement(const float& deltaTime)
 		{
 			return;
 		}
-	}
+	}*/
 
-	for(int i  = 0 ; i < _polygonTerrain->getShape().getPointCount() ; i++)
+	const int pointCount = static_cast<int>(_polygonTerrain->getShape().getPointCount());
+	const sf::ConvexShape polygonShape = _polygonTerrain->getShape();
+	const sf::Vector2f circleCenter = sf::Vector2f(_ballShape.getGlobalBounds().left + _ballShape.getGlobalBounds().width / 2.f,
+		_ballShape.getGlobalBounds().top + _ballShape.getGlobalBounds().height / 2.f);
+
+	for(int i  = 0 ; i < pointCount; i++)
 	{
-		if(i != _polygonTerrain->getShape().getPointCount()-1)
+		float xA = polygonShape.getTransform().transformPoint(sf::Vector2f(polygonShape.getPoint(i).x, polygonShape.getPoint(i).y)).x;
+		float yA = polygonShape.getTransform().transformPoint(sf::Vector2f(polygonShape.getPoint(i).x, polygonShape.getPoint(i).y)).y;
+		float xB = polygonShape.getTransform().transformPoint(sf::Vector2f(polygonShape.getPoint((i + 1) % pointCount).x, polygonShape.getPoint((i + 1) % pointCount).y)).x;
+		float yB = polygonShape.getTransform().transformPoint(sf::Vector2f(polygonShape.getPoint((i + 1) % pointCount).x, polygonShape.getPoint((i + 1) % pointCount).y)).y;
+
+		bool hit = lineCircleCollision(xA, yA, xB, yB, circleCenter.x, circleCenter.y, _ballShape.getRadius());
+
+		if (hit)
 		{
-			float xA = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(i).x, _polygonTerrain->getShape().getPoint(i).y)).x;
-			float yA = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(i).x, _polygonTerrain->getShape().getPoint(i).y)).y;
-			float xB = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(i + 1).x, _polygonTerrain->getShape().getPoint(i + 1).y)).x;
-			float yB = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(i + 1).x, _polygonTerrain->getShape().getPoint(i + 1).y)).y;
+			const sf::Vector2f surfaceVector = normalize(sf::Vector2f(xB - xA, yB - yA));
 
-			sf::Vector2f circleCenter = sf::Vector2f(_ballShape.getGlobalBounds().left + _ballShape.getGlobalBounds().width / 2.f,
-				_ballShape.getGlobalBounds().top + _ballShape.getGlobalBounds().height / 2.f);
-
-			bool hit = lineCircleCollision(xA, yA, xB, yB, circleCenter.x, circleCenter.y, _ballShape.getRadius());
-
-			if (hit)
-			{
-				const sf::Vector2f surfaceVector = (sf::Vector2f(xB - xA, yB - yA));
-
-				_velocity = _polygonTerrain->getVectorReflection(_velocity, normalize(surfaceVector));
-				_hasHit = true;
-				break;
-			}
-		}
-		else
-		{
-			float xA = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(_polygonTerrain->getShape().getPointCount() - 1).x, _polygonTerrain->getShape().getPoint(_polygonTerrain->getShape().getPointCount() - 1).y)).x;
-			float yA = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(_polygonTerrain->getShape().getPointCount() - 1).x, _polygonTerrain->getShape().getPoint(_polygonTerrain->getShape().getPointCount() - 1).y)).y;
-			float xB = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(0).x, _polygonTerrain->getShape().getPoint(0).y)).x;
-			float yB = _polygonTerrain->getShape().getTransform().transformPoint(sf::Vector2f(_polygonTerrain->getShape().getPoint(0).x, _polygonTerrain->getShape().getPoint(0).y)).y;
-
-			sf::Vector2f circleCenter = sf::Vector2f(_ballShape.getGlobalBounds().left + _ballShape.getGlobalBounds().width / 2.f,
-				_ballShape.getGlobalBounds().top + _ballShape.getGlobalBounds().height / 2.f);
-
-			bool hit = lineCircleCollision(xA, yA, xB, yB, circleCenter.x, circleCenter.y, _ballShape.getRadius());
-
-			if (hit)
-			{
-				const sf::Vector2f surfaceVector = (sf::Vector2f(xB - xA, yB - yA));
-
-				_velocity = _polygonTerrain->getVectorReflection(_velocity, normalize(surfaceVector));
-				_hasHit = true;
-				break;
-			}
+			_velocity = _polygonTerrain->getVectorReflection(_velocity, surfaceVector);
+			//_ballShape.setPosition(-surfaceVector.y, surfaceVector.x);
+			_hasHit = true;
+			break;
 		}
 	}
 
