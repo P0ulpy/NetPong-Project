@@ -12,8 +12,15 @@ private:
 	
 	sf::Texture sh;
 	sf::Texture ch;
-	sf::Sprite shield;
-	sf::Sprite charac;
+	//sf::Sprite shield;
+	//sf::Sprite charac;
+	//largeur charac = 477
+	//largeur shield = 223
+	//hauteur shield = 51
+	sf::CircleShape hitbox;
+	sf::CircleShape charac;
+	sf::RectangleShape shield;
+
 	bool leftFlag = false;
 	bool rightFlag = false;
 
