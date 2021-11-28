@@ -15,16 +15,18 @@ public:
 	sf::ConvexShape getShape() const;
 	sf::Rect<float> getPlayableArea() const;
 
-	sf::RectangleShape _proutctangle;
+	sf::Vector2f getVectorReflection(sf::Vector2f inDirection, sf::Vector2f surfaceVector) const;
+	sf::Vector2f getPointPosition(int index) const;
 
-	sf::Vector2f getVectorReflection(sf::Vector2f inDirection, sf::Vector2f surfaceVector);
-	sf::Vector2f getVectorReflection(sf::Vector2f originalVector, float surfaceAngle);
 private:
 	sf::ConvexShape _terrainShape;
 	sf::Rect<float> _playableArea;
 
-	sf::Vector2f _terrainSize{ 500, 700 };
+	sf::Vector2f _terrainSize{ 600, 600 };
+
+	std::vector<sf::Vector2f> _pointPositions;
 
 	void initShape(const sf::RenderWindow& window);
 	void initPlayableArea();
+	void initEdgesRegistration();
 };

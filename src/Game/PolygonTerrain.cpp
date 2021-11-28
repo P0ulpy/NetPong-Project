@@ -7,6 +7,7 @@ PolygonTerrain::PolygonTerrain(const sf::RenderWindow& window)
 {
 	initShape(window);
 	initPlayableArea();
+	initEdgesRegistration();
 }
 
 PolygonTerrain::~PolygonTerrain()
@@ -22,7 +23,6 @@ void PolygonTerrain::update()
 void PolygonTerrain::render(sf::RenderTarget& target) const
 {
 	target.draw(_terrainShape);
-	target.draw(_proutctangle);
 }
 
 sf::ConvexShape PolygonTerrain::getShape() const
@@ -37,11 +37,11 @@ sf::Rect<float> PolygonTerrain::getPlayableArea() const
 
 void PolygonTerrain::initShape(const sf::RenderWindow& window)
 {
-	float _terrainXsize = 500.f;
-	float _terrainYsize = 700.f;
+	const float _terrainXsize = 600.f;
+	const float _terrainYsize = 600.f;
 
-	float _terrainAngleXSize = 50.f;
-	float _terrainAngleYSize = 150.f;
+	const float _terrainAngleXSize = 100.f;
+	const float _terrainAngleYSize = 175.f;
 
 	_terrainShape.setFillColor(sf::Color::Black);
 	_terrainShape.setOutlineColor(sf::Color::White);
@@ -58,13 +58,6 @@ void PolygonTerrain::initShape(const sf::RenderWindow& window)
 	_terrainShape.setPoint(5, sf::Vector2f(_terrainAngleXSize, _terrainYsize));
 	_terrainShape.setPoint(6, sf::Vector2f(0, _terrainYsize - _terrainAngleYSize));
 	_terrainShape.setPoint(7, sf::Vector2f(0, _terrainAngleYSize));
-
-	// ------------------------------------------------------------
-	_proutctangle.setSize(sf::Vector2f(150, 1));
-	_proutctangle.setOutlineThickness(5);
-	_proutctangle.setOrigin(_proutctangle.getSize().x / 2.f, _proutctangle.getSize().y / 2.f);
-	_proutctangle.setPosition(600,300);
-	_proutctangle.rotate(30);
 }
 
 void PolygonTerrain::initPlayableArea()
@@ -75,22 +68,30 @@ void PolygonTerrain::initPlayableArea()
 		_terrainShape.getGlobalBounds().top + _terrainShape.getGlobalBounds().height - _terrainShape.getOutlineThickness());
 }
 
-sf::Vector2f PolygonTerrain::getVectorReflection(sf::Vector2f inDirection, sf::Vector2f surfaceVector)
+void PolygonTerrain::initEdgesRegistration()
 {
-	sf::Vector2 inNormal = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
-	float factor = -2.f * (inDirection.x * inNormal.x + inDirection.y * inNormal.y);
-	sf::Vector2f finalVector = sf::Vector2(std::round(factor * inNormal.x + inDirection.x),
-											std::round(factor * inNormal.y + inDirection.y));
+	const int pointCount = static_cast<int>(getShape().getPointCount());
+
+	for (int i = 0; i < pointCount; i++)
+	{
+		const sf::Vector2 transformPoint{ _terrainShape.getPoint(i).x, _terrainShape.getPoint(i).y };
+		
+		_pointPositions.emplace_back(_terrainShape.getTransform().transformPoint(transformPoint).x,	
+									 _terrainShape.getTransform().transformPoint(transformPoint).y);
+	}
+}
+
+sf::Vector2f PolygonTerrain::getVectorReflection(sf::Vector2f inDirection, sf::Vector2f surfaceVector) const
+{
+	const auto inNormal = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
+	const float factor = -2.f * (inDirection.x * inNormal.x + inDirection.y * inNormal.y);
+	const auto finalVector = sf::Vector2(std::round(factor * inNormal.x + inDirection.x),
+										 std::round(factor * inNormal.y + inDirection.y));
 	return finalVector;
 }
 
-sf::Vector2f PolygonTerrain::getVectorReflection(sf::Vector2f inDirection, float surfaceAngle)
+sf::Vector2f PolygonTerrain::getPointPosition(const int index) const
 {
-	sf::Vector2f surfaceVector = sf::Vector2f(std::cosf(surfaceAngle), std::sinf(surfaceAngle));
-	surfaceVector.x = std::atan2f(surfaceVector.x, surfaceVector.y);
-	sf::Vector2 inNormal = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
-	float factor = -2.f * (inDirection.x * inNormal.x + inDirection.y * inNormal.y);
-	sf::Vector2f finalVector = sf::Vector2(factor * inNormal.x + inDirection.x, factor * inNormal.y + inDirection.y);
-	return finalVector;
+	return _pointPositions.at(index);
 }
 

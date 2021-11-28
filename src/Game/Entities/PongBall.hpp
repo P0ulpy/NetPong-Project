@@ -5,7 +5,6 @@
 #include "../Entity.hpp"
 
 constexpr int BALL_SIZE = 20;
-constexpr int BALL_HITBOX_EDGES_COUNT = 16;
 
 class PolygonTerrain;
 class PhantomBall;
@@ -21,6 +20,7 @@ public:
 
 	//Functions
 	void update(const float& deltaTime) override;
+	void updateCollision();
 	void updateMovement(const float& deltaTime);
 	void updateBoost(const float& deltaTime);
 	void updatePhantomEffect(const float& deltaTime);
@@ -49,7 +49,6 @@ public:
 private:
 	//Ball rendering
 	sf::CircleShape _ballShape;
-	sf::CircleShape _ballHitboxShape{ BALL_SIZE, BALL_HITBOX_EDGES_COUNT };
 	sf::Color _ballColor;
 	int _ballSize;
 
@@ -73,11 +72,6 @@ private:
 	float _durationBetweenPhantomBalls;
 	bool _hasPhantomEffect;
 
-	//Collision
-	float _currentTimeStopCollisionTests { 0 };
-	float _durationStopCollisionTests { 0.05f };
-	bool _hasHit { false };
-
 	//Functions
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime) override;
 
@@ -93,8 +87,8 @@ private:
 
 	//Utils
 	float deceleration(float initial, float target, float time) const;
-	bool lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r);
-	bool pointCircleCollision(float px, float py, float cx, float cy, float r);
-	bool linePointCollision(float x1, float y1, float x2, float y2, float px, float py);
-	float getDistance(float x1, float y1, float x2, float y2);
+	bool lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r, sf::Vector2f& outImpactPoint) const;
+	bool pointCircleCollision(float px, float py, float cx, float cy, float r) const;
+	bool linePointCollision(float x1, float y1, float x2, float y2, float px, float py) const;
+	float getDistance(float x1, float y1, float x2, float y2) const;
 };

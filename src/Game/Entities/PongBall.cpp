@@ -4,7 +4,6 @@
 
 #include "PhantomBall.hpp"
 #include "../PolygonTerrain.hpp"
-#include "../PolygonCollisionResult.hpp"
 
 //--- Constructors - Destructor ---
 PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain)
@@ -24,7 +23,7 @@ PongBall::~PongBall()
 //--- Initializers ---
 void PongBall::initVariables()
 {
-	_velocity = sf::Vector2f(1.f, 1.f);
+	_velocity = sf::Vector2f(0.8f, 3.f);
 	_initialSpeed = 220.f;
 	_currentSpeed = _initialSpeed;
 	_maxSpeed = 2000.f;
@@ -44,12 +43,8 @@ void PongBall::initShapes(const sf::RenderWindow& window)
 	_ballShape.setFillColor(_ballColor);
 	_ballShape.setOutlineColor(sf::Color::White);
 	_ballShape.setOutlineThickness(2);
+	_ballShape.setOrigin(_ballShape.getGlobalBounds().width / 2.f, _ballShape.getGlobalBounds().height / 2.f);
 	_ballShape.setPosition(sf::Vector2f(static_cast<float>(window.getSize().x) / 2.f, static_cast<float>(window.getSize().y) / 2.f));
-
-	_ballHitboxShape.setFillColor(sf::Color(0,0,0,0));
-	_ballHitboxShape.setOutlineColor(sf::Color::Red);
-	_ballHitboxShape.setOutlineThickness(2);
-	_ballHitboxShape.setPosition(_ballShape.getPosition());
 }
 
 void PongBall::initBoost()
@@ -61,7 +56,7 @@ void PongBall::initBoost()
 
 void PongBall::initPhantomEffect()
 {
-	_phantomBallsMax = 15;
+	_phantomBallsMax = 10;
 	_durationBetweenPhantomBalls = 0.05f;
 
 	createPhantomBalls();
@@ -73,54 +68,41 @@ void PongBall::initPhantomEffect()
 void PongBall::update(const float& deltaTime)
 {
 	updateBoost(deltaTime);
+	updateCollision();
 	updateMovement(deltaTime);
 	updatePhantomEffect(deltaTime);
 }
 
-void PongBall::updateMovement(const float& deltaTime)
+void PongBall::updateCollision()
 {
-	/*if(_hasHit)
-	{
-		_currentTimeStopCollisionTests += deltaTime;
-
-		if (_currentTimeStopCollisionTests > _durationStopCollisionTests)
-		{
-			_hasHit = false;
-			_currentTimeStopCollisionTests = 0;
-		}
-		else
-		{
-			return;
-		}
-	}*/
-
 	const int pointCount = static_cast<int>(_polygonTerrain->getShape().getPointCount());
-	const sf::ConvexShape polygonShape = _polygonTerrain->getShape();
-	const sf::Vector2f circleCenter = sf::Vector2f(_ballShape.getGlobalBounds().left + _ballShape.getGlobalBounds().width / 2.f,
-		_ballShape.getGlobalBounds().top + _ballShape.getGlobalBounds().height / 2.f);
 
-	for(int i  = 0 ; i < pointCount; i++)
+	sf::Vector2f outImpactPoint{ 0,0 };
+
+	for (int i = 0; i < pointCount; i++)
 	{
-		float xA = polygonShape.getTransform().transformPoint(sf::Vector2f(polygonShape.getPoint(i).x, polygonShape.getPoint(i).y)).x;
-		float yA = polygonShape.getTransform().transformPoint(sf::Vector2f(polygonShape.getPoint(i).x, polygonShape.getPoint(i).y)).y;
-		float xB = polygonShape.getTransform().transformPoint(sf::Vector2f(polygonShape.getPoint((i + 1) % pointCount).x, polygonShape.getPoint((i + 1) % pointCount).y)).x;
-		float yB = polygonShape.getTransform().transformPoint(sf::Vector2f(polygonShape.getPoint((i + 1) % pointCount).x, polygonShape.getPoint((i + 1) % pointCount).y)).y;
+		const float xA = _polygonTerrain->getPointPosition(i).x;
+		const float yA = _polygonTerrain->getPointPosition(i).y;
+		const float xB = _polygonTerrain->getPointPosition((i + 1) % pointCount).x;
+		const float yB = _polygonTerrain->getPointPosition((i + 1) % pointCount).y;
 
-		bool hit = lineCircleCollision(xA, yA, xB, yB, circleCenter.x, circleCenter.y, _ballShape.getRadius());
+		bool hit = lineCircleCollision(xA, yA, xB, yB, _ballShape.getPosition().x, _ballShape.getPosition().y, _ballShape.getRadius(), outImpactPoint);
 
 		if (hit)
 		{
 			const sf::Vector2f surfaceVector = normalize(sf::Vector2f(xB - xA, yB - yA));
-
 			_velocity = _polygonTerrain->getVectorReflection(_velocity, surfaceVector);
-			//_ballShape.setPosition(-surfaceVector.y, surfaceVector.x);
-			_hasHit = true;
-			break;
+
+			const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
+			_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius() * 1.1f,
+				outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius() * 1.1f);
 		}
 	}
+}
 
+void PongBall::updateMovement(const float& deltaTime)
+{
 	moveEntity(_velocity, deltaTime);
-	_ballHitboxShape.setPosition(_ballShape.getPosition());
 }
 
 void PongBall::updateBoost(const float& deltaTime)
@@ -163,7 +145,6 @@ void PongBall::render(sf::RenderTarget& target) const
 {
 	renderPhantomEffect(target);
 	target.draw(_ballShape);
-	target.draw(_ballHitboxShape);
 }
 
 void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
@@ -285,14 +266,21 @@ void PongBall::createPhantomBalls()
 
 void PongBall::displayPhantomBall()
 {
+	bool isPhantomBallDisplayed = false;
 	//Recherche de la premiere PhantomBall qui n'est pas affichée dans la liste
 	for (const auto& phantomBall : _phantomBalls)
 	{
 		if (!phantomBall->isDisplayed())
 		{
 			phantomBall->show();
+			isPhantomBallDisplayed = true;
 			break;
 		}
+	}
+
+	if(!isPhantomBallDisplayed)
+	{
+		std::cout << "ERROR PongBall.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! " << std::endl;
 	}
 }
 
@@ -308,81 +296,71 @@ void PongBall::stopPhantomBallEffect()
 }
 
 // LINE/CIRCLE
-bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r) {
-
-	// is either end INSIDE the circle?
-	// if so, return true immediately
-	bool inside1 = pointCircleCollision(x1, y1, cx, cy, r);
-	bool inside2 = pointCircleCollision(x2, y2, cx, cy, r);
-	if (inside1 || inside2) return true;
-
+bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r, sf::Vector2f& outImpactPoint) const
+{
 	// get length of the line
-	float len = getDistance(x1, y1, x2, y2);
+	const float lengthLine = getDistance(x1, y1, x2, y2);
 
 	// get dot product of the line and circle
-	float dot = (((cx - x1)*(x2 - x1)) + ((cy - y1)*(y2 - y1))) / std::pow(len, 2);
+	const float dot = (((cx - x1)*(x2 - x1)) + ((cy - y1)*(y2 - y1))) / std::pow(lengthLine, 2);
 
 	// find the closest point on the line
-	float closestX = x1 + (dot * (x2 - x1));
-	float closestY = y1 + (dot * (y2 - y1));
+	const float closestX = x1 + (dot * (x2 - x1));
+	const float closestY = y1 + (dot * (y2 - y1));
 
 	// is this point actually on the line segment?
 	// if so keep going, but if not, return false
-	bool onSegment = linePointCollision(x1, y1, x2, y2, closestX, closestY);
-	if (!onSegment) return false;
+	if (!linePointCollision(x1, y1, x2, y2, closestX, closestY)) return false;
 
 	// get distance to closest point
-	float distance = getDistance(closestX, closestY, cx, cy);
+	const float distance = getDistance(closestX, closestY, cx, cy);
 
 	if (distance <= r) {
+		outImpactPoint.x = closestX;
+		outImpactPoint.y = closestY;
 		return true;
 	}
+
 	return false;
 }
 
 // LINE/POINT
-bool PongBall::linePointCollision(float x1, float y1, float x2, float y2, float px, float py) {
-
+bool PongBall::linePointCollision(float x1, float y1, float x2, float y2, float px, float py) const
+{
 	// get distance from the point to the two ends of the line
-	float d1 = getDistance(px, py, x1, y1);
-	float d2 = getDistance(px, py, x2, y2);
+	const float d1 = getDistance(px, py, x1, y1);
+	const float d2 = getDistance(px, py, x2, y2);
 
 	// get the length of the line
-	float lineLen = getDistance(x1, y1, x2, y2);
+	const float lineLen = getDistance(x1, y1, x2, y2);
 
 	// since floats are so minutely accurate, add
 	// a little buffer zone that will give collision
-	float buffer = 10.f;    // higher # = less accurate
+	const float buffer = 0.1f;    // higher # = less accurate
 
 	// if the two distances are equal to the line's 
 	// length, the point is on the line!
 	// note we use the buffer here to give a range, 
 	// rather than one #
-	if (d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer) {
-		return true;
-	}
-	return false;
+	return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
 }
 
 // POINT/CIRCLE
-bool PongBall::pointCircleCollision(float px, float py, float cx, float cy, float r) {
+bool PongBall::pointCircleCollision(float px, float py, float cx, float cy, float r) const
+{
 
 	// get distance between the point and circle's center
 	// using the Pythagorean Theorem
-	float distance = getDistance(px, py, cx, cy);
 
 	// if the distance is less than the circle's
 	// radius the point is inside!
-	if (distance <= r) {
-		return true;
-	}
-	return false;
+	return getDistance(px, py, cx, cy) <= r;
 }
 
-float PongBall::getDistance (float x1, float y1, float x2, float y2)
+float PongBall::getDistance (float x1, float y1, float x2, float y2) const
 {
-	float distX = x1 - x2;
-	float distY = y1 - y2;
+	const float distX = x1 - x2;
+	const float distY = y1 - y2;
 	return std::sqrt(distX*distX + distY*distY);
 }
 
