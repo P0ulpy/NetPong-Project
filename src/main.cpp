@@ -1,33 +1,20 @@
 ﻿#include "Engine/Engine.hpp"
+#include "Utils/EventEmitter.hpp"
+
+EventEmitter eventEmitter;
 
 int main(int argc, char** argv)
 {
     PoPossibEngin engine = PoPossibEngin(
         EngineConfig(
             EngineConfig::WindowConfig(
-	            sf::VideoMode(900, 900),
+                sf::VideoMode(900, 900),
                 "Netpong"
             )
         )
     );
 
     engine.start();
-
-    /*
-    sf::Thread client_thread(&client);
-    sf::Thread server_thread(&server);
-
-    server_thread.launch();
-    client_thread.launch();
-
-    server_thread.wait();
-    std::cout << "Fin du thread serveur" << std::endl;
-
-    client_thread.wait();
-    std::cout << "Fin du thread client" << std::endl;
-
-    system("PAUSE");
-    return 0;*/
 }
 
 void client()

@@ -1,13 +1,10 @@
-#ifndef ENGINE_HPP
-#define ENGINE_HPP
-
-#include <iostream>
+#pragma once
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
 #include "InputsManager/InputsManager.hpp"
-#include "Scenes/Scene.hpp"
+#include "SocketsManagement/SocketsManager.hpp"
 
 class Scene;
 
@@ -27,7 +24,7 @@ struct EngineConfig
 enum EngineState { STOP, INITIALIZING, INITIALIZED, RUNNING, PAUSE };
 
 // TEMP
-enum SceneType { MainGame };
+enum SceneType { SocketConnection, MainGame };
 
 class PoPossibEngin
 {
@@ -41,18 +38,20 @@ public:
 	// get / set
 
 	[[nodiscard]] sf::RenderWindow& getRenderWindow() const;
-	[[nodiscard]] EngineState getEngineState() const;
-	[[nodiscard]] EngineConfig& getEngineConfig();
+	[[nodiscard]] const EngineState& getEngineState() const;
+	[[nodiscard]] const EngineConfig& getEngineConfig() const;
 
 	[[nodiscard]] sf::Thread& getRenderThread();
 	[[nodiscard]] sf::Thread& getLogicThread();
 
 	[[nodiscard]] float getDeltaTime() const;
 
+	[[nodiscard]] SocketManager& getSocketManager();
+
 private:
 
 	EngineState _engineState = STOP;
-	EngineConfig _engineConfig;
+	const EngineConfig& _engineConfig;
 
 	sf::RenderWindow* _renderWindow = nullptr;
 
@@ -82,6 +81,10 @@ private:
 
 	void loadScene(SceneType sceneType);
 
+	// Net
+
+	SocketManager _socketManager;
+
 	// DEBUG
 
 	void renderThreadDebugInfo();
@@ -90,5 +93,3 @@ private:
 	int _currFrameCount = 0;
 	int _currFrameRate = 0;
 };
-
-#endif //ENGINE_HPP

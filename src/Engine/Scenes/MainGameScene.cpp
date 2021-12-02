@@ -1,4 +1,7 @@
 #include "MainGameScene.hpp"
+
+#include <iostream>
+
 #include "../../Game/Entities/PongBall.hpp"
 #include "../../Game/Entities/Terrain.hpp"
 
@@ -31,8 +34,8 @@ void MainGameScene::start()
 
 void MainGameScene::initValues()
 {
-	_terrain = std::make_unique<Terrain>(_poPossibEngin->getRenderWindow());
-	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _terrain->getPlayableArea());
+	_terrain = std::make_unique<Terrain>(_engine->getRenderWindow());
+	_pongBall = std::make_unique<PongBall>(_engine->getRenderWindow(), _terrain->getPlayableArea());
 }
 
 void MainGameScene::initFonts()
@@ -46,7 +49,7 @@ void MainGameScene::initFonts()
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs();
-	_pongBall->update(_poPossibEngin->getRenderWindow(), deltaTime);
+	_pongBall->update(_engine->getRenderWindow(), deltaTime);
 }
 
 void MainGameScene::render(sf::RenderTarget* target)

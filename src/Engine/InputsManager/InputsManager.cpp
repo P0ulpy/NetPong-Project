@@ -1,4 +1,4 @@
-#include <SFML/System.hpp>
+#pragma once
 
 #include "imgui-SFML.h"
 
@@ -6,35 +6,20 @@
 
 InputsManager::InputsManager()
 {
-	for (int i = 0; i < _eventsSize; i++)
-	{
-		_events[i] = nullptr;
-	}
+	clearEvents();
 }
 
-InputsManager::~InputsManager()
+void InputsManager::clearEvents()
 {
 	for (int i = 0; i < _eventsSize; i++)
 	{
-		if (_events[i] != nullptr)
-		{
-			delete _events[i];
-		}
+		_events[i].type = sf::Event::Count;
 	}
 }
 
 void InputsManager::updateEvents(sf::RenderWindow& renderWindow)
 {
-
-	for (int i = 0; i < _eventsSize; i++)
-	{
-		if (_events[i] != nullptr)
-		{
-			delete _events[i];
-		}
-
-		_events[i] = nullptr;
-	}
+	clearEvents();
 
 	sf::Event event;
 	while(renderWindow.pollEvent(event))
@@ -42,20 +27,20 @@ void InputsManager::updateEvents(sf::RenderWindow& renderWindow)
 		// ImGui Events Handling
 		ImGui::SFML::ProcessEvent(event);
 
-		_events[event.type] = new sf::Event(event);
+		_events[event.type] = event;
 	}
 }
 
 bool InputsManager::getEvent(sf::Event::EventType eventType)
 {
-	return (_events[eventType] != nullptr);
+	return (_events[eventType].type != sf::Event::Count);
 }
 
 bool InputsManager::getEvent(sf::Event::EventType eventType, sf::Event& outEvent)
 {
-	if (_events[eventType] != nullptr)
+	if (_events[eventType].type != sf::Event::Count)
 	{
-		outEvent = sf::Event(*_events[eventType]);
+		outEvent = _events[eventType];
 		return true;
 	}
 

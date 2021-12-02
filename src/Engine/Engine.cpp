@@ -1,6 +1,7 @@
 
-#ifndef ENGINE_CPP
-#define ENGINE_CPP
+#pragma once
+
+#include <iostream>
 
 #include <SFML/Window.hpp>
 
@@ -8,14 +9,17 @@
 #include <imgui-SFML.h>
 
 #include "Engine.hpp"
+#include "SocketsManagement/SocketsManager.hpp"
 
 // Scenes
 #include "Scenes/MainGameScene.hpp"
+#include "Scenes/SocketConnectionScene.hpp"
 
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
 	: _engineConfig(engineConfig),
 	_renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this)),
-	_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
+	_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this)),
+	_socketManager(SocketManager(*this))
 {
 
 }
@@ -58,13 +62,15 @@ PoPossibEngin::~PoPossibEngin()
 // Get
 
 sf::RenderWindow& PoPossibEngin::getRenderWindow() const { return *_renderWindow; }
-EngineState PoPossibEngin::getEngineState() const { return _engineState; }
-EngineConfig& PoPossibEngin::getEngineConfig() { return _engineConfig; }
+const EngineState& PoPossibEngin::getEngineState() const { return _engineState; }
+const EngineConfig& PoPossibEngin::getEngineConfig() const { return _engineConfig; }
 
 sf::Thread& PoPossibEngin::getRenderThread() { return _logicThread; }
 sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
 
 float PoPossibEngin::getDeltaTime() const { return _deltaClock.getElapsedTime().asSeconds(); }
+
+SocketManager& PoPossibEngin::getSocketManager() { return _socketManager; }
 
 #pragma endregion GET/SET
 
@@ -76,12 +82,6 @@ void PoPossibEngin::pollEvents()
 	if(_inputManager.getEvent(sf::Event::Closed))
 	{
 		stop();
-	}
-
-	sf::Event event;
-	if (_inputManager.getEvent(sf::Event::KeyPressed, event))
-	{
-		std::cout << event.key.code << std::endl;
 	}
 }
 
@@ -98,7 +98,8 @@ void PoPossibEngin::renderThreadEntry()
 	_engineState = INITIALIZED;
 
 	// TEMPORAIRE
-	loadScene(MainGame);
+	//loadScene(MainGame);
+	loadScene(SocketConnection);
 
 	renderThreadUpdate();
 }
@@ -195,7 +196,7 @@ void PoPossibEngin::logicThreadEntry()
 	{
 		if (_engineState == RUNNING)
 		{
-			
+			throw std::exception("not implemented");
 		}
 	}*/
 }
@@ -218,7 +219,10 @@ void PoPossibEngin::loadScene(SceneType sceneType)
 
 	switch (sceneType)
 	{
-	case MainGame: 
+	case SocketConnection: 
+		newScene = new SocketConnectionScene(*this);
+		break;
+	case MainGame:
 		newScene = new MainGameScene(*this);
 		break;
 	}
@@ -227,6 +231,6 @@ void PoPossibEngin::loadScene(SceneType sceneType)
 	_currScene = newScene;
 
 	_engineState = RUNNING;
-}
 
-#endif //ENGINE_CPP
+	_currScene->start();
+}
