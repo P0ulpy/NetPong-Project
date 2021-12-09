@@ -24,10 +24,12 @@ private:
 	std::unique_ptr<Terrain> _terrain;
 	std::unique_ptr<PongBall> _pongBall;
 	std::unique_ptr<Character> _character;
-
-
+	
+	bool activeShieldAutorize = true;
+	float delay = 2.f;
 	//Font and texts
 	sf::Font _font;
+	sf::Clock clock;
 
 	void initValues();
 	void initFonts();
