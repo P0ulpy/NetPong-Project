@@ -40,8 +40,8 @@ void PolygonTerrain::initShape(const sf::RenderWindow& window)
 	const float _terrainXsize = 600.f;
 	const float _terrainYsize = 600.f;
 
-	const float _terrainAngleXSize = 100.f;
-	const float _terrainAngleYSize = 175.f;
+	const float _terrainAngleXSize = 150.f;
+	const float _terrainAngleYSize = 300.f;
 
 	_terrainShape.setFillColor(sf::Color::Black);
 	_terrainShape.setOutlineColor(sf::Color::White);
@@ -85,8 +85,8 @@ sf::Vector2f PolygonTerrain::getVectorReflection(sf::Vector2f inDirection, sf::V
 {
 	const auto inNormal = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
 	const float factor = -2.f * (inDirection.x * inNormal.x + inDirection.y * inNormal.y);
-	const auto finalVector = sf::Vector2(std::round(factor * inNormal.x + inDirection.x),
-										 std::round(factor * inNormal.y + inDirection.y));
+	const auto finalVector = sf::Vector2f(factor * inNormal.x + inDirection.x,
+										 factor * inNormal.y + inDirection.y);
 	return finalVector;
 }
 

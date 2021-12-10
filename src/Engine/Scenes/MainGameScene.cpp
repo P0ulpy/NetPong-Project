@@ -20,9 +20,15 @@ void MainGameScene::updateInputs()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		_pongBall->resetSpeedMultiplierBonus();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad2))
-		_pongBall->startPhantomBallEffect();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad3))
 		_pongBall->startBoostBall(8.f);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad3))
+		_pongBall->startBoostBall(16.f);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad4))
+		_pongBall->startBoostBall(32.f);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad5))
+		_pongBall->startBoostBall(64.f);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad6))
+		_pongBall->startBoostBall(128.f);
 }
 
 void MainGameScene::start()

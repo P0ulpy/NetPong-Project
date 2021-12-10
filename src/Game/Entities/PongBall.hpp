@@ -20,7 +20,7 @@ public:
 
 	//Functions
 	void update(const float& deltaTime) override;
-	void updateCollision();
+	void updateCollision(const float& deltaTime);
 	void updateMovement(const float& deltaTime);
 	void updateBoost(const float& deltaTime);
 	void updatePhantomEffect(const float& deltaTime);
@@ -51,6 +51,10 @@ private:
 	sf::CircleShape _ballShape;
 	sf::Color _ballColor;
 	int _ballSize;
+
+	sf::Vector2f _initialPosition;
+	sf::CircleShape* _ballDestination;
+	sf::Vector2f _oldPosition;
 
 	//Ball physics
 	float _speedMultiplierBonus;
@@ -88,6 +92,7 @@ private:
 	//Utils
 	float deceleration(float initial, float target, float time) const;
 	bool lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r, sf::Vector2f& outImpactPoint) const;
+	bool lineLineCollision(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, sf::Vector2f& outIntersectionPoint) const;
 	bool pointCircleCollision(float px, float py, float cx, float cy, float r) const;
 	bool linePointCollision(float x1, float y1, float x2, float y2, float px, float py) const;
 	float getDistance(float x1, float y1, float x2, float y2) const;
