@@ -2,7 +2,6 @@
 
 Terrain::Terrain(const sf::RenderWindow& window)
 {
-	initVariables();
 	initShape(window);
 	initPlayableArea();
 }
@@ -30,11 +29,6 @@ sf::RectangleShape Terrain::getShape() const
 sf::Rect<float> Terrain::getPlayableArea() const
 {
 	return _playableArea;
-}
-
-void Terrain::initVariables()
-{
-
 }
 
 void Terrain::initShape(const sf::RenderWindow& window)
