@@ -1,6 +1,7 @@
 
-#ifndef ENGINE_CPP
-#define ENGINE_CPP
+#pragma once
+
+#include <iostream>
 
 #include <SFML/Window.hpp>
 
@@ -8,119 +9,228 @@
 #include <imgui-SFML.h>
 
 #include "Engine.hpp"
+#include "SocketsManagement/SocketsManager.hpp"
 
 // Scenes
 #include "Scenes/MainGameScene.hpp"
+#include "Scenes/SocketConnectionScene.hpp"
 
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
-// Threads Init
-	: _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this)),
-		_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
+	: _engineConfig(engineConfig),
+	_renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this)),
+	_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this)),
+	_socketManager(SocketManager(*this))
 {
-	_renderWindow = new sf::RenderWindow(
-		engineConfig.windowConfig.videoMode, 
-		engineConfig.windowConfig.title, 
-		engineConfig.windowConfig.style
-	);
 
-	if(engineConfig.windowConfig.framerateLimit)
-	{
-		_renderWindow->setFramerateLimit(engineConfig.windowConfig.framerateLimit);
-	}
-	else
-	{
-		_renderWindow->setVerticalSyncEnabled(true);
-	}
+}
 
-	if(engineConfig.windowConfig.enableImgui)
-	{
-		//ImGui::SFML::Init(*_renderWindow);
-	}
+void PoPossibEngin::start()
+{
+	_engineState = INITIALIZING;
 
-	std::cout << "Engine Initilized" << std::endl;
-	_engineState = INITIALIZED;
+	_renderThread.launch();
+	_logicThread.launch();
 
-	// TEMPORAIRE
-	loadScene(MainGame);
+	_renderThread.wait();
+	_logicThread.wait();
+}
 
-	// Threads Init
+void PoPossibEngin::stop()
+{
+	_engineState = STOP;
 
-	//_renderThread.launch();
-	//_logicThread.launch();
+	delete _currScene;
+	_currScene = nullptr;
+
+	_renderThread.terminate();
+	_logicThread.terminate();
+
+	_renderWindow->close();
 }
 
 PoPossibEngin::~PoPossibEngin()
 {
 	delete _renderWindow;
 	delete _currScene;
+
+	ImGui::SFML::Shutdown();
 }
 
+
+#pragma region GET/SET
+
+// Get
+
 sf::RenderWindow& PoPossibEngin::getRenderWindow() const { return *_renderWindow; }
-EngineState PoPossibEngin::getEngineState() const { return _engineState; }
+const EngineState& PoPossibEngin::getEngineState() const { return _engineState; }
+const EngineConfig& PoPossibEngin::getEngineConfig() const { return _engineConfig; }
 
 sf::Thread& PoPossibEngin::getRenderThread() { return _logicThread; }
 sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
 
-void PoPossibEngin::refreshDeltaTime()
+float PoPossibEngin::getDeltaTime() const { return _deltaClock.getElapsedTime().asSeconds(); }
+
+SocketManager& PoPossibEngin::getSocketManager() { return _socketManager; }
+
+#pragma endregion GET/SET
+
+
+void PoPossibEngin::pollEvents()
 {
-	_deltaTime = _deltaClock.restart().asSeconds();
+	_inputManager.updateEvents(*_renderWindow);
+
+	if(_inputManager.getEvent(sf::Event::Closed))
+	{
+		stop();
+	}
 }
+
+
+#pragma region RenderThread
 
 void PoPossibEngin::renderThreadEntry()
 {
 	std::cout << "Render Thread Entry" << std::endl;
 
-	while(_renderWindow->isOpen())
+	renderThread_InitWindow();
+
+	std::cout << "Engine Initilized" << std::endl;
+	_engineState = INITIALIZED;
+
+	// TEMPORAIRE
+	loadScene(MainGame);
+	//loadScene(SocketConnection);
+
+	renderThreadUpdate();
+}
+
+void PoPossibEngin::renderThread_InitWindow()
+{
+	_renderWindow = new sf::RenderWindow(
+		_engineConfig.windowConfig.videoMode,
+		_engineConfig.windowConfig.title,
+		_engineConfig.windowConfig.style
+	);
+
+	if (_engineConfig.windowConfig.framerateLimit == 0)
 	{
-		if(_engineState == RUNNING)
+		_renderWindow->setFramerateLimit(_engineConfig.windowConfig.framerateLimit);
+	}
+	else
+	{
+		_renderWindow->setVerticalSyncEnabled(true);
+
+		// DEBUG permet de déclancher le bug de collision
+		//_renderWindow->setFramerateLimit(300);
+	}
+
+	ImGui::SFML::Init(*_renderWindow);
+}
+
+void PoPossibEngin::renderThreadUpdate()
+{
+	if(_renderWindow == nullptr)
+	{
+		throw std::exception("_renderWindow not initialized");
+	}
+
+	while (_renderWindow->isOpen())
+	{
+		if (_engineState == RUNNING)
 		{
-			refreshDeltaTime();
+			sf::Time _deltaTime_Time = _deltaClock.restart();
+			_deltaTime = _deltaTime_Time.asSeconds();
+			ImGui::SFML::Update(*_renderWindow, _deltaTime_Time);
+
+			// DEBUG INFOS
+			renderThreadDebugInfo();
 
 			_renderWindow->clear();
 
-			_currScene->update(_deltaTime);
+			// TEMP
+			_currScene->update(getDeltaTime());
+			// TEMP
 
-			// TEMPORAIRE
 			_currScene->render(_renderWindow);
-			// TEMPORAIRE
+			ImGui::SFML::Render(*_renderWindow);
 
 			_renderWindow->display();
+
+			pollEvents();
 		}
 	}
 }
+
+void PoPossibEngin::renderThreadDebugInfo()
+{
+	ImGui::Begin("PoPosibEngin Info");
+
+	_currFrameCount++;
+	// TEMP : utilisation de _deltaTime pour le fix du soucis de la valeur de la clock incorecte lors de l'appel de .restart()
+	_currFrameTimeCount += _deltaTime;
+
+	if (_currFrameTimeCount >= 1)
+	{
+		_currFrameRate = _currFrameCount;
+		_currFrameCount = 0;
+		_currFrameTimeCount = 0;
+	}
+	
+	ImGui::Text("FrameRate : %d", _currFrameRate);
+	ImGui::Text("DeltaTime : %.5f", (double)getDeltaTime());
+	ImGui::Text("Engine state : %d", _engineState);
+
+	ImGui::End();
+}
+
+#pragma endregion RenderThread
+
+
+#pragma region LogicThread
 
 void PoPossibEngin::logicThreadEntry()
 {
 	std::cout << "Render Thread Entry" << std::endl;
 
-	/*while (_renderWindow->isOpen())
+	/*while (true)
 	{
 		if (_engineState == RUNNING)
 		{
-			// A REMPLIR
+			throw std::exception("not implemented");
 		}
 	}*/
 }
 
-void PoPossibEngin::loadScene(SceneType sceneType)
+void PoPossibEngin::logicThreadUpdate()
 {
-	{
-		_engineState = PAUSE;
-
-		Scene* newScene;
-
-		switch (sceneType)
-		{
-		case MainGame: 
-			newScene = new MainGameScene(*this);
-			break;
-		}
-
-		delete _currScene;
-		_currScene = newScene;
-
-		_engineState = RUNNING;
-	}
+	throw std::exception("not implemented");
 }
 
-#endif //ENGINE_CPP
+#pragma endregion LogicThread
+
+
+void PoPossibEngin::loadScene(SceneType sceneType)
+{
+	// IMPLEMENTATION TEMPORAIRE
+
+	_engineState = PAUSE;
+
+	Scene* newScene;
+
+	switch (sceneType)
+	{
+	case SocketConnection: 
+		newScene = new SocketConnectionScene(*this);
+		break;
+	case MainGame:
+		newScene = new MainGameScene(*this);
+		break;
+	}
+
+	delete _currScene;
+	_currScene = newScene;
+
+	_engineState = RUNNING;
+
+	_currScene->start();
+}

@@ -3,7 +3,8 @@
 #include <iostream>
 
 #include "PhantomBall.hpp"
-#include "../PolygonTerrain.hpp"
+#include "../Terrains/PolygonTerrain.hpp"
+
 
 //--- Constructors - Destructor ---
 PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain)
@@ -298,7 +299,7 @@ void PongBall::createPhantomBalls()
 void PongBall::displayPhantomBall()
 {
 	bool isPhantomBallDisplayed = false;
-	//Recherche de la premiere PhantomBall qui n'est pas affichée dans la liste
+	//Recherche de la premiere PhantomBall qui n'est pas affichï¿½e dans la liste
 	for (const auto& phantomBall : _phantomBalls)
 	{
 		if (!phantomBall->isDisplayed())

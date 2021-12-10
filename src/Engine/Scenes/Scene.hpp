@@ -1,5 +1,4 @@
-#ifndef SCENE_HPP
-#define SCENE_HPP
+#pragma once
 
 #include <SFML/Graphics.hpp>
 #include "../../Engine/Engine.hpp"
@@ -27,5 +26,3 @@ protected:
 	PoPossibEngin* _poPossibEngin;
 	std::vector<sf::Texture> _textures;
 };
-
-#endif //ENGINE_HPP
