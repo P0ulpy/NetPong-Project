@@ -2,87 +2,98 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "PongBall.hpp"
+#include "../Entity.hpp"
 
+constexpr int BALL_SIZE = 20;
+
+class PolygonTerrain;
 class PhantomBall;
+class PolygonCollisionResult;
 
-class PongBall
+class PongBall : public Entity
 {
 public:
 	//Constructors - Destructors
-	PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain);
+	PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain);
+
 	virtual ~PongBall();
 
 	//Functions
-	void update(sf::RenderTarget& target, float deltaTime);
+	void update(const float& deltaTime) override;
+	void updateCollision(const float& deltaTime);
 	void updateMovement(const float& deltaTime);
+	void updateBoost(const float& deltaTime);
 	void updatePhantomEffect(const float& deltaTime);
 
-	void render(sf::RenderTarget& target) const;
+	void render(sf::RenderTarget& target) const override;
 	void renderPhantomEffect(sf::RenderTarget& target) const;
+
+	void updateAndRenderPhantomEffect(sf::RenderTarget& target, const float& deltaTime);
 
 	//Getters - Setters
 	sf::CircleShape getShape() const;
 
-	void setTerrainArea(const sf::Rect<float>& terrain);
-
-	float getCurrentBoostTimeStamp() const;
 	void setSpeed(float speed);
-
-	void setSpeedBonusRatio(float pSpeedBonusRatio);
-	void addSpeedBonusRatio(float pSpeedBonusRatio);
-	void resetSpeedBonusRatio();
-
-	void createPhantomBalls();
-	void displayPhantomBall();
-	void activatedErasingLastPhantomBall();
+	void setSpeedMultiplierBonus(float pSpeedMultiplierBonus);
+	void addSpeedMultiplierBonus(float pSpeedMultiplierBonus);
+	void resetSpeedMultiplierBonus();
 
 	void startPhantomBallEffect();
+	void stopPhantomBallEffect();
 
-	void boostBall(float speedBoost);
-	float deceleration(float initial, float target, float time) const;
-	sf::Vector2f normalize(const sf::Vector2f& originalVector) const;
+	void startBoostBall(float speedBoostBonus);
+
+	static float dot(const sf::Vector2f& lhs, const sf::Vector2f& rhs);
+	static sf::Vector2f normalize(const sf::Vector2f& originalVector);
+
 private:
-
 	//Ball rendering
 	sf::CircleShape _ballShape;
 	sf::Color _ballColor;
 	int _ballSize;
 
+	sf::Vector2f _initialPosition;
+	sf::CircleShape* _ballDestination;
+	sf::Vector2f _oldPosition;
+
 	//Ball physics
-	sf::Vector2f _velocity;
-	float _currentSpeed;
-	float _initialSpeed;
-	float _maxSpeed;
-	float _speedBonusRatio;
-	bool _needErasePhantomBall{ false };
+	float _speedMultiplierBonus;
+
+	//Terrain
+	sf::Rect<float> _terrainArea;
+	PolygonTerrain* _polygonTerrain;
 
 	//Boost
-	bool _isBoosted{ false };
 	float _currentTimeBoost;
 	float _boostDuration;
+	bool _isBoosted;
 
 	//Phantom ball effect
 	std::vector<std::unique_ptr<PhantomBall>> _phantomBalls;
 	int _phantomBallsMax;
 
-	float _currentTimePhantomBallEffect;
 	float _currentTimePhantomBallCooldown;
-	float _timeBetweenPhantomBalls;
-	float _phantomBallEffectDuration;
-	bool _hasPhantomEffect{ false };
-
-	//Terrain
-	sf::Rect<float> _terrainArea;
+	float _durationBetweenPhantomBalls;
+	bool _hasPhantomEffect;
 
 	//Functions
-	void moveBall(const float& deltaTime);
+	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime) override;
 
 	//Initializers
 	void initVariables();
-	void initShape(const sf::RenderWindow& window);
+	void initShapes(const sf::RenderWindow& window);
 	void initBoost();
 	void initPhantomEffect();
 
-	void eraseLastPhantomBall();
+	//Phantom Ball Effect
+	void displayPhantomBall();
+	void createPhantomBalls();
+
+	//Utils
+	float deceleration(float initial, float target, float time) const;
+	bool lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r, sf::Vector2f& outImpactPoint) const;
+	bool lineLineCollision(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, sf::Vector2f& outIntersectionPoint) const;
+	bool pointCircleCollision(float px, float py, float cx, float cy, float r) const;
+	bool linePointCollision(float x1, float y1, float x2, float y2, float px, float py) const;
+	float getDistance(float x1, float y1, float x2, float y2) const;
 };

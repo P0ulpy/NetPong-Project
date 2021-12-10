@@ -2,6 +2,8 @@
 
 #include "Scene.hpp"
 
+class PolygonCollisionResult;
+class PolygonTerrain;
 class Terrain;
 class PongBall;
 class PoPossibEngin;
@@ -21,12 +23,14 @@ private:
 	std::vector<sf::Texture> _textures;
 
 	//Game objects
-	std::unique_ptr<Terrain> _terrain;
 	std::unique_ptr<PongBall> _pongBall;
 	std::unique_ptr<Character> _character;
 	
 	bool activeShieldAutorize = true;
 	float delay = 2.f;
+
+	std::unique_ptr<PolygonTerrain> _polygonTerrain;
+
 	//Font and texts
 	sf::Font _font;
 	//sf::Clock clock;
