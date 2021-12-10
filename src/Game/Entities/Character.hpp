@@ -1,9 +1,6 @@
 #include "SFML/Graphics.hpp"
 
-#define SPEED  5
 #define PI  3.14
-
-
 
 class Character
 {
@@ -43,6 +40,7 @@ private:
 
 public:
 
+	const int SPEED = 5;
 
 	Character(sf::RenderWindow& window);
 	~Character();

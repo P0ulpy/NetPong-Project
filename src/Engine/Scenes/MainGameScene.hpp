@@ -23,7 +23,6 @@ private:
 	std::vector<sf::Texture> _textures;
 
 	//Game objects
-	std::unique_ptr<Terrain> _terrain;
 	std::unique_ptr<PongBall> _pongBall;
 	std::unique_ptr<Character> _character;
 	

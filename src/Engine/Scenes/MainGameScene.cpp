@@ -3,9 +3,9 @@
 #include <iostream>
 
 #include "../../Game/Entities/PongBall.hpp"
-#include "../../Game/Entities/Terrain.hpp"
+#include "../../Game/Terrains/Terrain.hpp"
 #include "../../Game/Entities/Character.hpp"
-#include "../../Game/PolygonTerrain.hpp"
+#include "../../Game/Terrains/PolygonTerrain.hpp"
 
 MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -38,20 +38,20 @@ void MainGameScene::updateInputs(const float& deltaTime)
 	// Joueur 1
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) 
 	{
-		_character->direction(true, false, _terrain->getPlayableArea());
+		_character->direction(true, false, _polygonTerrain->getPlayableArea());
 	}
 	else
 	{
-		_character->direction(false, false, _terrain->getPlayableArea());
+		_character->direction(false, false, _polygonTerrain->getPlayableArea());
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) 
 	{
-		_character->direction(false, true, _terrain->getPlayableArea());
+		_character->direction(false, true, _polygonTerrain->getPlayableArea());
 	}
 	else
 	{
-		_character->direction(false, false, _terrain->getPlayableArea());
+		_character->direction(false, false, _polygonTerrain->getPlayableArea());
 	}
 
 
@@ -59,22 +59,22 @@ void MainGameScene::updateInputs(const float& deltaTime)
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 	{
-		_character->directionP2(true, false, _terrain->getPlayableArea());
+		_character->directionP2(true, false, _polygonTerrain->getPlayableArea());
 	}
 	else
 	{
-		_character->directionP2(false, false, _terrain->getPlayableArea());
+		_character->directionP2(false, false, _polygonTerrain->getPlayableArea());
 	}
 
 
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
-		_character->directionP2(false, true, _terrain->getPlayableArea());
+		_character->directionP2(false, true, _polygonTerrain->getPlayableArea());
 	}
 	else
 	{
-		_character->directionP2(false, false, _terrain->getPlayableArea());
+		_character->directionP2(false, false, _polygonTerrain->getPlayableArea());
 	}
 
 
@@ -89,11 +89,6 @@ void MainGameScene::updateInputs(const float& deltaTime)
 			activeShieldAutorize = false;
 		}
 	}
-
-
-		
-
-	
 }
 
 void MainGameScene::start()
@@ -103,11 +98,9 @@ void MainGameScene::start()
 
 void MainGameScene::initValues()
 {
-	_terrain = std::make_unique<Terrain>(_poPossibEngin->getRenderWindow());
 	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow());
 
-	//_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _terrain->getPlayableArea());
-	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _terrain->getPlayableArea(), *_polygonTerrain);
+	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain);
 	_character = std::make_unique<Character>(_poPossibEngin->getRenderWindow());
 }
 
@@ -117,15 +110,12 @@ void MainGameScene::initFonts()
 	{
 		std::cout << "ERROR FONT NOT LOADED - MainGameScene.cpp" << std::endl;
 	}
-
-
-
 }
 
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs(deltaTime);
-	_pongBall->update(_poPossibEngin->getRenderWindow(), deltaTime);
+	_pongBall->update(deltaTime);
 	_character->updateMouvement(_poPossibEngin->getRenderWindow(),_poPossibEngin->getRenderWindow(), clock);
 	_character->updateMouvementP2(_poPossibEngin->getRenderWindow(),_poPossibEngin->getRenderWindow(),clock);
 }

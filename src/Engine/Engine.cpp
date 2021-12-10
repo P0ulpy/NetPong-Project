@@ -120,7 +120,7 @@ void PoPossibEngin::renderThread_InitWindow()
 	{
 		_renderWindow->setVerticalSyncEnabled(true);
 
-		// DEBUG permet de d�clancher le bug de collision
+		// DEBUG permet de déclancher le bug de collision
 		//_renderWindow->setFramerateLimit(300);
 	}
 

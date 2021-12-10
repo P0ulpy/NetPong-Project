@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "PhantomBall.hpp"
-#include "../PolygonTerrain.hpp"
+#include "../Terrains/PolygonTerrain.hpp"
 
 
 //--- Constructors - Destructor ---
