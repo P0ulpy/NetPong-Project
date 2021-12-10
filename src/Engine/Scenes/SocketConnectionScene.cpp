@@ -1,6 +1,7 @@
 #include "SocketConnectionScene.hpp"
 
 #include "imgui.h"
+#include "../SocketsManagement/Server/Server.hpp"
 
 SocketConnectionScene::SocketConnectionScene(PoPossibEngin& poPossibEngin) :
 	Scene(poPossibEngin, SceneConfig())
@@ -37,14 +38,32 @@ void SocketConnectionScene::render(sf::RenderTarget* renderTarget)
 	}
 
 	if (hostWindowOpen)
-		hostWindow();
+		displayHostWindow();
 	if (joinWindowOpen)
-		joinWindow();
+		displayJoinWindow();
 
 	ImGui::End();
+
+	if(_engine->getSocketManager().getServerInstance() != nullptr)
+	{
+		auto server = _engine->getSocketManager().getServerInstance();
+
+		ImGui::Begin("Server Infos");
+
+		ImGui::BeginChild("Clients list");
+
+		for(auto client : server->getServerSocket().getClients())
+		{
+			ImGui::Text(client.first.c_str());
+		}
+
+		ImGui::EndChild();
+
+		ImGui::End();
+	}
 }
 
-void SocketConnectionScene::hostWindow()
+void SocketConnectionScene::displayHostWindow()
 {
 	if (ImGui::CollapsingHeader("Host"))
 	{
@@ -64,7 +83,7 @@ void SocketConnectionScene::hostWindow()
 	}
 }
 
-void SocketConnectionScene::joinWindow()
+void SocketConnectionScene::displayJoinWindow()
 {
 	if (ImGui::CollapsingHeader("Join"))
 	{

@@ -9,6 +9,7 @@ struct HostSettings
 {
 	std::string name = "New Lobby";
 	int port = 25565;
+	float socketConnectionTimeout = 2000.f;
 };
 
 struct ClientConnectionSettings

@@ -13,22 +13,27 @@ public:
 	~ServerSocket();
 
 	[[nodiscard]] const EventEmitter& getEventEmitter() const;
-
+	[[nodiscard]] const std::map<std::string, sf::TcpSocket*>& getClients() const;
+	
 private:
-	Server* _server;
+	Server* _server = nullptr;
 
 	sf::TcpListener _listener;
 
 	EventEmitter _eventEmitter;
 	void registerListeners();
 
+	sf::Mutex mutex;
+
 	sf::Thread _connectionsListenThread;
 	void connectionsListenEntry();
 
-	sf::Thread _packetListenThread;
-	void packetListenEntry();
+	sf::Thread _listenEventsThread;
+	void listenEvents();
+	void propagateEvent(sf::TcpSocket& socket, sf::Packet& packet);
 
 	std::map<std::string, sf::TcpSocket*> _clients;
+	sf::SocketSelector _clientsSocketSelector;
 
-	void onClientConnect(sf::TcpSocket* clientSocket);
+	void onClientConnection(sf::TcpSocket* clientSocket);
 };

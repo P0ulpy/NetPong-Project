@@ -28,7 +28,7 @@ private:
 	void registerListeners();
 
 	sf::Thread _listenThread;
-	void listenEntry();
+	void listenEvents();
 
-	void onHelloWorld(std::string hello);
+	void onConnected(sf::Packet packet);
 };

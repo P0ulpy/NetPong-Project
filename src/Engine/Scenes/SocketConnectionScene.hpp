@@ -16,6 +16,6 @@ private:
 	bool joinWindowOpen = false;
 	bool hostWindowOpen = false;
 
-	void hostWindow();
-	void joinWindow();
+	void displayHostWindow();
+	void displayJoinWindow();
 };

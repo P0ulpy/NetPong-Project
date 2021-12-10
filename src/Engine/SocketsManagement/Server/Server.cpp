@@ -12,6 +12,8 @@ Server::Server(const HostSettings& hostSettings, PoPossibEngin* engine) :
 const HostSettings& Server::getHostSettings() const { return _hostSettings; }
 const sf::Thread& Server::getServerThread() const { return _serverThread; }
 
+const ServerSocket& Server::getServerSocket() const { return _serverSocket; }
+
 void Server::threadEntry()
 {
 

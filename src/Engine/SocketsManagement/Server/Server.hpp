@@ -14,6 +14,7 @@ public:
 
 	[[nodiscard]] const HostSettings& getHostSettings() const;
 	[[nodiscard]] const sf::Thread& getServerThread() const;
+	[[nodiscard]] const ServerSocket& getServerSocket() const;
 
 private:
 	HostSettings _hostSettings;
