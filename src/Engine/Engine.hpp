@@ -15,7 +15,7 @@ struct EngineConfig
 		sf::VideoMode videoMode = sf::VideoMode(800, 800);
 		std::string title = "Render Window";
 		unsigned int style = sf::Style::Default;
-		unsigned int framerateLimit = 0; // 0 mean automatic (verticalSyncEnabled = true)
+		unsigned int framerateLimit = 60; // 0 mean automatic (verticalSyncEnabled = true)
 	};
 
 	WindowConfig windowConfig;
