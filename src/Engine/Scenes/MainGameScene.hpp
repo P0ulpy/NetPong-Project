@@ -13,7 +13,7 @@ public:
 	MainGameScene(PoPossibEngin& poPossibEngin);
 	~MainGameScene();
 
-	void updateInputs();
+	void updateInputs(const float& deltaTime);
 	void start();
 	void update(const float& deltaTime);
 	void render(sf::RenderTarget* target = nullptr);
@@ -29,7 +29,8 @@ private:
 	float delay = 2.f;
 	//Font and texts
 	sf::Font _font;
-	sf::Clock clock;
+	//sf::Clock clock;
+	float clock = 0;
 
 	void initValues();
 	void initFonts();

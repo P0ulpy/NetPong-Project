@@ -16,15 +16,15 @@ private:
 	sf::CircleShape charac;
 	sf::RectangleShape shield;
 	//	Joueur 2
-	sf::CircleShape charac2;
-	sf::RectangleShape shield2;
+	sf::CircleShape characP2;
+	sf::RectangleShape shieldP2;
 
 	bool leftFlag = false;
 	bool rightFlag = false;
 
-	bool leftFlag2 = false;
-	bool rightFlag2 = false;
-	float shielCooldown = 0;
+	bool leftFlagP2 = false;
+	bool rightFlagP2 = false;
+
 	bool isActive = false;
 
 
@@ -35,10 +35,10 @@ private:
 	const int yShie = 700;
 
 	//Position du joueur 2
-	int xChar2 = 450;
-	int xShie2 = 450;
-	const int yChar2 = 200;
-	const int yShie2 = 200;
+	int xCharP2 = 450;
+	int xShieP2 = 450;
+	const int yCharP2 = 200;
+	const int yShieP2 = 200;
 
 
 public:
@@ -47,36 +47,42 @@ public:
 	Character(sf::RenderWindow& window);
 	~Character();
 
+	// On change la position du personnage en fonction de la speed et sa direction
 	void setCharacterPosition(int x,int y);
-	void setCharacterPosition2(int x,int y);
+	void setCharacterPositionP2(int x,int y);
+
+	// On change la position du bouclier en fonction de la speed et de la direction du personnage
 	void setShieldPosition(int x,int y);
-	void setShieldPosition2(int x,int y);
+	void setShieldPositionP2(int x,int y);
+
+	// On change la rotation du personnage en fonction de la position de la souris
 	void setCharacterRotation(sf::Vector2i mousePos);
-	void setCharacterRotation2(sf::Vector2i mousePos);
+	void setCharacterRotationP2(sf::Vector2i mousePos);
+
+	// On change la position du bouclier en fonction de la position de la souris
 	void setShieldRotation(sf::Vector2i mousePos);
-	void setShieldRotation2(sf::Vector2i mousePos);
+	void setShieldRotationP2(sf::Vector2i mousePos);
+
+	// On défini la direction du personnage grâce aux inputs
 	void direction(bool left, bool right, const sf::Rect<float>& terrain);
-	void direction2(bool left, bool right, const sf::Rect<float>& terrain);
+	void directionP2(bool left, bool right, const sf::Rect<float>& terrain);
+
+	// On défini les paramètres des deux personnages
 	void initParamP1(sf::RenderWindow& window);
 	void initParamP2(sf::RenderWindow& window);
-
+	
+	// On vérifie si le bouclier est actif ou non
 	void verifActiveShield(bool isActive);
 	
-	void updateMouvement(sf::RenderTarget& target, sf::RenderWindow& window, sf::Clock clock);
-	void updateMouvement2(sf::RenderTarget& target, sf::RenderWindow& window);
-	
 
+	// Update des personnage
+	void updateMouvement(sf::RenderTarget& target, sf::RenderWindow& window,float clock);
+	void updateMouvementP2(sf::RenderTarget& target, sf::RenderWindow& window,float clock);
+	
+	// Affichage des personnages
 	void render(sf::RenderTarget& target);
-	void render2(sf::RenderTarget& target);
+	void renderP2(sf::RenderTarget& target);
 	
 	sf::Vector2i mousePosition(sf::RenderWindow& window);
-
-
-
-	//void update(sf::RenderTarget & target, float deltaTime);
-	
-	
-
-
 
 };
