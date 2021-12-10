@@ -23,6 +23,6 @@ public:
 	[[nodiscard]] PoPossibEngin& getParentEngine() const;
 
 protected:
-	PoPossibEngin* _engine;
+	PoPossibEngin* _poPossibEngin;
 	std::vector<sf::Texture> _textures;
 };

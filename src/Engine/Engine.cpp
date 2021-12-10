@@ -98,8 +98,8 @@ void PoPossibEngin::renderThreadEntry()
 	_engineState = INITIALIZED;
 
 	// TEMPORAIRE
-	//loadScene(MainGame);
-	loadScene(SocketConnection);
+	loadScene(MainGame);
+	//loadScene(SocketConnection);
 
 	renderThreadUpdate();
 }
@@ -112,7 +112,7 @@ void PoPossibEngin::renderThread_InitWindow()
 		_engineConfig.windowConfig.style
 	);
 
-	if (_engineConfig.windowConfig.framerateLimit)
+	if (_engineConfig.windowConfig.framerateLimit == 0)
 	{
 		_renderWindow->setFramerateLimit(_engineConfig.windowConfig.framerateLimit);
 	}

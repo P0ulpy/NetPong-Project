@@ -126,7 +126,7 @@ void ServerSocket::listenEvents()
 
 void ServerSocket::propagateEvent(sf::TcpSocket& socket, sf::Packet& packet)
 {
-	sf::Packet packet;
+	/*sf::Packet packet;
 	if (socket.receive(packet) != sf::Socket::Done)
 	{
 		std::cout << "Error during packet reception" << std::endl;
@@ -140,7 +140,7 @@ void ServerSocket::propagateEvent(sf::TcpSocket& socket, sf::Packet& packet)
 	else
 	{
 		std::cout << "Error can't decapsulate eventID" << std::endl;
-	}
+	}*/
 }
 
 void ServerSocket::registerListeners()

@@ -44,9 +44,9 @@ void SocketConnectionScene::render(sf::RenderTarget* renderTarget)
 
 	ImGui::End();
 
-	if(_engine->getSocketManager().getServerInstance() != nullptr)
+	if(_poPossibEngin->getSocketManager().getServerInstance() != nullptr)
 	{
-		auto server = _engine->getSocketManager().getServerInstance();
+		auto server = _poPossibEngin->getSocketManager().getServerInstance();
 
 		ImGui::Begin("Server Infos");
 
@@ -75,7 +75,7 @@ void SocketConnectionScene::displayHostWindow()
 
 		if(ImGui::Button("Create lobby"))
 		{
-			_engine->getSocketManager().startServer(HostSettings(
+			_poPossibEngin->getSocketManager().startServer(HostSettings(
 				name,
 				port
 			));
@@ -95,7 +95,7 @@ void SocketConnectionScene::displayJoinWindow()
 
 		if (ImGui::Button("Join lobby"))
 		{
-			_engine->getSocketManager().connectClient(ClientConnectionSettings(
+			_poPossibEngin->getSocketManager().connectClient(ClientConnectionSettings(
 				ip,
 				port
 			));
