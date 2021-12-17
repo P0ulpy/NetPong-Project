@@ -15,10 +15,16 @@ struct EngineConfig
 		sf::VideoMode videoMode = sf::VideoMode(1200, 900);
 		std::string title = "Render Window";
 		unsigned int style = sf::Style::Default;
-		unsigned int framerateLimit = 0; // 0 mean automatic (verticalSyncEnabled = true)
+		unsigned int framerateLimit = 60; // 0 mean automatic (verticalSyncEnabled = true)
+
+		WindowConfig(sf::VideoMode pVideoMode, std::string pTitle = "Render Window", unsigned int pStyle = sf::Style::Default, unsigned int pFramerateLimit = 60)
+			: videoMode(pVideoMode), title(pTitle), style(pStyle), framerateLimit(pFramerateLimit) {}
 	};
 
 	WindowConfig windowConfig;
+
+	EngineConfig(WindowConfig pWindowConfig)
+		: windowConfig(pWindowConfig) {}
 };
 
 enum EngineState { STOP, INITIALIZING, INITIALIZED, RUNNING, PAUSE };
