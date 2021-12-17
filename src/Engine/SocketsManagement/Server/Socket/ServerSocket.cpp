@@ -35,7 +35,7 @@ ServerSocket::~ServerSocket()
 	}
 }
 
-const EventEmitter& ServerSocket::getEventEmitter() const { return _eventEmitter; }
+//const EventEmitter& ServerSocket::getEventEmitter() const { return _eventEmitter; }
 
 const std::map<std::string, sf::TcpSocket*>& ServerSocket::getClients() const { return _clients; }
 
@@ -91,6 +91,8 @@ void ServerSocket::listenEvents()
 					{
 					case sf::Socket::Done:
 						{
+							//TESTS
+
 							SocketEvents event;
 							std::string data;
 
@@ -100,6 +102,8 @@ void ServerSocket::listenEvents()
 							std::cout << "data recieved :" << std::endl;
 							std::cout << event << std::endl;
 							std::cout << data << std::endl;
+
+							//TESTS
 						}
 					break;
 
@@ -109,11 +113,9 @@ void ServerSocket::listenEvents()
 						break;
 					case sf::Socket::Disconnected:
 						_clientsSocketSelector.remove(*socket);
-						_eventEmitter.emit(SocketEvents::Disconnected);
 						break;
 					case sf::Socket::Error:
 						_clientsSocketSelector.remove(*socket);
-						_eventEmitter.emit(SocketEvents::Disconnected);
 						break;
 					default:
 						break;
@@ -123,9 +125,10 @@ void ServerSocket::listenEvents()
 		}
 	}
 }
-
-void ServerSocket::propagateEvent(sf::TcpSocket& socket, sf::Packet& packet)
+void ServerSocket::emit(SocketEvents event, sf::TcpSocket& socket, sf::Packet data)
 {
+
+
 	/*sf::Packet packet;
 	if (socket.receive(packet) != sf::Socket::Done)
 	{
@@ -143,7 +146,7 @@ void ServerSocket::propagateEvent(sf::TcpSocket& socket, sf::Packet& packet)
 	}*/
 }
 
-void ServerSocket::registerListeners()
+void ServerSocket::registerListeners(sf::TcpSocket* clientSocket)
 {
 	
 }
@@ -152,11 +155,9 @@ void ServerSocket::onClientConnection(sf::TcpSocket* clientSocket)
 {
 	std::cout << "Client connecte !" << std::endl;
 
-	//clientSocket->setBlocking(false);
-
 	// TESTS
 
-	sf::Packet hello;
+	/*sf::Packet hello;
 	hello << SocketEvents::Connected;
 	hello << "Hello World";
 
@@ -165,7 +166,7 @@ void ServerSocket::onClientConnection(sf::TcpSocket* clientSocket)
 		std::cout << "Error during hello" << std::endl;
 	}
 
-	/*sf::Packet packet;
+	sf::Packet packet;
 	if (clientSocket->receive(packet) != sf::Socket::Done)
 	{
 		std::cout << "Error during packet reception" << std::endl;

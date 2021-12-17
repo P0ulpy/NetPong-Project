@@ -63,7 +63,7 @@ public:
     template <typename... Args>
     void emit(unsigned int event_id, Args... args);
 
-private:
+protected:
     struct ListenerBase
     {
         ListenerBase() {}

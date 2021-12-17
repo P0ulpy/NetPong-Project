@@ -31,6 +31,8 @@ public:
 
 	[[nodiscard]] ClientSocket* getSocketClient() const;
 	[[nodiscard]] Server* getServerInstance() const;
+	[[nodiscard]] const bool isHost() const;
+	[[nodiscard]] const bool isClient() const;
 
 private:
 	PoPossibEngin& _engine;

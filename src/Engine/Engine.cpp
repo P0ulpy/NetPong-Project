@@ -68,7 +68,7 @@ const EngineConfig& PoPossibEngin::getEngineConfig() const { return _engineConfi
 sf::Thread& PoPossibEngin::getRenderThread() { return _logicThread; }
 sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
 
-float PoPossibEngin::getDeltaTime() const { return _deltaClock.getElapsedTime().asSeconds(); }
+float PoPossibEngin::getDeltaTime() const { return _deltaTime; }
 
 SocketManager& PoPossibEngin::getSocketManager() { return _socketManager; }
 
@@ -98,8 +98,8 @@ void PoPossibEngin::renderThreadEntry()
 	_engineState = INITIALIZED;
 
 	// TEMPORAIRE
-	loadScene(MainGame);
-	//loadScene(SocketConnection);
+	//loadScene(MainGame);
+	loadScene(SocketConnection);
 
 	renderThreadUpdate();
 }
@@ -112,16 +112,13 @@ void PoPossibEngin::renderThread_InitWindow()
 		_engineConfig.windowConfig.style
 	);
 
-	if (_engineConfig.windowConfig.framerateLimit == 0)
+	if (_engineConfig.windowConfig.framerateLimit != 0)
 	{
 		_renderWindow->setFramerateLimit(_engineConfig.windowConfig.framerateLimit);
 	}
 	else
 	{
 		_renderWindow->setVerticalSyncEnabled(true);
-
-		// DEBUG permet de déclancher le bug de collision
-		//_renderWindow->setFramerateLimit(300);
 	}
 
 	ImGui::SFML::Init(*_renderWindow);
@@ -166,7 +163,6 @@ void PoPossibEngin::renderThreadDebugInfo()
 	ImGui::Begin("PoPosibEngin Info");
 
 	_currFrameCount++;
-	// TEMP : utilisation de _deltaTime pour le fix du soucis de la valeur de la clock incorecte lors de l'appel de .restart()
 	_currFrameTimeCount += _deltaTime;
 
 	if (_currFrameTimeCount >= 1)

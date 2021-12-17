@@ -1,6 +1,9 @@
 ﻿#include "Engine/Engine.hpp"
 #include "Utils/EventEmitter.hpp"
 
+#include <iostream>
+#include "Utils/NetTools.hpp"
+
 EventEmitter eventEmitter;
 
 int main(int argc, char** argv)

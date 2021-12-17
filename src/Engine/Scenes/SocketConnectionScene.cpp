@@ -44,7 +44,7 @@ void SocketConnectionScene::render(sf::RenderTarget* renderTarget)
 
 	ImGui::End();
 
-	if(_poPossibEngin->getSocketManager().getServerInstance() != nullptr)
+	if(_poPossibEngin->getSocketManager().getServerInstance())
 	{
 		auto server = _poPossibEngin->getSocketManager().getServerInstance();
 

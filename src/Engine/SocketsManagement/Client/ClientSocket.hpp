@@ -19,6 +19,8 @@ public:
 	[[nodiscard]] const EventEmitter& getEventEmitter() const;
 
 private:
+	std::string _id = "undefined";
+
 	ClientConnectionSettings _clientConnectionSettings;
 	PoPossibEngin* _engine = nullptr;
 
