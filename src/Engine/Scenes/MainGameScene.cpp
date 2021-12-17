@@ -125,6 +125,6 @@ void MainGameScene::render(sf::RenderTarget* target)
 	//_terrain->render(*target);
 	_polygonTerrain->render(*target);
 	_pongBall->render(*target);
-	_character->render(*target);
-	_character->renderP2(*target);
+	//_character->render(*target);
+	//_character->renderP2(*target);
 }

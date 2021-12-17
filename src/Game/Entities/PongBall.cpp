@@ -33,7 +33,7 @@ void PongBall::initVariables()
 	_sprite = std::make_unique<sf::Sprite>();
 
 	_ballSize = BALL_SIZE;
-	_ballColor = sf::Color(0, 200, 0, 255);
+	_ballColor = sf::Color(65, 90, 255, 255);
 
 	_speedMultiplierBonus = 1.f;
 }
@@ -120,9 +120,6 @@ void PongBall::updateCollision(const float& deltaTime)
 
 	_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + normalize(_velocity).x * _currentSpeed * deltaTime,
 		std::abs(_ballShape.getPosition().y) + normalize(_velocity).y * _currentSpeed * deltaTime);
-
-	//_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + normalize(_velocity).x * _currentSpeed * deltaTime,
-	//	std::abs(_ballShape.getPosition().y) + normalize(_velocity).y * _currentSpeed * deltaTime);
 
 	_oldPosition = _ballShape.getPosition();
 }

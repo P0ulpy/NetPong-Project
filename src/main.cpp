@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     PoPossibEngin engine = PoPossibEngin(
         EngineConfig(
             EngineConfig::WindowConfig(
-                sf::VideoMode(900, 900),
+                sf::VideoMode(1200, 900),
                 "Netpong"
             )
         )
