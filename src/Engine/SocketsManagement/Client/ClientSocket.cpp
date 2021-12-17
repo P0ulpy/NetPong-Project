@@ -49,6 +49,11 @@ void ClientSocket::listenEvents()
 		int eventID;
 		if(packet >> eventID)
 		{
+			if (eventID > SocketEvents::Count || eventID < 0)
+			{
+				std::cout << "Can't emit event \"" << eventID << "\" eventID is invalid" << std::endl;
+			}
+
 			_eventEmitter.emit(eventID, packet);
 		}
 		else
@@ -60,15 +65,28 @@ void ClientSocket::listenEvents()
 
 void ClientSocket::onConnected(sf::Packet packet)
 {
-	std::string hello;
-	packet >> hello;
+	std::string socketID;
+	if (!(packet >> socketID))
+	{
+		std::cout << "Error can't decapsulate client socketID" << std::endl;
+		return;
+	}
 
-	std::cout << "YEY : " << hello << std::endl;
+	_id = socketID;
+
+	// TESTS
+
+	std::string message;
+	packet >> message;
+
+	std::cout << "OnConnected : " << message << std::endl;
 
 	sf::Packet sendPacket;
 
 	if (_socket.send(packet) != sf::Socket::Done)
 	{
-		std::cout << "Error while sending data" << hello << std::endl;
+		std::cout << "Error while sending data : " << message << std::endl;
 	}
+
+	// TESTS
 }

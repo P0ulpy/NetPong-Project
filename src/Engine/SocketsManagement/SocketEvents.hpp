@@ -2,5 +2,7 @@
 
 enum SocketEvents {
 	Disconnected,
-	Connected
+	Connected,
+
+	Count
 };
