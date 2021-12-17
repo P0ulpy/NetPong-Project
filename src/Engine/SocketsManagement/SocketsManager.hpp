@@ -10,12 +10,18 @@ struct HostSettings
 	std::string name = "New Lobby";
 	int port = 25565;
 	float socketConnectionTimeout = 2000.f;
+
+	HostSettings(std::string pName = "New Lobby", int pPort = 25565, float pSocketConnectionTimeout = 2000.f)
+		: name(pName), port(pPort), socketConnectionTimeout(pSocketConnectionTimeout) {}
 };
 
 struct ClientConnectionSettings
 {
 	std::string ip = "127.0.0.1";
 	int port = 25565;
+
+	ClientConnectionSettings(std::string pIP = "127.0.0.1", int pPort = 25565)
+		: ip(pIP), port(pPort) {}
 };
 
 class SocketManager

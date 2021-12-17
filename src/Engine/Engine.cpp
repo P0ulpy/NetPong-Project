@@ -68,7 +68,7 @@ const EngineConfig& PoPossibEngin::getEngineConfig() const { return _engineConfi
 sf::Thread& PoPossibEngin::getRenderThread() { return _logicThread; }
 sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
 
-float PoPossibEngin::getDeltaTime() const { return _deltaClock.getElapsedTime().asSeconds(); }
+float PoPossibEngin::getDeltaTime() const { return _deltaTime; }
 
 SocketManager& PoPossibEngin::getSocketManager() { return _socketManager; }
 
