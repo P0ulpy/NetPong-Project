@@ -21,74 +21,42 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-		_pongBall->resetSpeedMultiplierBonus();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad2))
-		_pongBall->startBoostBall(8.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad3))
-		_pongBall->startBoostBall(16.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad4))
-		_pongBall->startBoostBall(32.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad5))
-		_pongBall->startBoostBall(64.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad6))
-		_pongBall->startBoostBall(128.f);
+	sf::Event event;
 
 	
-	// Joueur 1
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) 
+	if (_poPossibEngin->getInputsManager().getEvent(sf::Event::KeyPressed, event))
 	{
-		_character->direction(true, false, _polygonTerrain->getPlayableArea());
-	}
-	else
-	{
-		_character->direction(false, false, _polygonTerrain->getPlayableArea());
-	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) 
-	{
-		_character->direction(false, true, _polygonTerrain->getPlayableArea());
-	}
-	else
-	{
-		_character->direction(false, false, _polygonTerrain->getPlayableArea());
-	}
-
-
-	// Joueur 2
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-	{
-		_character->directionP2(true, false, _polygonTerrain->getPlayableArea());
-	}
-	else
-	{
-		_character->directionP2(false, false, _polygonTerrain->getPlayableArea());
-	}
-
-
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-	{
-		_character->directionP2(false, true, _polygonTerrain->getPlayableArea());
-	}
-	else
-	{
-		_character->directionP2(false, false, _polygonTerrain->getPlayableArea());
-	}
-
-
-	clock += deltaTime;
-
-	if (clock >= 2 || activeShieldAutorize == true )
-	{
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		switch (event.key.code)
 		{
-			_character->verifActiveShield(true);
-			clock = 0;
-			activeShieldAutorize = false;
+			case sf::Keyboard::Space:   _pongBall->resetSpeedMultiplierBonus();
+			case sf::Keyboard::Numpad2: _pongBall->startBoostBall(8.f);
+			case sf::Keyboard::Numpad3: _pongBall->startBoostBall(16.f);
+			case sf::Keyboard::Numpad4: _pongBall->startBoostBall(32.f);
+			case sf::Keyboard::Numpad5: _pongBall->startBoostBall(64.f);
+			case sf::Keyboard::Numpad6: _pongBall->startBoostBall(128.f);
+
+				//Player 1
+			case sf::Keyboard::Left:  _character->direction(1, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+			case sf::Keyboard::Right: _character->direction(false, 1, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+			case sf::Keyboard::Up:    _character->direction(false, false, 1, false, _polygonTerrain->getPlayableArea(), deltaTime);
+			case sf::Keyboard::Down:  _character->direction(false, false, false, 1, _polygonTerrain->getPlayableArea(), deltaTime);
+				//Player 2
+			case sf::Keyboard::Q: _character->directionP2(1, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+			case sf::Keyboard::D: _character->directionP2(false, 1, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+			case sf::Keyboard::Z: _character->directionP2(false, false, 1, false, _polygonTerrain->getPlayableArea(), deltaTime);
+			case sf::Keyboard::S: _character->directionP2(false, false, false, 1, _polygonTerrain->getPlayableArea(), deltaTime);
+
+			default: break;
 		}
 	}
+	//Si une touche est relachée
+	if (_poPossibEngin->getInputsManager().getEvent(sf::Event::KeyReleased, event))
+	{
+		_character->direction(false, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+	}
+
+	
+	
 }
 
 void MainGameScene::start()
@@ -102,6 +70,8 @@ void MainGameScene::initValues()
 
 	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain);
 	_character = std::make_unique<Character>(_poPossibEngin->getRenderWindow());
+	_character2 = std::make_unique<Character>(_poPossibEngin->getRenderWindow());
+
 }
 
 void MainGameScene::initFonts()
@@ -113,11 +83,14 @@ void MainGameScene::initFonts()
 }
 
 void MainGameScene::update(const float& deltaTime)
-{
+{	
+	_poPossibEngin->setMousePosition();
 	updateInputs(deltaTime);
 	_pongBall->update(deltaTime);
-	_character->updateMouvement(_poPossibEngin->getRenderWindow(),_poPossibEngin->getRenderWindow(), clock);
-	_character->updateMouvementP2(_poPossibEngin->getRenderWindow(),_poPossibEngin->getRenderWindow(),clock);
+	_character->updateMouvement(deltaTime);
+	_character->updateMouvementP2(deltaTime);
+	_character1->updateMouvement(deltaTime);
+	_character2->updateMouvement(deltaTime);
 }
 
 void MainGameScene::render(sf::RenderTarget* target)
@@ -126,5 +99,4 @@ void MainGameScene::render(sf::RenderTarget* target)
 	_polygonTerrain->render(*target);
 	_pongBall->render(*target);
 	_character->render(*target);
-	_character->renderP2(*target);
 }

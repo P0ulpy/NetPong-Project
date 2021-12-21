@@ -15,7 +15,7 @@ struct EngineConfig
 		sf::VideoMode videoMode = sf::VideoMode(1200, 900);
 		std::string title = "Render Window";
 		unsigned int style = sf::Style::Default;
-		unsigned int framerateLimit = 60; // 0 mean automatic (verticalSyncEnabled = true)
+		unsigned int framerateLimit = 0; // 0 mean automatic (verticalSyncEnabled = true)
 	};
 
 	WindowConfig windowConfig;
@@ -29,6 +29,7 @@ enum SceneType { SocketConnection, MainGame };
 class PoPossibEngin
 {
 public:
+	PoPossibEngin() = default;
 	PoPossibEngin(const EngineConfig& engineConfig);
 	~PoPossibEngin();
 
@@ -37,6 +38,10 @@ public:
 
 	// get / set
 
+	[[nodiscard]] static PoPossibEngin& getInstance();
+	sf::Vector2i getMousePosition();
+
+	
 	[[nodiscard]] sf::RenderWindow& getRenderWindow() const;
 	[[nodiscard]] const EngineState& getEngineState() const;
 	[[nodiscard]] const EngineConfig& getEngineConfig() const;
@@ -46,9 +51,17 @@ public:
 
 	[[nodiscard]] float getDeltaTime() const;
 
+	[[nodiscard]] InputsManager& getInputsManager();
 	[[nodiscard]] SocketManager& getSocketManager();
+	void setMousePosition();
 
 private:
+
+	static PoPossibEngin* _instance;
+
+	sf::Vector2i mousePosition;
+
+	
 
 	EngineState _engineState = STOP;
 	const EngineConfig& _engineConfig;

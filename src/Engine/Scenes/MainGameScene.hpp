@@ -25,6 +25,7 @@ private:
 	//Game objects
 	std::unique_ptr<PongBall> _pongBall;
 	std::unique_ptr<Character> _character;
+	std::unique_ptr<Character> _character2;
 	
 	bool activeShieldAutorize = true;
 	float delay = 2.f;
@@ -33,8 +34,7 @@ private:
 
 	//Font and texts
 	sf::Font _font;
-	//sf::Clock clock;
-	float clock = 0;
+	
 
 	void initValues();
 	void initFonts();
