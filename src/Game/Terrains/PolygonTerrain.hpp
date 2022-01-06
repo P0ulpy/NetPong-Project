@@ -57,9 +57,9 @@ private:
 
 	sf::Vector2f initPoint(const sf::Vector2f& previousPoint, DrawDirection drawDirection, Orientation orientation, int pointDistance);
 	void setPointAndUpdateCurrentPoint( DrawDirection drawDirection, Orientation orientation, int pointDistance, int& currentPointDrawned);
+	void initTerrainOrigin(const sf::RenderWindow& window);
 	void drawTerrain1();
 	void drawTerrain2();
 	void drawTerrain3();
 	void drawTerrain4();
-	void drawTerrain5();
 };
