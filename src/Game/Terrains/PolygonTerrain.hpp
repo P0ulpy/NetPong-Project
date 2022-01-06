@@ -2,20 +2,22 @@
 
 #include "SFML/Graphics.hpp"
 
+class PongBall;
+
 class PolygonTerrain
 {
 public:
-	PolygonTerrain(const sf::RenderWindow& window);
+	PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBalls);
 	virtual ~PolygonTerrain();
 
 	//Functions
-	void update();
+	void update(const float& deltaTime);
+	void updateCollision(const float& deltaTime) const;
 	void render(sf::RenderTarget& target) const;
 
 	sf::ConvexShape getShape() const;
 	sf::Rect<float> getPlayableArea() const;
 
-	sf::Vector2f getVectorReflection(sf::Vector2f inDirection, sf::Vector2f surfaceVector) const;
 	sf::Vector2f getPointPosition(int index) const;
 
 private:
@@ -39,6 +41,8 @@ private:
 		NINETY = 90
 	};
 
+	const std::vector<PongBall*>& _pongBalls;
+
 	sf::ConvexShape _terrainShape;
 	sf::RectangleShape* _globalBounds;
 	sf::Rect<float> _playableArea;
@@ -53,7 +57,6 @@ private:
 
 	sf::Vector2f initPoint(const sf::Vector2f& previousPoint, DrawDirection drawDirection, Orientation orientation, int pointDistance);
 	void setPointAndUpdateCurrentPoint( DrawDirection drawDirection, Orientation orientation, int pointDistance, int& currentPointDrawned);
-	sf::Vector2f normalize(const sf::Vector2f& originalVector);
 	void drawTerrain1();
 	void drawTerrain2();
 	void drawTerrain3();

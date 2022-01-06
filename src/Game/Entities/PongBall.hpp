@@ -30,6 +30,9 @@ public:
 
 	void updateAndRenderPhantomEffect(sf::RenderTarget& target, const float& deltaTime);
 
+	bool hitWallIfCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint);
+	void resetBallDestAndOldPos(const float& deltaTime);
+
 	//Getters - Setters
 	sf::CircleShape getShape() const;
 
@@ -43,8 +46,7 @@ public:
 
 	void startBoostBall(float speedBoostBonus);
 
-	static float dot(const sf::Vector2f& lhs, const sf::Vector2f& rhs);
-	static sf::Vector2f normalize(const sf::Vector2f& originalVector);
+	bool linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const;
 
 private:
 	//Ball rendering
@@ -88,12 +90,4 @@ private:
 	//Phantom Ball Effect
 	void displayPhantomBall();
 	void createPhantomBalls();
-
-	//Utils
-	float deceleration(float initial, float target, float time) const;
-	bool lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r, sf::Vector2f& outImpactPoint) const;
-	bool lineLineCollision(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, sf::Vector2f& outIntersectionPoint) const;
-	bool pointCircleCollision(float px, float py, float cx, float cy, float r) const;
-	bool linePointCollision(float x1, float y1, float x2, float y2, float px, float py) const;
-	float getDistance(float x1, float y1, float x2, float y2) const;
 };

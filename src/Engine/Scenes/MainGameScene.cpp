@@ -7,6 +7,8 @@
 #include "../../Game/Entities/Character.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 
+constexpr int NUM_MAX_PONGBALL = 1;
+
 MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
 {
@@ -21,18 +23,21 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-		_pongBall->resetSpeedMultiplierBonus();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad2))
-		_pongBall->startBoostBall(8.f);
+		for (const auto pongBall : _pongBalls)
+			pongBall->startBoostBall(8.f);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad3))
-		_pongBall->startBoostBall(16.f);
+		for (const auto pongBall : _pongBalls)
+			pongBall->startBoostBall(16.f);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad4))
-		_pongBall->startBoostBall(32.f);
+		for (const auto pongBall : _pongBalls)
+			pongBall->startBoostBall(32.f);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad5))
-		_pongBall->startBoostBall(64.f);
+		for (const auto pongBall : _pongBalls)
+			pongBall->startBoostBall(64.f);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad6))
-		_pongBall->startBoostBall(128.f);
+		for (const auto pongBall : _pongBalls)
+			pongBall->startBoostBall(128.f);
 
 	
 	// Joueur 1
@@ -98,7 +103,12 @@ void MainGameScene::start()
 
 void MainGameScene::initValues()
 {
-	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow());
+	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls);
+
+	for (int i = 0 ; i < NUM_MAX_PONGBALL ; i++)
+	{
+		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain));
+	}
 
 	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain);
 	_character = std::make_unique<Character>(_poPossibEngin->getRenderWindow());
@@ -115,7 +125,12 @@ void MainGameScene::initFonts()
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs(deltaTime);
-	_pongBall->update(deltaTime);
+	_polygonTerrain->update(deltaTime);
+	//_pongBall->update(deltaTime);
+	for (const auto pongBall : _pongBalls)
+	{
+		pongBall->update(deltaTime);
+	}
 	_character->updateMouvement(_poPossibEngin->getRenderWindow(),_poPossibEngin->getRenderWindow(), clock);
 	_character->updateMouvementP2(_poPossibEngin->getRenderWindow(),_poPossibEngin->getRenderWindow(),clock);
 }
@@ -124,7 +139,12 @@ void MainGameScene::render(sf::RenderTarget* target)
 {
 	//_terrain->render(*target);
 	_polygonTerrain->render(*target);
-	_pongBall->render(*target);
+	//_pongBall->render(*target);
+
+	for (const auto pongBall : _pongBalls)
+	{
+		pongBall->render(*target);
+	}
 	//_character->render(*target);
 	//_character->renderP2(*target);
 }

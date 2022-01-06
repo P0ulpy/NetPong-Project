@@ -1,12 +1,15 @@
 #include "PolygonTerrain.hpp"
 
 #include <iostream>
+#include "../../Utils/Utils.hpp"
+#include "../Entities/PongBall.hpp"
 #include <math.h>
 
 constexpr int TERRAIN_SIZE_MULTIPLIER = 20;
 constexpr int TERRAIN_NUM_EDGES = 8;
 
-PolygonTerrain::PolygonTerrain(const sf::RenderWindow& window)
+PolygonTerrain::PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBall)
+	:_pongBalls(pongBall)
 {
 	initShape(window);
 	initPlayableArea();
@@ -18,10 +21,37 @@ PolygonTerrain::~PolygonTerrain()
 
 }
 
-void PolygonTerrain::update()
+void PolygonTerrain::update(const float& deltaTime)
 {
-
+	updateCollision(deltaTime);
 }
+
+void PolygonTerrain::updateCollision(const float& deltaTime) const
+{
+	const int pointCount = static_cast<int>(getShape().getPointCount());
+
+	sf::Vector2f outImpactPoint{ 0,0 };
+
+	//For every sides of the terrain
+	for (int i = 0; i < pointCount; i++)
+	{
+		const float xA = getPointPosition(i).x;
+		const float yA = getPointPosition(i).y;
+		const float xB = getPointPosition((i + 1) % pointCount).x;
+		const float yB = getPointPosition((i + 1) % pointCount).y;
+
+		for (const auto pongBall : _pongBalls)
+		{
+			if (pongBall->hitWallIfCollision(xA, yA, xB, yB, outImpactPoint)) break;
+		}
+	}
+
+	for (const auto pongBall : _pongBalls)
+	{
+		pongBall->resetBallDestAndOldPos(deltaTime);
+	}
+}
+
 
 void PolygonTerrain::render(sf::RenderTarget& target) const
 {
@@ -107,7 +137,7 @@ sf::Vector2f PolygonTerrain::initPoint(const sf::Vector2f& previousPoint, DrawDi
 		case NINETY: newPoint =		  sf::Vector2f(0, directionY * 3); break;
 	}
 
-	newPoint = normalize(newPoint);
+	newPoint = Utils::normalize(newPoint);
 
 	newPoint.x = previousPoint.x + newPoint.x * pointDistance * TERRAIN_SIZE_MULTIPLIER;
 	newPoint.y = previousPoint.y + newPoint.y * pointDistance * TERRAIN_SIZE_MULTIPLIER;
@@ -115,33 +145,9 @@ sf::Vector2f PolygonTerrain::initPoint(const sf::Vector2f& previousPoint, DrawDi
 	return newPoint;
 }
 
-
-sf::Vector2f PolygonTerrain::getVectorReflection(sf::Vector2f inDirection, sf::Vector2f surfaceVector) const
-{
-	const auto inNormal = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
-	const float factor = -2.f * (inDirection.x * inNormal.x + inDirection.y * inNormal.y);
-	const auto finalVector = sf::Vector2f(factor * inNormal.x + inDirection.x,
-										 factor * inNormal.y + inDirection.y);
-	return finalVector;
-}
-
 sf::Vector2f PolygonTerrain::getPointPosition(const int index) const
 {
 	return _pointPositions.at(index);
-}
-
-sf::Vector2f PolygonTerrain::normalize(const sf::Vector2f& originalVector)
-{
-	const float norm = std::sqrt((originalVector.x * originalVector.x) + (originalVector.y * originalVector.y));
-
-	// Prevent division by zero
-	if (norm <= std::numeric_limits<float>::epsilon() * norm * 2 //2 -> constexpr units_in_last_place
-		|| norm < std::numeric_limits<float>::min())
-	{
-		return sf::Vector2f{};
-	}
-
-	return originalVector / norm;
 }
 
 void PolygonTerrain::drawTerrain1()

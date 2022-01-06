@@ -24,6 +24,7 @@ private:
 
 	//Game objects
 	std::unique_ptr<PongBall> _pongBall;
+	std::vector<PongBall*> _pongBalls;
 	std::unique_ptr<Character> _character;
 	
 	bool activeShieldAutorize = true;

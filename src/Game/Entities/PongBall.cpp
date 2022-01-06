@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "PhantomBall.hpp"
+#include "../../Utils/Utils.hpp"
 #include "../Terrains/PolygonTerrain.hpp"
 
 
@@ -24,7 +25,7 @@ PongBall::~PongBall()
 //--- Initializers ---
 void PongBall::initVariables()
 {
-	_velocity = normalize(sf::Vector2f(1.f, 2.f));
+	_velocity = Utils::normalize(sf::Vector2f(1.f, 2.f));
 	_initialSpeed = 220.f;
 	_currentSpeed = _initialSpeed;
 	_maxSpeed = 10000.f;
@@ -92,7 +93,7 @@ void PongBall::updateCollision(const float& deltaTime)
 		_ballShape.setPosition(_initialPosition);
 	}
 
-	const int pointCount = static_cast<int>(_polygonTerrain->getShape().getPointCount());
+	/*const int pointCount = static_cast<int>(_polygonTerrain->getShape().getPointCount());
 
 	sf::Vector2f outImpactPoint{ 0,0 };
 
@@ -103,11 +104,11 @@ void PongBall::updateCollision(const float& deltaTime)
 		const float xB = _polygonTerrain->getPointPosition((i + 1) % pointCount).x;
 		const float yB = _polygonTerrain->getPointPosition((i + 1) % pointCount).y;
 
-		bool hit = lineCircleCollision(xA, yA, xB, yB, _ballShape.getPosition().x, _ballShape.getPosition().y, _ballShape.getRadius(), outImpactPoint);
+		bool hit = linePongBallCollision(xA, yA, xB, yB, outImpactPoint);
 
 		if (hit)
 		{
-			const sf::Vector2f surfaceVector = normalize(sf::Vector2f(xB - xA, yB - yA));
+			const sf::Vector2f surfaceVector = Utils::normalize(sf::Vector2f(xB - xA, yB - yA));
 			_velocity = _polygonTerrain->getVectorReflection(_velocity, surfaceVector);
 
 			const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
@@ -118,18 +119,18 @@ void PongBall::updateCollision(const float& deltaTime)
 		}
 	}
 
-	_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + normalize(_velocity).x * _currentSpeed * deltaTime,
-		std::abs(_ballShape.getPosition().y) + normalize(_velocity).y * _currentSpeed * deltaTime);
+	_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
+		std::abs(_ballShape.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
 
-	_oldPosition = _ballShape.getPosition();
+	_oldPosition = _ballShape.getPosition();*/
 }
 
 void PongBall::updateMovement(const float& deltaTime)
 {
 	_oldPosition = _ballShape.getPosition();
 	moveEntity(_velocity, deltaTime);
-	_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + normalize(_velocity).x * _currentSpeed * deltaTime,
-		std::abs(_ballShape.getPosition().y) + normalize(_velocity).y * _currentSpeed * deltaTime);
+	_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
+		std::abs(_ballShape.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
 }
 
 void PongBall::updateBoost(const float& deltaTime)
@@ -198,6 +199,33 @@ void PongBall::updateAndRenderPhantomEffect(sf::RenderTarget& target, const floa
 	}
 }
 
+bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint)
+{
+	bool hit = linePongBallCollision(x1, y1, x2, y2, outImpactPoint);
+
+	if (hit)
+	{
+		const sf::Vector2f surfaceVector = Utils::normalize(sf::Vector2f(x2 - x1, y2 - y1));
+		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
+
+		const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
+		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius() * 1.025f,
+			outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius() * 1.025f);
+
+		return true;
+	}
+
+	return false;
+}
+
+void PongBall::resetBallDestAndOldPos(const float& deltaTime)
+{
+	_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
+		std::abs(_ballShape.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
+
+	_oldPosition = _ballShape.getPosition();
+}
+
 //--- Getters - Setters ---
 void PongBall::setSpeedMultiplierBonus(float pSpeedMultiplierBonus)
 {
@@ -239,11 +267,11 @@ void PongBall::moveEntity(const sf::Vector2f& velocity, const float& deltaTime)
 {
 	if (_isBoosted)
 	{
-		const float newSpeedRatio = deceleration(_speedMultiplierBonus, 1.f, _currentTimeBoost);
+		const float newSpeedRatio = Utils::deceleration(_speedMultiplierBonus, 1.f, _currentTimeBoost);
 		setSpeed(newSpeedRatio * _initialSpeed);
 	}
 
-	_ballShape.move(normalize(velocity) * _currentSpeed * deltaTime);
+	_ballShape.move(Utils::normalize(velocity) * _currentSpeed * deltaTime);
 }
 
 //--- Boost ---
@@ -254,34 +282,6 @@ void PongBall::startBoostBall(float speedBoostBonus)
 
 	_speedMultiplierBonus = speedBoostBonus;
 	setSpeedMultiplierBonus(_speedMultiplierBonus);
-}
-
-float PongBall::deceleration(const float initial, const float target, const float time) const
-{
-	//Linear(Y0,Y1,t) = Y0 + t(Y1 - Y0)
-	//Deceleration(Y0,Y1,t) = Linear( Y0, Y1, 1 - pow(1 - t,2) )
-	//t = 1 - pow(1 - t,2), donc :
-	//LinearDec(Y0,Y1,t) = Y0 + ( 1 - pow(1 - t,2) ) * (Y1 - Y0) )
-	return initial + (1 - std::pow(1 - time / 2, 2)) * (target - initial);
-}
-
-sf::Vector2f PongBall::normalize(const sf::Vector2f& originalVector)
-{
-	const float norm = std::sqrt((originalVector.x * originalVector.x) + (originalVector.y * originalVector.y));
-
-	// Prevent division by zero
-	if (norm <= std::numeric_limits<float>::epsilon() * norm * 2 //2 -> constexpr units_in_last_place
-		|| norm < std::numeric_limits<float>::min())
-	{
-		return sf::Vector2f{};
-	}
-
-	return originalVector / norm;
-}
-
-float PongBall::dot(const sf::Vector2f& lhs, const sf::Vector2f& rhs)
-{
-	return lhs.x * rhs.x + lhs.y * rhs.y;
 }
 
 //--- Phantom balls effect ---
@@ -325,15 +325,15 @@ void PongBall::stopPhantomBallEffect()
 }
 
 // LINE/CIRCLE
-bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r, sf::Vector2f& outImpactPoint) const
+bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const
 {
 	sf::Vector2f outIntersectionPoint{};
 
 	//// get length of the line
-	const float lengthLine = getDistance(x1, y1, x2, y2);
+	const float lengthLine = Utils::getDistance(x1, y1, x2, y2);
 
 	// get dot product of the line and circle
-	const float dot = ((cx - x1)*(x2 - x1) + (cy - y1)*(y2 - y1)) / std::pow(lengthLine, 2);
+	const float dot = ((_ballShape.getPosition().x - x1)*(x2 - x1) + (_ballShape.getPosition().y - y1)*(y2 - y1)) / std::pow(lengthLine, 2);
 
 	// find the closest point on the line
 	const float closestX = x1 + (dot * (x2 - x1));
@@ -341,12 +341,12 @@ bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float
 
 	// is this point actually on the line segment?
 	// if so keep going, but if not, return false
-	if (!linePointCollision(x1, y1, x2, y2, closestX, closestY)) return false;
+	if (!Utils::linePointCollision(x1, y1, x2, y2, closestX, closestY)) return false;
 
 	// get distance to closest point
-	const float distance = getDistance(closestX, closestY, cx, cy);
+	const float distance = Utils::getDistance(closestX, closestY, _ballShape.getPosition().x, _ballShape.getPosition().y);
 
-	if (distance <= r)
+	if (distance <= _ballShape.getRadius())
 	{
 		outImpactPoint.x = closestX;
 		outImpactPoint.y = closestY;
@@ -356,7 +356,7 @@ bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float
 	float ballEdgeCollTestStartX = (_velocity.x > 0 ? -_ballShape.getRadius() : _ballShape.getRadius()) * std::abs(_velocity.x);
 	float ballEdgeCollTestStartY = (_velocity.y > 0 ? -_ballShape.getRadius() : _ballShape.getRadius()) * std::abs(_velocity.y);
 
-	if (lineLineCollision(x1, y1, x2, y2, cx + ballEdgeCollTestStartX, cy + ballEdgeCollTestStartY,
+	if (Utils::lineLineCollision(x1, y1, x2, y2, _ballShape.getPosition().x + ballEdgeCollTestStartX, _ballShape.getPosition().y + ballEdgeCollTestStartY,
 		_ballDestination->getPosition().x, _ballDestination->getPosition().y, outIntersectionPoint))
 	{
 		std::cout << "Traverse !! " << std::endl;
@@ -364,7 +364,7 @@ bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float
 		return true;
 	}
 
-	if (lineLineCollision(x1, y1, x2, y2, _oldPosition.x + ballEdgeCollTestStartX, _oldPosition.y + ballEdgeCollTestStartY,
+	if (Utils::lineLineCollision(x1, y1, x2, y2, _oldPosition.x + ballEdgeCollTestStartX, _oldPosition.y + ballEdgeCollTestStartY,
 		_ballShape.getPosition().x + ballEdgeCollTestStartX, _ballShape.getPosition().y + ballEdgeCollTestStartY, outIntersectionPoint))
 	{
 		std::cout << "Traverse old position !! " << std::endl;
@@ -374,65 +374,6 @@ bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float
 
 
 	return false;
-}
-
-// LINE/LINE
-bool PongBall::lineLineCollision(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, sf::Vector2f& outIntersectionPoint) const
-{
-
-	// calculate the distance to intersection point
-	float uA = ((x4 - x3)*(y1 - y3) - (y4 - y3)*(x1 - x3)) / ((y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1));
-	float uB = ((x2 - x1)*(y1 - y3) - (y2 - y1)*(x1 - x3)) / ((y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1));
-
-	// if uA and uB are between 0-1, lines are colliding
-	if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1)
-	{
-		outIntersectionPoint.x = x1 + uA * (x2 - x1);
-		outIntersectionPoint.y = y1 + uA * (y2 - y1);
-		return true;
-	}
-
-	return false;
-}
-
-// LINE/POINT
-bool PongBall::linePointCollision(float x1, float y1, float x2, float y2, float px, float py) const
-{
-	// get distance from the point to the two ends of the line
-	const float d1 = getDistance(px, py, x1, y1);
-	const float d2 = getDistance(px, py, x2, y2);
-
-	// get the length of the line
-	const float lineLen = getDistance(x1, y1, x2, y2);
-
-	// since floats are so minutely accurate, add
-	// a little buffer zone that will give collision
-	const float buffer = 0.1f;    // higher # = less accurate
-
-	// if the two distances are equal to the line's 
-	// length, the point is on the line!
-	// note we use the buffer here to give a range, 
-	// rather than one #
-	return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
-}
-
-// POINT/CIRCLE
-bool PongBall::pointCircleCollision(float px, float py, float cx, float cy, float r) const
-{
-
-	// get distance between the point and circle's center
-	// using the Pythagorean Theorem
-
-	// if the distance is less than the circle's
-	// radius the point is inside!
-	return getDistance(px, py, cx, cy) <= r;
-}
-
-float PongBall::getDistance (float x1, float y1, float x2, float y2) const
-{
-	const float distX = x1 - x2;
-	const float distY = y1 - y2;
-	return std::sqrt(distX*distX + distY*distY);
 }
 
 
