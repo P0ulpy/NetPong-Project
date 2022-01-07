@@ -30,7 +30,7 @@ public:
 
 	void updateAndRenderPhantomEffect(sf::RenderTarget& target, const float& deltaTime);
 
-	bool hitWallIfCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint);
+	bool hitWallIfCollision(float x1, float y1, float x2, float y2);
 	void resetBallDestAndOldPos(const float& deltaTime);
 
 	//Getters - Setters
@@ -41,6 +41,9 @@ public:
 	void addSpeedMultiplierBonus(float pSpeedMultiplierBonus);
 	void resetSpeedMultiplierBonus();
 
+	void setActive(bool isActive);
+	bool isActive() const;
+
 	void startPhantomBallEffect();
 	void stopPhantomBallEffect();
 
@@ -50,6 +53,8 @@ public:
 
 private:
 	//Ball rendering
+	bool _isActive;
+
 	sf::CircleShape _ballShape;
 	sf::Color _ballColor;
 	int _ballSize;
@@ -60,6 +65,8 @@ private:
 
 	//Ball physics
 	float _speedMultiplierBonus;
+	int _maxNumBounces;
+	int _currentNumBounces;
 
 	//Terrain
 	sf::Rect<float> _terrainArea;
@@ -90,4 +97,6 @@ private:
 	//Phantom Ball Effect
 	void displayPhantomBall();
 	void createPhantomBalls();
+
+	void addNumBounceAndUpdateVisibility();
 };

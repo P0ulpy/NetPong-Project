@@ -25,6 +25,8 @@ PongBall::~PongBall()
 //--- Initializers ---
 void PongBall::initVariables()
 {
+	setActive(true);
+
 	_velocity = Utils::normalize(sf::Vector2f(1.f, 2.f));
 	_initialSpeed = 220.f;
 	_currentSpeed = _initialSpeed;
@@ -32,6 +34,8 @@ void PongBall::initVariables()
 
 	_texture = std::make_unique<sf::Texture>();
 	_sprite = std::make_unique<sf::Sprite>();
+
+	_maxNumBounces = 2;
 
 	_ballSize = BALL_SIZE;
 	_ballColor = sf::Color(65, 90, 255, 255);
@@ -79,9 +83,13 @@ void PongBall::initPhantomEffect()
 //--- Updating ---
 void PongBall::update(const float& deltaTime)
 {
-	updateBoost(deltaTime);
-	updateMovement(deltaTime);
-	updateCollision(deltaTime);
+	if(_isActive)
+	{
+		updateBoost(deltaTime);
+		updateMovement(deltaTime);
+		updateCollision(deltaTime);
+	}
+
 	updatePhantomEffect(deltaTime);
 }
 
@@ -141,8 +149,12 @@ void PongBall::updatePhantomEffect(const float& deltaTime)
 void PongBall::render(sf::RenderTarget& target) const
 {
 	renderPhantomEffect(target);
-	target.draw(_ballShape);
-	target.draw(*_ballDestination);
+
+	if(_isActive)
+	{
+		target.draw(_ballShape);
+		target.draw(*_ballDestination);
+	}
 }
 
 void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
@@ -168,8 +180,10 @@ void PongBall::updateAndRenderPhantomEffect(sf::RenderTarget& target, const floa
 	}
 }
 
-bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint)
+bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2)
 {
+	sf::Vector2f outImpactPoint{ 0,0 };
+
 	bool hit = linePongBallCollision(x1, y1, x2, y2, outImpactPoint);
 
 	if (hit)
@@ -180,6 +194,8 @@ bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, sf::Ve
 		const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
 		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius(),
 			outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius());
+
+		addNumBounceAndUpdateVisibility();
 
 		return true;
 	}
@@ -220,6 +236,30 @@ void PongBall::resetSpeedMultiplierBonus()
 	setSpeed(_initialSpeed);
 	_isBoosted = false;
 }
+
+void PongBall::setActive(bool isActive)
+{
+	_isActive = isActive;
+
+	_currentNumBounces = 0;
+	_isActive ? startPhantomBallEffect() : stopPhantomBallEffect();
+}
+
+bool PongBall::isActive() const
+{
+	return _isActive;
+}
+
+void PongBall::addNumBounceAndUpdateVisibility()
+{
+	_currentNumBounces++;
+
+	if(_currentNumBounces > _maxNumBounces)
+	{
+		setActive(false);
+	}
+}
+
 
 void PongBall::setSpeed(float pSpeed)
 {

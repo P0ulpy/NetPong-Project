@@ -29,8 +29,6 @@ void PolygonTerrain::updateCollision(const float& deltaTime) const
 {
 	const int pointCount = static_cast<int>(getShape().getPointCount());
 
-	sf::Vector2f outImpactPoint{ 0,0 };
-
 	//For every sides of the terrain
 	for (int i = 0; i < pointCount; i++)
 	{
@@ -41,13 +39,14 @@ void PolygonTerrain::updateCollision(const float& deltaTime) const
 
 		for (const auto pongBall : _pongBalls)
 		{
-			if (pongBall->hitWallIfCollision(xA, yA, xB, yB, outImpactPoint)) break;
+			if (pongBall->isActive() && pongBall->hitWallIfCollision(xA, yA, xB, yB)) break;
 		}
 	}
 
 	for (const auto pongBall : _pongBalls)
 	{
-		pongBall->resetBallDestAndOldPos(deltaTime);
+		if(pongBall->isActive())
+			pongBall->resetBallDestAndOldPos(deltaTime);
 	}
 }
 

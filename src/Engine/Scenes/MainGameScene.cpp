@@ -26,6 +26,12 @@ void MainGameScene::updateInputs(const float& deltaTime)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->startRoundStartCountdown();
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
+		for (const auto pongBall : _pongBalls)
+			pongBall->setActive(true);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
+		for (const auto pongBall : _pongBalls)
+			pongBall->setActive(false);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad2))
 		for (const auto pongBall : _pongBalls)
 			pongBall->startBoostBall(8.f);
