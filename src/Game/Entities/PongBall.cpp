@@ -92,37 +92,6 @@ void PongBall::updateCollision(const float& deltaTime)
 		std::cout << "Out of window !" << std::endl;
 		_ballShape.setPosition(_initialPosition);
 	}
-
-	/*const int pointCount = static_cast<int>(_polygonTerrain->getShape().getPointCount());
-
-	sf::Vector2f outImpactPoint{ 0,0 };
-
-	for (int i = 0; i < pointCount; i++)
-	{
-		const float xA = _polygonTerrain->getPointPosition(i).x;
-		const float yA = _polygonTerrain->getPointPosition(i).y;
-		const float xB = _polygonTerrain->getPointPosition((i + 1) % pointCount).x;
-		const float yB = _polygonTerrain->getPointPosition((i + 1) % pointCount).y;
-
-		bool hit = linePongBallCollision(xA, yA, xB, yB, outImpactPoint);
-
-		if (hit)
-		{
-			const sf::Vector2f surfaceVector = Utils::normalize(sf::Vector2f(xB - xA, yB - yA));
-			_velocity = _polygonTerrain->getVectorReflection(_velocity, surfaceVector);
-
-			const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
-			_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius() * 1.025f,
-				outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius() * 1.025f);
-
-			break;
-		}
-	}
-
-	_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
-		std::abs(_ballShape.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
-
-	_oldPosition = _ballShape.getPosition();*/
 }
 
 void PongBall::updateMovement(const float& deltaTime)
@@ -209,8 +178,8 @@ bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, sf::Ve
 		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
 
 		const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
-		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius() * 1.025f,
-			outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius() * 1.025f);
+		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius(),
+			outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius());
 
 		return true;
 	}

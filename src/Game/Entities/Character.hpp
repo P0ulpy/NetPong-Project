@@ -71,7 +71,6 @@ public:
 	
 	// On vérifie si le bouclier est actif ou non
 	void verifActiveShield(bool isActive);
-	
 
 	// Update des personnage
 	void updateMouvement(sf::RenderTarget& target, sf::RenderWindow& window,float clock);

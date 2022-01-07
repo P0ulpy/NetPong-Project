@@ -6,6 +6,7 @@
 #include "../../Game/Terrains/Terrain.hpp"
 #include "../../Game/Entities/Character.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
+#include "../../Game/System/GameManager.hpp"
 
 constexpr int NUM_MAX_PONGBALL = 1;
 
@@ -23,6 +24,8 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
+		_gameManager->startRoundStartCountdown();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad2))
 		for (const auto pongBall : _pongBalls)
 			pongBall->startBoostBall(8.f);
@@ -112,6 +115,9 @@ void MainGameScene::initValues()
 
 	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain);
 	_character = std::make_unique<Character>(_poPossibEngin->getRenderWindow());
+
+	//TODO : Renseigner les deux joueurs dans le constructeur de GameManager
+	_gameManager = std::make_unique<GameManager>(_character.get(), _character.get());
 }
 
 void MainGameScene::initFonts()
@@ -125,21 +131,25 @@ void MainGameScene::initFonts()
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs(deltaTime);
+
+	_gameManager->update(deltaTime);
+
 	_polygonTerrain->update(deltaTime);
 	//_pongBall->update(deltaTime);
 	for (const auto pongBall : _pongBalls)
 	{
 		pongBall->update(deltaTime);
 	}
+
 	_character->updateMouvement(_poPossibEngin->getRenderWindow(),_poPossibEngin->getRenderWindow(), clock);
 	_character->updateMouvementP2(_poPossibEngin->getRenderWindow(),_poPossibEngin->getRenderWindow(),clock);
 }
 
 void MainGameScene::render(sf::RenderTarget* target)
 {
-	//_terrain->render(*target);
+	_gameManager->render(*target);
+
 	_polygonTerrain->render(*target);
-	//_pongBall->render(*target);
 
 	for (const auto pongBall : _pongBalls)
 	{

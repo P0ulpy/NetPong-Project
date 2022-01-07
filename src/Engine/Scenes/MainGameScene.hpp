@@ -2,6 +2,7 @@
 
 #include "Scene.hpp"
 
+class GameManager;
 class PolygonCollisionResult;
 class PolygonTerrain;
 class Terrain;
@@ -21,6 +22,7 @@ public:
 	void render(sf::RenderTarget* target = nullptr);
 private:
 	std::vector<sf::Texture> _textures;
+	std::unique_ptr<GameManager> _gameManager;
 
 	//Game objects
 	std::unique_ptr<PongBall> _pongBall;

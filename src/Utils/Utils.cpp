@@ -1,56 +1,42 @@
 #include "Utils.hpp"
 #include <math.h>
 
-// LINE/CIRCLE
-bool Utils::lineCircleCollision(float x1, float y1, float x2, float y2, float cx, float cy, float r, sf::Vector2f& outImpactPoint)
+//----------- MATHS -----------
+float Utils::getDistance(float x1, float y1, float x2, float y2)
 {
-	//sf::Vector2f outIntersectionPoint{};
-
-	////// get length of the line
-	//const float lengthLine = getDistance(x1, y1, x2, y2);
-
-	//// get dot product of the line and circle
-	//const float dot = ((cx - x1)*(x2 - x1) + (cy - y1)*(y2 - y1)) / std::pow(lengthLine, 2);
-
-	//// find the closest point on the line
-	//const float closestX = x1 + (dot * (x2 - x1));
-	//const float closestY = y1 + (dot * (y2 - y1));
-
-	//// is this point actually on the line segment?
-	//// if so keep going, but if not, return false
-	//if (!linePointCollision(x1, y1, x2, y2, closestX, closestY)) return false;
-
-	//// get distance to closest point
-	//const float distance = getDistance(closestX, closestY, cx, cy);
-
-	//if (distance <= r)
-	//{
-	//	outImpactPoint.x = closestX;
-	//	outImpactPoint.y = closestY;
-	//	return true;
-	//}
-
-	//float ballEdgeCollTestStartX = (_velocity.x > 0 ? -_ballShape.getRadius() : _ballShape.getRadius()) * std::abs(_velocity.x);
-	//float ballEdgeCollTestStartY = (_velocity.y > 0 ? -_ballShape.getRadius() : _ballShape.getRadius()) * std::abs(_velocity.y);
-
-	//if (lineLineCollision(x1, y1, x2, y2, cx + ballEdgeCollTestStartX, cy + ballEdgeCollTestStartY,
-	//	_ballDestination->getPosition().x, _ballDestination->getPosition().y, outIntersectionPoint))
-	//{
-	//	std::cout << "Traverse !! " << std::endl;
-	//	outImpactPoint = outIntersectionPoint;
-	//	return true;
-	//}
-
-	//if (lineLineCollision(x1, y1, x2, y2, _oldPosition.x + ballEdgeCollTestStartX, _oldPosition.y + ballEdgeCollTestStartY,
-	//	_ballShape.getPosition().x + ballEdgeCollTestStartX, _ballShape.getPosition().y + ballEdgeCollTestStartY, outIntersectionPoint))
-	//{
-	//	std::cout << "Traverse old position !! " << std::endl;
-	//	outImpactPoint = outIntersectionPoint;
-	//	return true;
-	//}
-
-	return false;
+	const float distX = x1 - x2;
+	const float distY = y1 - y2;
+	return std::sqrt(distX*distX + distY * distY);
 }
+
+float Utils::deceleration(const float initial, const float target, const float time)
+{
+	//Linear(Y0,Y1,t) = Y0 + t(Y1 - Y0)
+	//Deceleration(Y0,Y1,t) = Linear( Y0, Y1, 1 - pow(1 - t,2) )
+	//t = 1 - pow(1 - t,2), donc :
+	//LinearDec(Y0,Y1,t) = Y0 + ( 1 - pow(1 - t,2) ) * (Y1 - Y0) )
+	return initial + (1 - std::pow(1 - time / 2, 2)) * (target - initial);
+}
+
+sf::Vector2f Utils::normalize(const sf::Vector2f& originalVector)
+{
+	const float norm = std::sqrt((originalVector.x * originalVector.x) + (originalVector.y * originalVector.y));
+
+	// Prevent division by zero
+	if (norm <= std::numeric_limits<float>::epsilon() * norm * 2
+		|| norm < std::numeric_limits<float>::min())
+	{
+		return sf::Vector2f{};
+	}
+
+	return originalVector / norm;
+}
+
+float Utils::dot(const sf::Vector2f& lhs, const sf::Vector2f& rhs)
+{
+	return lhs.x * rhs.x + lhs.y * rhs.y;
+}
+
 
 sf::Vector2f Utils::getVectorReflection(const sf::Vector2f& inDirection, const sf::Vector2f& surfaceVector)
 {
@@ -61,7 +47,14 @@ sf::Vector2f Utils::getVectorReflection(const sf::Vector2f& inDirection, const s
 	return finalVector;
 }
 
-// LINE/LINE
+bool Utils::circleCircleCollision(float c1x, float c1y, float c1r, float c2x, float c2y, float c2r)
+{
+	if (getDistance(c1x, c1y, c2x, c2y) <= c1r + c2r) {
+		return true;
+	}
+	return false;
+}
+
 bool Utils::lineLineCollision(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, sf::Vector2f& outIntersectionPoint)
 {
 	// calculate the distance to intersection point
@@ -103,46 +96,5 @@ bool Utils::linePointCollision(float x1, float y1, float x2, float y2, float px,
 // POINT/CIRCLE
 bool Utils::pointCircleCollision(float px, float py, float cx, float cy, float r)
 {
-
-	// get distance between the point and circle's center
-	// using the Pythagorean Theorem
-
-	// if the distance is less than the circle's
-	// radius the point is inside!
 	return getDistance(px, py, cx, cy) <= r;
-}
-
-float Utils::getDistance(float x1, float y1, float x2, float y2)
-{
-	const float distX = x1 - x2;
-	const float distY = y1 - y2;
-	return std::sqrt(distX*distX + distY * distY);
-}
-
-float Utils::deceleration(const float initial, const float target, const float time)
-{
-	//Linear(Y0,Y1,t) = Y0 + t(Y1 - Y0)
-	//Deceleration(Y0,Y1,t) = Linear( Y0, Y1, 1 - pow(1 - t,2) )
-	//t = 1 - pow(1 - t,2), donc :
-	//LinearDec(Y0,Y1,t) = Y0 + ( 1 - pow(1 - t,2) ) * (Y1 - Y0) )
-	return initial + (1 - std::pow(1 - time / 2, 2)) * (target - initial);
-}
-
-sf::Vector2f Utils::normalize(const sf::Vector2f& originalVector)
-{
-	const float norm = std::sqrt((originalVector.x * originalVector.x) + (originalVector.y * originalVector.y));
-
-	// Prevent division by zero
-	if (norm <= std::numeric_limits<float>::epsilon() * norm * 2 //2 -> constexpr units_in_last_place
-		|| norm < std::numeric_limits<float>::min())
-	{
-		return sf::Vector2f{};
-	}
-
-	return originalVector / norm;
-}
-
-float Utils::dot(const sf::Vector2f& lhs, const sf::Vector2f& rhs)
-{
-	return lhs.x * rhs.x + lhs.y * rhs.y;
 }

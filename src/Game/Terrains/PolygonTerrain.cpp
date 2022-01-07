@@ -80,7 +80,6 @@ void PolygonTerrain::initShape(const sf::RenderWindow& window)
 	initTerrainOrigin(window);
 	initEdgesRegistration();//We register two times the edges so the points positions update with their new origin.
 
-
 	//DEBUG TO SHOW GLOBAL BOUNDS OF TERRAIN
 	_globalBounds = new sf::RectangleShape(sf::Vector2f(_terrainShape.getGlobalBounds().width, _terrainShape.getGlobalBounds().height));
 	_globalBounds->setOrigin(_terrainShape.getOrigin());
