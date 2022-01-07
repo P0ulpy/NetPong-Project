@@ -10,7 +10,6 @@ private:
 	std::vector<std::string> _countDownMessages;
 	int _currentCountdownMessageIndex;
 	float _currentTimeBetweenStartCountdownNumbers;
-	float _durationBetweenStartCountdownNumbers;
 	bool _isStartCountdownActive;
 
 	void initValues();

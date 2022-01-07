@@ -25,13 +25,12 @@ MainGameScene::~MainGameScene()
 void MainGameScene::updateInputs(const float& deltaTime)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
-		_gameManager->startRoundStartCountdown();
+		_gameManager->player1WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
 		for (const auto pongBall : _pongBalls)
 			pongBall->setActive(true);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
-		for (const auto pongBall : _pongBalls)
-			pongBall->setActive(false);
+		hideAllPongBalls();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad2))
 		for (const auto pongBall : _pongBalls)
 			pongBall->startBoostBall(8.f);
@@ -105,11 +104,6 @@ void MainGameScene::updateInputs(const float& deltaTime)
 	}
 }
 
-void MainGameScene::start()
-{
-
-}
-
 void MainGameScene::initValues()
 {
 	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls);
@@ -119,11 +113,9 @@ void MainGameScene::initValues()
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain));
 	}
 
-	_pongBall = std::make_unique<PongBall>(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain);
 	_character = std::make_unique<Character>(_poPossibEngin->getRenderWindow());
 
-	//TODO : Renseigner les deux joueurs dans le constructeur de GameManager
-	_gameManager = std::make_unique<GameManager>(_character.get(), _character.get());
+	_gameManager = std::make_shared<GameManager>(this);
 }
 
 void MainGameScene::initFonts()
@@ -141,7 +133,7 @@ void MainGameScene::update(const float& deltaTime)
 	_gameManager->update(deltaTime);
 
 	_polygonTerrain->update(deltaTime);
-	//_pongBall->update(deltaTime);
+
 	for (const auto pongBall : _pongBalls)
 	{
 		pongBall->update(deltaTime);
@@ -163,4 +155,17 @@ void MainGameScene::render(sf::RenderTarget* target)
 	}
 	//_character->render(*target);
 	//_character->renderP2(*target);
+}
+
+PolygonTerrain* MainGameScene::getPolygonTerrain() const
+{
+	return _polygonTerrain.get();
+}
+
+void MainGameScene::hideAllPongBalls()
+{
+	for (auto pongBall : _pongBalls)
+	{
+		pongBall->setActive(false);
+	}
 }

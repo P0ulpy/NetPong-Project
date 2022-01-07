@@ -4,18 +4,22 @@
 
 #include "SFML/Graphics/RenderTarget.hpp"
 
+class MainGameScene;
 class GameUI;
 class RoundStartCountdown;
-class Character;
 
 class GameManager
 {
 private	:
-	Character* _player1;
-	Character* _player2;
+	MainGameScene* _mainGameScene;
 
-	int _numRoundsToWin;
+	int _tempScorePlayer1;
+	int _tempScorePlayer2;
+	bool _isRoundEnded;
+
 	int _currentRound;
+
+	float _currentTimeBeforeStartingNewRound;
 
 	std::unique_ptr<RoundStartCountdown> _roundStartCountdown;
 	std::unique_ptr<GameUI> _gameUI;
@@ -23,17 +27,22 @@ private	:
 	void initValues();
 
 public:
-	GameManager(Character* player1, Character* player2);
+	GameManager(MainGameScene* pMainGameScene);
 	~GameManager();
 
 	void update(const float& deltaTime);
+	void updateRoundEndTimer(const float& deltaTime);
 	void render(sf::RenderTarget& target) const;
 
-	//TODO : À voir si on a besoin d'une méthode générique pour les deux joueurs, ou bien deux méthodes séparées (incrementScorePlayer1, incrementScorePlayer2...)
-	void incrementScorePlayer(Character* pPlayer);
-	void playerWinsRound(Character* pPlayer);
-	void playerWinsGame(Character* pPlayer);
+	void player1WinsRound();
+	void player2WinsRound();
+
+	void player1WinsGame();
+	void player2WinsGame();
 
 	void startRoundStartCountdown();
+	void endRound();
+	void startRoundEndTimer();
+	void restartRound();
 	void resetGame();
 };

@@ -4,8 +4,6 @@
 
 #include "../Entity.hpp"
 
-constexpr int BALL_SIZE = 20;
-
 class PolygonTerrain;
 class PhantomBall;
 class PolygonCollisionResult;
@@ -65,7 +63,6 @@ private:
 
 	//Ball physics
 	float _speedMultiplierBonus;
-	int _maxNumBounces;
 	int _currentNumBounces;
 
 	//Terrain
@@ -74,15 +71,11 @@ private:
 
 	//Boost
 	float _currentTimeBoost;
-	float _boostDuration;
 	bool _isBoosted;
 
 	//Phantom ball effect
 	std::vector<std::unique_ptr<PhantomBall>> _phantomBalls;
-	int _phantomBallsMax;
-
 	float _currentTimePhantomBallCooldown;
-	float _durationBetweenPhantomBalls;
 	bool _hasPhantomEffect;
 
 	//Functions

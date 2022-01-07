@@ -6,6 +6,14 @@
 #include "../../Utils/Utils.hpp"
 #include "../Terrains/PolygonTerrain.hpp"
 
+constexpr int BALL_SIZE = 20;
+
+constexpr int MAX_NUM_BOUNCES = 2;
+constexpr float BOOST_DURATION = 2.f;
+
+constexpr int MAX_PHANTOM_BALLS = 20;
+constexpr float DURATION_BETWEEN_PHANTOM_BALLS = .025f;
+
 
 //--- Constructors - Destructor ---
 PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain)
@@ -34,8 +42,6 @@ void PongBall::initVariables()
 
 	_texture = std::make_unique<sf::Texture>();
 	_sprite = std::make_unique<sf::Sprite>();
-
-	_maxNumBounces = 2;
 
 	_ballSize = BALL_SIZE;
 	_ballColor = sf::Color(65, 90, 255, 255);
@@ -66,15 +72,11 @@ void PongBall::initShapes(const sf::RenderWindow& window)
 void PongBall::initBoost()
 {
 	_isBoosted = false;
-	_boostDuration = 2.f;
 	_currentTimeBoost = 0.f;
 }
 
 void PongBall::initPhantomEffect()
 {
-	_phantomBallsMax = 20;
-	_durationBetweenPhantomBalls = 0.025f;
-
 	createPhantomBalls();
 
 	startPhantomBallEffect();
@@ -115,7 +117,7 @@ void PongBall::updateBoost(const float& deltaTime)
 	if (_isBoosted)
 	{
 		_currentTimeBoost += deltaTime;
-		if (_currentTimeBoost >= _boostDuration)
+		if (_currentTimeBoost >= BOOST_DURATION)
 		{
 			_isBoosted = false;
 			resetSpeedMultiplierBonus();
@@ -129,7 +131,7 @@ void PongBall::updatePhantomEffect(const float& deltaTime)
 	{
 		_currentTimePhantomBallCooldown += deltaTime;
 
-		if (_currentTimePhantomBallCooldown > _durationBetweenPhantomBalls)
+		if (_currentTimePhantomBallCooldown > DURATION_BETWEEN_PHANTOM_BALLS)
 		{
 			displayPhantomBall();
 			_currentTimePhantomBallCooldown = 0;
@@ -241,8 +243,16 @@ void PongBall::setActive(bool isActive)
 {
 	_isActive = isActive;
 
-	_currentNumBounces = 0;
-	_isActive ? startPhantomBallEffect() : stopPhantomBallEffect();
+	if(_isActive)
+	{
+		_currentNumBounces = 0;
+		startPhantomBallEffect();
+	}
+	else
+	{
+		stopPhantomBallEffect();
+		resetSpeedMultiplierBonus();
+	}
 }
 
 bool PongBall::isActive() const
@@ -254,7 +264,7 @@ void PongBall::addNumBounceAndUpdateVisibility()
 {
 	_currentNumBounces++;
 
-	if(_currentNumBounces > _maxNumBounces)
+	if(_currentNumBounces > MAX_NUM_BOUNCES)
 	{
 		setActive(false);
 	}
@@ -296,7 +306,7 @@ void PongBall::startBoostBall(float speedBoostBonus)
 //--- Phantom balls effect ---
 void PongBall::createPhantomBalls()
 {
-	for (int i = 0; i < _phantomBallsMax; i++)
+	for (int i = 0; i < MAX_PHANTOM_BALLS; i++)
 	{
 		_phantomBalls.push_back(std::make_unique<PhantomBall>(*this));
 	}

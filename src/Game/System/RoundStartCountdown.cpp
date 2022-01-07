@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+constexpr float DURATION_BETWEEN_START_COUNTDOWN_NUMBERS = 0.6f;
+
 RoundStartCountdown::RoundStartCountdown()
 {
 	initValues();
@@ -15,7 +17,6 @@ void RoundStartCountdown::initValues()
 {
 	_countDownMessages = { "3", "2", "1", "GO!" };
 	_currentCountdownMessageIndex = 0;
-	_durationBetweenStartCountdownNumbers = 0.6f;
 
 	stopBeginCountdown();
 }
@@ -25,7 +26,7 @@ void RoundStartCountdown::update(const float& deltaTime)
 	if (_isStartCountdownActive)
 	{
 		_currentTimeBetweenStartCountdownNumbers += deltaTime;
-		if (_currentTimeBetweenStartCountdownNumbers >= _durationBetweenStartCountdownNumbers)
+		if (_currentTimeBetweenStartCountdownNumbers >= DURATION_BETWEEN_START_COUNTDOWN_NUMBERS)
 		{
 			_currentTimeBetweenStartCountdownNumbers = 0;
 			_currentCountdownMessageIndex++;

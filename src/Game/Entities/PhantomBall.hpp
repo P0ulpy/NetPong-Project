@@ -27,11 +27,8 @@ private:
 	sf::Color _currentOutlineColor;
 	sf::CircleShape _phantomBallShape;
 
-	sf::Uint8 _initialAlpha;
 	sf::Uint8 _currentAlpha;
-	sf::Uint8 _alphaDecreaseSpeed;
 
-	float _alphaDecreaseCooldown;
 	float _timeAlphaDecreaseCooldown;
 
 	bool _isDisplayed { false };
