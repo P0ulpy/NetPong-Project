@@ -38,7 +38,7 @@ public:
 
 	// get / set
 
-	[[nodiscard]] static PoPossibEngin& getInstance();
+	//[[nodiscard]] static PoPossibEngin& getInstance();
 	sf::Vector2i getMousePosition();
 
 	
@@ -57,7 +57,7 @@ public:
 
 private:
 
-	static PoPossibEngin* _instance;
+	//static PoPossibEngin* _instance;
 
 	sf::Vector2i mousePosition;
 

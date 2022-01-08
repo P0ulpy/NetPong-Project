@@ -1,6 +1,7 @@
 #include "SFML/Graphics.hpp"
 #include "../Entity.hpp"
 
+
 #define PI  3.14
 
 class Character : public Entity
@@ -25,31 +26,29 @@ private:
 
 
 	//Position du joueur 1 
-	int xChar = 450;
-	int xShie = 450;
+	int xChar;
+	int xShie;
+	int yChar;
+	int yShie;
 
-	int yChar = 700;
-	int yShie = 700;
-
+	sf::Vector2i mousePosition;
 	
+
 
 public:
 
 
 
-	Character(sf::RenderWindow& window);
+	Character(sf::RenderWindow& window,int xSpawn, int ySpawn, sf::Color color);
 	~Character();
+	void setMousePosition(sf::Vector2i mouse);
+
 
 	void update(const float& deltaTime)override;
 	void render(sf::RenderTarget& renderTarget)const override;
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime)override;
 
-	// On change la position du personnage en fonction de la speed et sa direction
-	void setCharacterPosition(int x,int y);
 
-
-	// On change la position du bouclier en fonction de la speed et de la direction du personnage
-	void setShieldPosition(int x,int y);
 
 
 	// On change la rotation du personnage en fonction de la position de la souris
@@ -65,15 +64,16 @@ public:
 
 
 	// On défini les paramètres des deux personnages
-	void initParamP1(sf::RenderWindow& window);
+	void initParam(sf::RenderWindow& window);
 
 	
 	// On vérifie si le bouclier est actif ou non
 	void verifActiveShield(bool isActive);
 	
+;
 
 	// Update des personnage
-	void updateMouvement( sf::RenderWindow& window,float clock);
+	//void updateMouvement( sf::RenderWindow& window,float clock);
 
 	
 	

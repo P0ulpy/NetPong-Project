@@ -24,12 +24,11 @@ private:
 
 	//Game objects
 	std::unique_ptr<PongBall> _pongBall;
-	std::unique_ptr<Character> _character;
+	std::unique_ptr<Character> _character1;
 	std::unique_ptr<Character> _character2;
 	
-	bool activeShieldAutorize = true;
-	float delay = 2.f;
-
+	
+	
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
 
 	//Font and texts

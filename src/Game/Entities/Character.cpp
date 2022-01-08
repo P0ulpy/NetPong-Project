@@ -2,19 +2,30 @@
 #include "iostream"
 #include "math.h"
 #include <windows.h>
+#include "string"
+
 constexpr int SPEED = 250;
-Character::Character(sf::RenderWindow& window, sf::Vector2f spawnPoint)
+
+Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color color)
 {
-	
-	tel parametre
-
-
-
-
+	xChar = xSpawn;
+	xShie = xSpawn;
+	yChar = ySpawn;
+	yShie = ySpawn;
 	_currentSpeed = SPEED;
+	charac.setPosition(xChar, yChar);
+	shield.setPosition(xChar, yChar);
+	charac.setRadius(36);
+	shield.setSize(sf::Vector2f(70, 15));
+	charac.setFillColor(color);
+	shield.setFillColor(sf::Color::White);
 
-	initParamP1(window);
-	initParamP2(window);
+	sf::FloatRect characSize = charac.getGlobalBounds();
+	sf::FloatRect shieldSize = shield.getGlobalBounds();
+
+	charac.setOrigin((characSize.width / 2), (characSize.height / 2));
+	shield.setOrigin(shieldSize.width / 2, (shieldSize.height / 2) + (characSize.height / 2));
+
 	
 }
 
@@ -23,28 +34,38 @@ Character::~Character()
 
 }
 
-void Character::update(const float& deltaTime) 
+void Character::setMousePosition(sf::Vector2i mouse)
 {
-	updateMouvement()
+	mousePosition = mouse;
+}
+
+
+void Character::update(const float& deltaTime)
+{
+	_velocity = sf::Vector2f(xChar, yChar);
+	moveEntity(_velocity, deltaTime);
+	_velocity = sf::Vector2f(xShie, yShie);
+	moveEntity(_velocity, deltaTime);
+
+
+	setCharacterRotation(mousePosition);
+	setShieldRotation(mousePosition);
 
 }
 
-void Character::moveEntity(const sf::Vector2f& velocity, const float& deltaTime) 
-{
-	charac.move(velocity * _currentSpeed * deltaTime);
-	characP2.move(velocity * _currentSpeed * deltaTime);
-	shield.move(velocity * _currentSpeed * deltaTime);
-	shieldP2.move(velocity * _currentSpeed * deltaTime);
-}
-void Character::updateMouvement()
-{
-	setCharacterPosition(xChar, yChar);
-	setShieldPosition(xShie, yShie);
 
-	setCharacterRotation(mousePosition(window));
-	setShieldRotation(mousePosition(window));
 
+void Character::moveEntity(const sf::Vector2f& position, const float& deltaTime) 
+{
+	//std::cout << "Déplacement : " << position.y << std::endl;
+	charac.setPosition(position);
+	//characP2.move(velocity * _currentSpeed * deltaTime);
+	shield.setPosition(position);
+	//shieldP2.move(velocity * _currentSpeed * deltaTime);
+
+	
 }
+
 
 
 
@@ -60,7 +81,7 @@ void Character::render(sf::RenderTarget& target)const
 
 
 
-void Character::initParamP1(sf::RenderWindow& window) {
+void Character::initParam(sf::RenderWindow& window) {
 
 	charac.setRadius(36);
 	shield.setSize(sf::Vector2f(70,15));
@@ -75,37 +96,11 @@ void Character::initParamP1(sf::RenderWindow& window) {
 	
 	
 }
-/*
-void Character::initParamP2(sf::RenderWindow& window) {
-
-	characP2.setRadius(36);
-	shieldP2.setSize(sf::Vector2f(70, 15));
-	characP2.setFillColor(sf::Color::Cyan);
-	shieldP2.setFillColor(sf::Color::White);
-
-	sf::FloatRect characSize2 = characP2.getGlobalBounds();
-	sf::FloatRect shieldSize2 = shieldP2.getGlobalBounds();
-
-	characP2.setOrigin((characSize2.width / 2), (characSize2.height / 2));
-	shieldP2.setOrigin(shieldSize2.width / 2 , (shieldSize2.height / 2) + (characSize2.height / 2));
-
-
-}*/
-
-
-
-void Character::setCharacterPosition( int x,int y)
-{
-	charac.setPosition(x, y);
-}
 
 
 
 
-void Character::setShieldPosition( int x, int y)
-{
-	shield.setPosition(x, y);
-}
+
 
 void Character::setCharacterRotation(sf::Vector2i mousePos)
 {
@@ -140,18 +135,29 @@ void Character::direction(bool isleft, bool isright, bool up, bool down, const s
 	rightFlag = isright;
 	upFlag = up;
 	downFlag = down;
+	std::cout << "Gauche : " << leftFlag << std::endl;
+	std::cout << "Droite : " << rightFlag << std::endl;
+	std::cout << "Haut : " << upFlag << std::endl;
+	std::cout << "Bas : " << downFlag << std::endl;
+	std::cout<<std::endl;
 
-	if (leftFlag) xChar -= (SPEED * deltaTime);
-	if (rightFlag) xChar += (SPEED * deltaTime);
+	if (leftFlag) {
+		xChar -= (SPEED * deltaTime);
+		xShie -= (SPEED * deltaTime);
+	}
+	if (rightFlag) {
+		xChar = xChar + (SPEED * deltaTime);
+		xShie = xChar + (SPEED * deltaTime);
+	}
+	if (upFlag) {
+		yChar -= (SPEED * deltaTime);
+		yShie -= (SPEED * deltaTime);
+	}
+	if (downFlag) {
+		yChar += (SPEED * deltaTime);
+		yShie += (SPEED * deltaTime);
+	}
 
-	if (leftFlag) xShie -= (SPEED * deltaTime);
-	if (rightFlag) xShie += (SPEED * deltaTime);
-
-	if (upFlag) yChar -= (SPEED * deltaTime);
-	if (downFlag) yChar += (SPEED * deltaTime);
-
-	if (upFlag) yShie -= (SPEED * deltaTime);
-	if (downFlag) yShie += (SPEED * deltaTime);
 
 	if (xChar > terrain.width - (charac.getGlobalBounds().width / 2 ))
 	{

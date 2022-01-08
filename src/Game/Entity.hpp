@@ -3,10 +3,11 @@
 #include "SFML/Graphics.hpp"
 #include "../Engine/Engine.hpp"
 
+
 class Entity
 {
 protected:
-	PoPossibEngin& _engine = PoPossibEngin::getInstance();
+	//PoPossibEngin& _engine = PoPossibEngin::getInstance();
 
 	std::unique_ptr<sf::Texture> _texture;
 	std::unique_ptr<sf::Sprite> _sprite;
