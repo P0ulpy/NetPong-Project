@@ -35,6 +35,10 @@ void RoundStartCountdown::update(const float& deltaTime)
 			{
 				stopBeginCountdown();
 			}
+			else
+			{
+				std::cout << _countDownMessages.at(_currentCountdownMessageIndex).data() << std::endl;
+			}
 		}
 	}
 }
@@ -43,13 +47,14 @@ void RoundStartCountdown::render(sf::RenderTarget& target) const
 {
 	if (_isStartCountdownActive)
 	{
-		std::cout << _countDownMessages.at(_currentCountdownMessageIndex).data() << std::endl;
+		//DisplayInsaneCountdownUI
 	}
 }
 
 void RoundStartCountdown::startBeginCountdown()
 {
 	_isStartCountdownActive = true;
+	std::cout << _countDownMessages.at(_currentCountdownMessageIndex).data() << std::endl;
 }
 
 void RoundStartCountdown::stopBeginCountdown()

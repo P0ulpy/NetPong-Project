@@ -14,6 +14,7 @@ constexpr float BOOST_DURATION = 2.f;
 constexpr int MAX_PHANTOM_BALLS = 20;
 constexpr float DURATION_BETWEEN_PHANTOM_BALLS = .025f;
 
+constexpr float INITIAL_SPEED = 220.f;
 
 //--- Constructors - Destructor ---
 PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain)
@@ -35,8 +36,8 @@ void PongBall::initVariables()
 {
 	setActive(true);
 
-	_velocity = Utils::normalize(sf::Vector2f(1.f, 2.f));
-	_initialSpeed = 220.f;
+	_velocity = Utils::normalize(sf::Vector2f(1.f, 1.5f));
+	_initialSpeed = INITIAL_SPEED;
 	_currentSpeed = _initialSpeed;
 	_maxSpeed = 10000.f;
 

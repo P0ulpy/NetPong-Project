@@ -20,6 +20,8 @@ public:
 
 	sf::Vector2f getPointPosition(int index) const;
 
+	void drawRandomTerrain();
+
 private:
 
 	enum DrawDirection
@@ -41,23 +43,27 @@ private:
 		NINETY = 90
 	};
 
+	const sf::RenderWindow* _window;
+
 	const std::vector<PongBall*>& _pongBalls;
 
 	sf::ConvexShape _terrainShape;
-	sf::RectangleShape* _globalBounds;
 	sf::Rect<float> _playableArea;
 
 	sf::Vector2f _terrainSize{ 600, 600 };
 
 	std::vector<sf::Vector2f> _pointPositions;
 
-	void initShape(const sf::RenderWindow& window);
+	int _tempCurrentTerrain {1};
+
+	void initShape();
 	void initPlayableArea();
 	void initEdgesRegistration();
 
 	sf::Vector2f initPoint(const sf::Vector2f& previousPoint, DrawDirection drawDirection, Orientation orientation, int pointDistance);
 	void setPointAndUpdateCurrentPoint( DrawDirection drawDirection, Orientation orientation, int pointDistance, int& currentPointDrawned);
-	void initTerrainOrigin(const sf::RenderWindow& window);
+	void selectAndDrawRandomTerrain();
+	void initTerrainOrigin();
 	void drawTerrain1();
 	void drawTerrain2();
 	void drawTerrain3();

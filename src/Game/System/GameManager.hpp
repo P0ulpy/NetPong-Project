@@ -43,6 +43,6 @@ public:
 	void startRoundStartCountdown();
 	void endRound();
 	void startRoundEndTimer();
-	void restartRound();
+	void restartRound(const float& deltaTime);
 	void resetGame();
 };
