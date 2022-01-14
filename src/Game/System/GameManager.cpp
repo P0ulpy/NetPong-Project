@@ -68,6 +68,7 @@ void GameManager::player1WinsRound()
 	if(_tempScorePlayer1 >= NUM_ROUNDS_TO_WIN)
 	{
 		std::cout << "Player 1 won the game !!\n\nRestarting game\n";
+		std::cout << "Score player 1 : " << _tempScorePlayer1 << " | Score player 2 : " << _tempScorePlayer2 << std::endl;
 		resetGame();
 	}
 	else
@@ -85,12 +86,16 @@ void GameManager::player2WinsRound()
 	if (_tempScorePlayer2 >= NUM_ROUNDS_TO_WIN)
 	{
 		std::cout << "Player 2 won the game !!\n\nRestarting game\n";
+
+		std::cout << "Score player 1 : " << _tempScorePlayer1 << " | Score player 2 : " << _tempScorePlayer2 << std::endl;
+
 		resetGame();
 	}
 	else
 	{
 		std::cout << "Player 2 won the round !!\n\n";
 	}
+
 	endRound();
 }
 

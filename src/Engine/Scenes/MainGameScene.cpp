@@ -26,6 +26,8 @@ void MainGameScene::updateInputs(const float& deltaTime)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
+		_gameManager->player2WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
 		for (const auto pongBall : _pongBalls)
 			pongBall->setActive(true);
