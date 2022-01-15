@@ -36,6 +36,9 @@ class PoPossibEngin
 {
 public:
 	PoPossibEngin(const EngineConfig& engineConfig);
+
+	PoPossibEngin(const sf::Thread &renderThread);
+
 	~PoPossibEngin();
 
 	void start();
@@ -47,7 +50,7 @@ public:
 	[[nodiscard]] const EngineState& getEngineState() const;
 	[[nodiscard]] const EngineConfig& getEngineConfig() const;
 
-	[[nodiscard]] sf::Thread& getRenderThread();
+    [[maybe_unused]] [[nodiscard]] sf::Thread& getRenderThread();
 	[[nodiscard]] sf::Thread& getLogicThread();
 
 	[[nodiscard]] float getDeltaTime() const;

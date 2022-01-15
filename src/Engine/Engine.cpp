@@ -9,17 +9,16 @@
 #include <imgui-SFML.h>
 
 #include "Engine.hpp"
-#include "SocketsManagement/SocketsManager.hpp"
 
 // Scenes
 #include "Scenes/MainGameScene.hpp"
 #include "Scenes/SocketConnectionScene.hpp"
 
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
-	: _engineConfig(engineConfig),
-	_renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this)),
-	_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this)),
-	_socketManager(SocketManager(*this))
+    : _engineConfig(engineConfig)
+	, _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this))
+	, _logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
+	, _socketManager(SocketManager(*this))
 {
 
 }
@@ -85,7 +84,6 @@ void PoPossibEngin::pollEvents()
 	}
 }
 
-
 #pragma region RenderThread
 
 void PoPossibEngin::renderThreadEntry()
@@ -99,7 +97,7 @@ void PoPossibEngin::renderThreadEntry()
 
 	// TEMPORAIRE
 	//loadScene(MainGame);
-	loadScene(SocketConnection);
+	loadScene(MainGame);
 
 	renderThreadUpdate();
 }
