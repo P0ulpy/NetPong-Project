@@ -1,0 +1,20 @@
+#pragma once
+
+#include "SFML/Graphics.hpp"
+
+class Utils
+{
+public:
+	//----------- MATHS -----------
+	static float dot(const sf::Vector2f& lhs, const sf::Vector2f& rhs);
+	static sf::Vector2f normalize(const sf::Vector2f& originalVector);
+	static float deceleration(float initial, float target, float time);
+	static float getDistance(float x1, float y1, float x2, float y2);
+	static sf::Vector2f getVectorReflection(const sf::Vector2f& inDirection, const sf::Vector2f& surfaceVector);
+
+	//----------- COLLISIONS -----------
+	static bool circleCircleCollision(float c1x, float c1y, float c1r, float c2x, float c2y, float c2r);
+	static bool lineLineCollision(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, sf::Vector2f& outIntersectionPoint);
+	static bool pointCircleCollision(float px, float py, float cx, float cy, float r);
+	static bool linePointCollision(float x1, float y1, float x2, float y2, float px, float py);
+};

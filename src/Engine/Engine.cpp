@@ -22,7 +22,12 @@ PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
 	, _logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
 	, _socketManager(SocketManager(*this))
 {
+	/*
+	if (_instance != nullptr)
+		throw std::exception("Engine is a singleton");
 
+	_instance = this;
+	*/
 }
 
 void PoPossibEngin::start()
@@ -62,6 +67,8 @@ PoPossibEngin::~PoPossibEngin()
 
 // Get
 
+//PoPossibEngin& PoPossibEngin::getInstance() { return *_instance; }
+
 sf::RenderWindow& PoPossibEngin::getRenderWindow() const { return *_renderWindow; }
 const EngineState& PoPossibEngin::getEngineState() const { return _engineState; }
 const EngineConfig& PoPossibEngin::getEngineConfig() const { return _engineConfig; }
@@ -71,6 +78,7 @@ sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
 
 float PoPossibEngin::getDeltaTime() const { return _deltaTime; }
 
+InputsManager& PoPossibEngin::getInputsManager() { return _inputManager; }
 SocketManager& PoPossibEngin::getSocketManager() { return _socketManager; }
 
 #pragma endregion GET/SET
@@ -203,6 +211,10 @@ void PoPossibEngin::logicThreadUpdate()
 }
 
 #pragma endregion LogicThread
+
+//Mouse
+void PoPossibEngin::setMousePosition() {	mousePosition = sf::Mouse::getPosition(getRenderWindow());}
+sf::Vector2i PoPossibEngin::getMousePosition() { return mousePosition; }
 
 
 void PoPossibEngin::loadScene(SceneType sceneType)

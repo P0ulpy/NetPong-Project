@@ -1,16 +1,20 @@
 #include "PolygonTerrain.hpp"
 
 #include <iostream>
+#include "../../Utils/Utils.hpp"
+#include "../Entities/PongBall.hpp"
 #include <math.h>
 
 constexpr int TERRAIN_SIZE_MULTIPLIER = 20;
 constexpr int TERRAIN_NUM_EDGES = 8;
 
-PolygonTerrain::PolygonTerrain(const sf::RenderWindow& window)
+constexpr int NUM_TERRAINS = 4;
+
+PolygonTerrain::PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBall)
+	:_window(&window), _pongBalls(pongBall)
 {
-	initShape(window);
+	initShape();
 	initPlayableArea();
-	initEdgesRegistration();
 }
 
 PolygonTerrain::~PolygonTerrain()
@@ -18,15 +22,40 @@ PolygonTerrain::~PolygonTerrain()
 
 }
 
-void PolygonTerrain::update()
+void PolygonTerrain::update(const float& deltaTime)
 {
-
+	updateCollision(deltaTime);
 }
+
+void PolygonTerrain::updateCollision(const float& deltaTime) const
+{
+	const int pointCount = static_cast<int>(getShape().getPointCount());
+
+	//For every sides of the terrain
+	for (int i = 0; i < pointCount; i++)
+	{
+		const float xA = getPointPosition(i).x;
+		const float yA = getPointPosition(i).y;
+		const float xB = getPointPosition((i + 1) % pointCount).x;
+		const float yB = getPointPosition((i + 1) % pointCount).y;
+
+		for (const auto pongBall : _pongBalls)
+		{
+			if (pongBall->isActive() && pongBall->hitWallIfCollision(xA, yA, xB, yB)) break;
+		}
+	}
+
+	for (const auto pongBall : _pongBalls)
+	{
+		if(pongBall->isActive())
+			pongBall->resetBallDestAndOldPos(deltaTime);
+	}
+}
+
 
 void PolygonTerrain::render(sf::RenderTarget& target) const
 {
 	target.draw(_terrainShape);
-	//target.draw(*_globalBounds);
 }
 
 sf::ConvexShape PolygonTerrain::getShape() const
@@ -39,24 +68,13 @@ sf::Rect<float> PolygonTerrain::getPlayableArea() const
 	return _playableArea;
 }
 
-void PolygonTerrain::initShape(const sf::RenderWindow& window)
+void PolygonTerrain::initShape()
 {
 	_terrainShape.setFillColor(sf::Color::Black);
 	_terrainShape.setOutlineColor(sf::Color(255,65,225,255));
 	_terrainShape.setOutlineThickness(18.f);
 
-	drawTerrain1();
-
-	_terrainShape.setOrigin(sf::Vector2f(-static_cast<float>(window.getSize().x) / 2.f + _terrainShape.getGlobalBounds().width / 2.f,
-		-static_cast<float>(window.getSize().y) / 2.f + _terrainShape.getGlobalBounds().height / 2.f));
-
-	//DEBUG TO SHOW GLOBAL BOUNDS OF TERRAIN
-	_globalBounds = new sf::RectangleShape(sf::Vector2f(_terrainShape.getGlobalBounds().width, _terrainShape.getGlobalBounds().height));
-	_globalBounds->setOrigin(_terrainShape.getOrigin());
-	_globalBounds->setPosition(_terrainShape.getPosition());
-	_globalBounds->setFillColor(sf::Color(0, 0, 0, 0));
-	_globalBounds->setOutlineColor(sf::Color::Green);
-	_globalBounds->setOutlineThickness(3.f);
+	drawRandomTerrain();
 }
 
 
@@ -70,6 +88,8 @@ void PolygonTerrain::initPlayableArea()
 
 void PolygonTerrain::initEdgesRegistration()
 {
+	_pointPositions.clear();
+
 	const int pointCount = static_cast<int>(getShape().getPointCount());
 
 	for (int i = 0; i < pointCount; i++)
@@ -86,7 +106,6 @@ sf::Vector2f PolygonTerrain::initPoint(const sf::Vector2f& previousPoint, DrawDi
 {
 	float directionX = 1, directionY = 1;
 	sf::Vector2f newPoint;
-	pointDistance = static_cast<float>(pointDistance);
 
 	switch (drawDirection)
 	{
@@ -107,41 +126,36 @@ sf::Vector2f PolygonTerrain::initPoint(const sf::Vector2f& previousPoint, DrawDi
 		case NINETY: newPoint =		  sf::Vector2f(0, directionY * 3); break;
 	}
 
-	newPoint = normalize(newPoint);
+	newPoint = Utils::normalize(newPoint);
 
-	newPoint.x = previousPoint.x + newPoint.x * pointDistance * TERRAIN_SIZE_MULTIPLIER;
-	newPoint.y = previousPoint.y + newPoint.y * pointDistance * TERRAIN_SIZE_MULTIPLIER;
+	newPoint.x = previousPoint.x + newPoint.x * static_cast<float>(pointDistance) * TERRAIN_SIZE_MULTIPLIER;
+	newPoint.y = previousPoint.y + newPoint.y * static_cast<float>(pointDistance) * TERRAIN_SIZE_MULTIPLIER;
 
 	return newPoint;
 }
 
-
-sf::Vector2f PolygonTerrain::getVectorReflection(sf::Vector2f inDirection, sf::Vector2f surfaceVector) const
+void PolygonTerrain::initTerrainOrigin()
 {
-	const auto inNormal = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
-	const float factor = -2.f * (inDirection.x * inNormal.x + inDirection.y * inNormal.y);
-	const auto finalVector = sf::Vector2f(factor * inNormal.x + inDirection.x,
-										 factor * inNormal.y + inDirection.y);
-	return finalVector;
+	float topX = getPointPosition(0).x;
+	float topY = getPointPosition(0).y;
+	const float lineThickness = _terrainShape.getOutlineThickness();
+
+	//For every sides of the terrain
+	for (int i = 0; i < getShape().getPointCount(); i++)
+	{
+		topX = std::min(topX, getPointPosition(i).x);
+		topY = std::min(topY, getPointPosition(i).y);
+	}
+
+	_terrainShape.setOrigin(sf::Vector2f(
+		-static_cast<float>(_window->getSize().x) / 2.f + _terrainShape.getGlobalBounds().width / 2.f + topX - lineThickness,
+		-static_cast<float>(_window->getSize().y) / 2.f + _terrainShape.getGlobalBounds().height / 2.f + topY - lineThickness)
+	);
 }
 
 sf::Vector2f PolygonTerrain::getPointPosition(const int index) const
 {
 	return _pointPositions.at(index);
-}
-
-sf::Vector2f PolygonTerrain::normalize(const sf::Vector2f& originalVector)
-{
-	const float norm = std::sqrt((originalVector.x * originalVector.x) + (originalVector.y * originalVector.y));
-
-	// Prevent division by zero
-	if (norm <= std::numeric_limits<float>::epsilon() * norm * 2 //2 -> constexpr units_in_last_place
-		|| norm < std::numeric_limits<float>::min())
-	{
-		return sf::Vector2f{};
-	}
-
-	return originalVector / norm;
 }
 
 void PolygonTerrain::drawTerrain1()
@@ -197,9 +211,9 @@ void PolygonTerrain::drawTerrain3()
 
 void PolygonTerrain::drawTerrain4()
 {
-	int edgeLenght = 8;
+	int edgeLenght = 6;
 	int edgeLenght2 = edgeLenght / 2;
-	int edgeLenght4 = edgeLenght / 4;
+	int edgeLenght4 = edgeLenght / 3;
 	sf::Vector2f firstPoint{ 0,0 };
 
 	_terrainShape.setPointCount(24);
@@ -235,36 +249,50 @@ void PolygonTerrain::drawTerrain4()
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, NINETY, edgeLenght, currentPoint);
 }
 
-void PolygonTerrain::drawTerrain5()
+void PolygonTerrain::drawRandomTerrain()
 {
-	int edgeLenght = 10;
-	int edgeLenght2 = 8;
-	int edgeLenght4 = 6;
-	int edgeLenght8 = 2;
+	_terrainShape.setOrigin(sf::Vector2f(0, 0));
 
-	sf::Vector2f firstPoint{ 200,200 };
-	_terrainShape.setPointCount(12);
+	selectAndDrawRandomTerrain();
 
-	_terrainShape.setPoint(0, firstPoint);
-	_terrainShape.setPoint(1, initPoint(_terrainShape.getPoint(0), BOTTOM_LEFT_TO_TOP_RIGHT, FOURTY_FIVE, edgeLenght4));
-	_terrainShape.setPoint(2, initPoint(_terrainShape.getPoint(1), TOP_LEFT_TO_BOTTOM_RIGHT, FIFTEEN, edgeLenght));
-
-	_terrainShape.setPoint(3, initPoint(_terrainShape.getPoint(2), BOTTOM_LEFT_TO_TOP_RIGHT, FIFTEEN, edgeLenght));
-	_terrainShape.setPoint(4, initPoint(_terrainShape.getPoint(3), TOP_LEFT_TO_BOTTOM_RIGHT, FOURTY_FIVE, edgeLenght4));
-	_terrainShape.setPoint(5, initPoint(_terrainShape.getPoint(4), TOP_LEFT_TO_BOTTOM_RIGHT, NINETY, edgeLenght4));
-
-	_terrainShape.setPoint(6, initPoint(_terrainShape.getPoint(5), TOP_RIGHT_TO_BOTTOM_LEFT, SIXTY, edgeLenght2));
-	_terrainShape.setPoint(7, initPoint(_terrainShape.getPoint(6), TOP_RIGHT_TO_BOTTOM_LEFT, ZERO, edgeLenght8));
-	_terrainShape.setPoint(8, initPoint(_terrainShape.getPoint(7), TOP_RIGHT_TO_BOTTOM_LEFT, FIFTEEN, edgeLenght4));
-
-	_terrainShape.setPoint(9, initPoint(_terrainShape.getPoint(8), BOTTOM_RIGHT_TO_TOP_LEFT, FIFTEEN, edgeLenght4));
-	_terrainShape.setPoint(10, initPoint(_terrainShape.getPoint(9), BOTTOM_RIGHT_TO_TOP_LEFT, ZERO, edgeLenght8));
-	_terrainShape.setPoint(11, initPoint(_terrainShape.getPoint(10), BOTTOM_RIGHT_TO_TOP_LEFT, SIXTY, edgeLenght2));
+	initEdgesRegistration();
+	initTerrainOrigin();
+	initEdgesRegistration();//We register two times the edges so the points positions update with their new origin.
 }
 
 void PolygonTerrain::setPointAndUpdateCurrentPoint(DrawDirection drawDirection, Orientation orientation, int pointDistance, int& currentPointDrawned)
 {
-	_terrainShape.setPoint(currentPointDrawned, initPoint(_terrainShape.getPoint(currentPointDrawned-1), drawDirection, orientation, pointDistance));
+	_terrainShape.setPoint(currentPointDrawned, initPoint(_terrainShape.getPoint(currentPointDrawned - 1), drawDirection, orientation, pointDistance));
 	currentPointDrawned++;
 }
 
+void PolygonTerrain::selectAndDrawRandomTerrain()
+{
+	//Pick random index between 1 and NUM_TERRAINS, that is different from the previous one
+	srand(static_cast<unsigned>(time(nullptr)));
+	int random;
+	do
+	{
+		random = rand() % NUM_TERRAINS + 1;
+	} while (random == _tempCurrentTerrain);
+
+	//Draw random terrain
+	switch (random)
+	{
+	case 1:
+		drawTerrain1(); _tempCurrentTerrain = 1;
+		break;
+	case 2:
+		drawTerrain2(); _tempCurrentTerrain = 2;
+		break;
+	case 3:
+		drawTerrain3(); _tempCurrentTerrain = 3;
+		break;
+	case 4:
+		drawTerrain4(); _tempCurrentTerrain = 4;
+		break;
+	default:
+		drawTerrain1(); _tempCurrentTerrain = 1;
+		break;
+	}
+}
