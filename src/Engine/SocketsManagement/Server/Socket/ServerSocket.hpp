@@ -4,6 +4,8 @@
 
 #include "../../../../Utils/EventEmitter.hpp"
 
+#include "../../SocketEvents.hpp"
+
 class Server;
 
 class ServerSocket
@@ -12,7 +14,7 @@ public:
 	ServerSocket(Server* server);
 	~ServerSocket();
 
-	[[nodiscard]] const EventEmitter& getEventEmitter() const;
+	//[[nodiscard]] const EventEmitter& getEventEmitter() const;
 	[[nodiscard]] const std::map<std::string, sf::TcpSocket*>& getClients() const;
 	
 private:
@@ -20,17 +22,21 @@ private:
 
 	sf::TcpListener _listener;
 
-	EventEmitter _eventEmitter;
-	void registerListeners();
+	void registerListeners(sf::TcpSocket* clientSocket);
 
 	sf::Mutex mutex;
 
 	sf::Thread _connectionsListenThread;
-	void connectionsListenEntry();
+
+    [[noreturn]] void connectionsListenEntry();
 
 	sf::Thread _listenEventsThread;
-	void listenEvents();
-	void propagateEvent(sf::TcpSocket& socket, sf::Packet& packet);
+
+    [[noreturn]] void listenEvents();
+
+	void emit(SocketEvents event, sf::TcpSocket& socket, sf::Packet data);
+
+	void emitToAll(SocketEvents event, sf::Packet& packet, sf::Packet data);
 
 	std::map<std::string, sf::TcpSocket*> _clients;
 	sf::SocketSelector _clientsSocketSelector;

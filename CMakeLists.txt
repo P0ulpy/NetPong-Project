@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.8)
 set(CMAKE_TOOLCHAIN_FILE ./vcpkg/scripts/buildsystems/vcpkg.cmake)
 
 project (NetPong-Project VERSION 0.1.0 DESCRIPTION "Net pong")
@@ -9,10 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(imgui CONFIG REQUIRED)
 find_package(ImGui-SFML CONFIG REQUIRED)
 find_package(SFML COMPONENTS system window graphics network audio CONFIG REQUIRED)
-
-# Cmake tests
-# include(CTest)
-# enable_testing()
+find_package(RapidJSON CONFIG REQUIRED)
 
 if(WIN32)
     add_compile_definitions(WINDOWS=1)
@@ -33,15 +30,16 @@ else()
 endif(${CMAKE_BUILD_TYPE} MATCHES Debug)
 
 file(GLOB_RECURSE src_files
-     "src/*.hpp"
-     "src/*.cpp"
-)
+        "src/*.hpp"
+        "src/*.cpp"
+        )
 add_executable (NetPong-Project ${src_files})
 
-target_link_libraries(NetPong-Project 
-    sfml-system sfml-window sfml-graphics sfml-audio sfml-network 
-    imgui::imgui 
-    ImGui-SFML::ImGui-SFML
-)
+target_link_libraries(NetPong-Project
+        sfml-system sfml-window sfml-graphics sfml-audio sfml-network
+        imgui::imgui
+        ImGui-SFML::ImGui-SFML
+        rapidjson
+    )
 
 file(COPY src/Assets DESTINATION /)

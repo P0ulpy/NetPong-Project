@@ -9,17 +9,18 @@
 #include <imgui-SFML.h>
 
 #include "Engine.hpp"
-#include "SocketsManagement/SocketsManager.hpp"
 
 // Scenes
 #include "Scenes/MainGameScene.hpp"
 #include "Scenes/SocketConnectionScene.hpp"
 
+#include "../Logger/Logger.hpp"
+
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
-	: _engineConfig(engineConfig),
-	_renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this)),
-	_logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this)),
-	_socketManager(SocketManager(*this))
+    : _engineConfig(engineConfig)
+	, _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this))
+	, _logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
+	, _socketManager(SocketManager(*this))
 {
 	/*
 	if (_instance != nullptr)
@@ -93,21 +94,20 @@ void PoPossibEngin::pollEvents()
 	}
 }
 
-
 #pragma region RenderThread
 
 void PoPossibEngin::renderThreadEntry()
 {
-	std::cout << "Render Thread Entry" << std::endl;
+	Logger::Log("Render Thread Entry");
 
 	renderThread_InitWindow();
 
-	std::cout << "Engine Initilized" << std::endl;
+	Logger::Log("Engine Initilized");
 	_engineState = INITIALIZED;
 
 	// TEMPORAIRE
-	loadScene(MainGame);
-	//loadScene(SocketConnection);
+	//loadScene(MainGame);
+	loadScene(SocketConnection);
 
 	renderThreadUpdate();
 }
@@ -127,9 +127,6 @@ void PoPossibEngin::renderThread_InitWindow()
 	else
 	{
 		_renderWindow->setVerticalSyncEnabled(true);
-
-		// DEBUG permet de déclancher le bug de collision
-		//_renderWindow->setFramerateLimit(300);
 	}
 
 	ImGui::SFML::Init(*_renderWindow);
@@ -174,7 +171,6 @@ void PoPossibEngin::renderThreadDebugInfo()
 	ImGui::Begin("PoPosibEngin Info");
 
 	_currFrameCount++;
-	// TEMP : utilisation de _deltaTime pour le fix du soucis de la valeur de la clock incorecte lors de l'appel de .restart()
 	_currFrameTimeCount += _deltaTime;
 
 	if (_currFrameTimeCount >= 1)
@@ -198,7 +194,7 @@ void PoPossibEngin::renderThreadDebugInfo()
 
 void PoPossibEngin::logicThreadEntry()
 {
-	std::cout << "Render Thread Entry" << std::endl;
+	Logger::Log("Render Thread Entry");
 
 	/*while (true)
 	{
