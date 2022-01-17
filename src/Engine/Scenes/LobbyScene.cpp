@@ -5,8 +5,8 @@
 #include "imgui.h"
 #include "../SocketsManagement/Server/Server.hpp"
 
-LobbyScene::LobbyScene(PoPossibEngin& poPossibEngin) :
-	Scene(poPossibEngin, SceneConfig())
+LobbyScene::LobbyScene(PoPossibEngin& poPossibEngin)
+	: Scene(poPossibEngin, SceneConfig())
 {
 
 }

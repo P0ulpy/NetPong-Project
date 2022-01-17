@@ -30,7 +30,8 @@ private:
 	void registerListeners();
 
 	sf::Thread _listenThread;
-	void listenEvents();
+
+    [[noreturn]] void listenEvents();
 
 	void onConnected(sf::Packet packet);
 };

@@ -3,8 +3,8 @@
 #include "Server/Server.hpp"
 #include "Client/ClientSocket.hpp"
 
-SocketManager::SocketManager(PoPossibEngin& engine) :
-	_engine(engine)
+SocketManager::SocketManager(PoPossibEngin& engine)
+    : _engine(engine)
 {
 	
 }

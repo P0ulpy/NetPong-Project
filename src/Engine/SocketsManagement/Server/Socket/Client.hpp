@@ -19,7 +19,7 @@ public:
 	unsigned int on(SocketEvents event_id, std::function<void()> cb)		{ add_listener(event_id, cb); }
 
 	template<typename LambdaType>
-	unsigned int on(SocketEvents event_id, LambdaType lambda)				{ add_listener(event_id, cb); }
+	unsigned int on(SocketEvents event_id, LambdaType cb)				{ add_listener(event_id, cb); }
 
 	[[nodiscard]] const sf::TcpSocket* getSocket() const					{ return _socket; }
 	[[nodiscard]] const std::string& getId() const							{ return _id; }

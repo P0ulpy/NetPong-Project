@@ -6,7 +6,8 @@
   "dependencies": [
     "freetype",
     "sfml",
-    "imgui-sfml"
+    "imgui-sfml",
+    "rapidjson"
   ],
   "overrides": [
     {

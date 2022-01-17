@@ -2,12 +2,30 @@
 #include "iostream"
 #include "math.h"
 #include <windows.h>
+#include "string"
 
-Character::Character(sf::RenderWindow& window)
+constexpr int SPEED = 250;
+
+Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color color)
 {
+	xChar = xSpawn;
+	xShie = xSpawn;
+	yChar = ySpawn;
+	yShie = ySpawn;
+	_currentSpeed = SPEED;
+	charac.setPosition(xChar, yChar);
+	shield.setPosition(xChar, yChar);
+	charac.setRadius(36);
+	shield.setSize(sf::Vector2f(70, 15));
+	charac.setFillColor(color);
+	shield.setFillColor(sf::Color::White);
 
-	initParamP1(window);
-	initParamP2(window);
+	sf::FloatRect characSize = charac.getGlobalBounds();
+	sf::FloatRect shieldSize = shield.getGlobalBounds();
+
+	charac.setOrigin((characSize.width / 2), (characSize.height / 2));
+	shield.setOrigin(shieldSize.width / 2, (shieldSize.height / 2) + (characSize.height / 2));
+
 	
 }
 
@@ -16,73 +34,54 @@ Character::~Character()
 
 }
 
-void Character::updateMouvement(sf::RenderTarget& target, sf::RenderWindow& window,  float clock)
+void Character::setMousePosition(sf::Vector2i mouse)
 {
-	setCharacterPosition(xChar, yChar);
-	setShieldPosition(xShie, yShie);
-	
-	setCharacterRotation(mousePosition(window));
-	setShieldRotation(mousePosition(window));
-
-
-
-	if (clock > 0 && clock < 1 && isActive == true)
-	{
-		shield.setFillColor(sf::Color::Green);
-	}
-	if (clock >= 1)
-	{
-		clock = 0;
-		shield.setFillColor(sf::Color::White);
-		isActive = false;
-	}
-	
-	
-	
+	mousePosition = mouse;
 }
 
-void Character::updateMouvementP2(sf::RenderTarget& target, sf::RenderWindow& window,float clock)
+
+void Character::update(const float& deltaTime)
 {
+	_velocity = sf::Vector2f(xChar, yChar);
+	moveEntity(_velocity, deltaTime);
+	_velocity = sf::Vector2f(xShie, yShie);
+	moveEntity(_velocity, deltaTime);
 
-	setCharacterPositionP2(xCharP2, yCharP2);
-	setShieldPositionP2(xShieP2, yShieP2);
 
-	setCharacterRotationP2(mousePosition(window));
-	setShieldRotationP2(mousePosition(window));
-
-	if (clock > 0 && clock < 1 && isActive == true)
-	{
-		shieldP2.setFillColor(sf::Color::Green);
-	}
-	if (clock >= 1)
-	{
-		clock = 0;
-		shieldP2.setFillColor(sf::Color::White);
-		isActive = false;
-	}
-	
-
+	setCharacterRotation(mousePosition);
+	setShieldRotation(mousePosition);
 
 }
 
-void Character::render(sf::RenderTarget& target)
+
+
+void Character::moveEntity(const sf::Vector2f& position, const float& deltaTime) 
+{
+	//std::cout << "Déplacement : " << position.y << std::endl;
+	charac.setPosition(position);
+	//characP2.move(velocity * _currentSpeed * deltaTime);
+	shield.setPosition(position);
+	//shieldP2.move(velocity * _currentSpeed * deltaTime);
+
+	
+}
+
+
+
+
+
+
+void Character::render(sf::RenderTarget& target)const
 {
 	target.draw(charac);
 	target.draw(shield);
-
-
-}
-
-void Character::renderP2(sf::RenderTarget& target)
-{
-
-	target.draw(characP2);
-	target.draw(shieldP2);
-
 }
 
 
-void Character::initParamP1(sf::RenderWindow& window) {
+
+
+
+void Character::initParam(sf::RenderWindow& window) {
 
 	charac.setRadius(36);
 	shield.setSize(sf::Vector2f(70,15));
@@ -98,44 +97,10 @@ void Character::initParamP1(sf::RenderWindow& window) {
 	
 }
 
-void Character::initParamP2(sf::RenderWindow& window) {
-
-	characP2.setRadius(36);
-	shieldP2.setSize(sf::Vector2f(70, 15));
-	characP2.setFillColor(sf::Color::Cyan);
-	shieldP2.setFillColor(sf::Color::White);
-
-	sf::FloatRect characSize2 = characP2.getGlobalBounds();
-	sf::FloatRect shieldSize2 = shieldP2.getGlobalBounds();
-
-	characP2.setOrigin((characSize2.width / 2), (characSize2.height / 2));
-	shieldP2.setOrigin(shieldSize2.width / 2 , (shieldSize2.height / 2) + (characSize2.height / 2));
-
-
-}
 
 
 
-void Character::setCharacterPosition( int x,int y)
-{
-	charac.setPosition(x, y);
-}
 
-void Character::setCharacterPositionP2(int x, int y)
-{
-	characP2.setPosition(x, y);
-}
-
-
-void Character::setShieldPosition( int x, int y)
-{
-	shield.setPosition(x, y);
-}
-
-void Character::setShieldPositionP2(int x, int y)
-{
-	shieldP2.setPosition(x, y);
-}
 
 void Character::setCharacterRotation(sf::Vector2i mousePos)
 {
@@ -147,15 +112,7 @@ void Character::setCharacterRotation(sf::Vector2i mousePos)
 	charac.setRotation(rotation);
 }
 
-void Character::setCharacterRotationP2(sf::Vector2i mousePos)
-{
-	sf::Vector2f curPos = characP2.getPosition();
-	float dx = curPos.x - mousePos.x;
-	float dy = curPos.y - mousePos.y;
 
-	float rotation = ((atan2(dy, dx)) * 180.0 / PI) - 90;
-	characP2.setRotation(rotation);
-}
 
 
 
@@ -169,25 +126,38 @@ void Character::setShieldRotation(sf::Vector2i mousePos)
 	shield.setRotation(rotation);
 }
 
-void Character::setShieldRotationP2(sf::Vector2i mousePos)
-{
-	sf::Vector2f curPos = characP2.getPosition();
-	float dx = curPos.x - mousePos.x;
-	float dy = curPos.y - mousePos.y;
-
-	float rotation = ((atan2(dy, dx)) * 180.0 / PI) - 90;
-	shieldP2.setRotation(rotation);
-}
 
 
-void Character::direction(bool isleft, bool isright, const sf::Rect<float>& terrain)
+
+void Character::direction(bool isleft, bool isright, bool up, bool down, const sf::Rect<float>& terrain, float deltaTime)
 {
 	leftFlag = isleft;
 	rightFlag = isright;
-	if (leftFlag) xChar -= SPEED;
-	if (rightFlag) xChar += SPEED;
-	if (leftFlag) xShie -= SPEED;
-	if (rightFlag) xShie += SPEED;
+	upFlag = up;
+	downFlag = down;
+	//std::cout << "Gauche : " << leftFlag << std::endl;
+	//std::cout << "Droite : " << rightFlag << std::endl;
+	//std::cout << "Haut : " << upFlag << std::endl;
+	//std::cout << "Bas : " << downFlag << std::endl;
+	//std::cout<<std::endl;
+
+	if (leftFlag) {
+		xChar -= (SPEED * deltaTime);
+		xShie -= (SPEED * deltaTime);
+	}
+	if (rightFlag) {
+		xChar = xChar + (SPEED * deltaTime);
+		xShie = xChar + (SPEED * deltaTime);
+	}
+	if (upFlag) {
+		yChar -= (SPEED * deltaTime);
+		yShie -= (SPEED * deltaTime);
+	}
+	if (downFlag) {
+		yChar += (SPEED * deltaTime);
+		yShie += (SPEED * deltaTime);
+	}
+
 
 	if (xChar > terrain.width - (charac.getGlobalBounds().width / 2 ))
 	{
@@ -201,37 +171,11 @@ void Character::direction(bool isleft, bool isright, const sf::Rect<float>& terr
 		xShie = xChar;
 	}
 
-}
 
-void Character::directionP2(bool isleft, bool isright, const sf::Rect<float>& terrain)
-{
-	leftFlagP2 = isleft;
-	rightFlagP2 = isright;
-	if (leftFlagP2) xCharP2 -= SPEED;
-	if (rightFlagP2) xCharP2 += SPEED;
-	if (leftFlagP2) xShieP2 -= SPEED;
-	if (rightFlagP2) xShieP2 += SPEED;
-
-
-	if (xCharP2 > terrain.width - (charac.getGlobalBounds().width / 2))
-	{
-		xCharP2 = terrain.width - (charac.getGlobalBounds().width / 2);
-		xShieP2 = xCharP2;
-	}
-
-	if (xCharP2 < terrain.left + (charac.getGlobalBounds().width / 2))
-	{
-		xCharP2 = terrain.left + (charac.getGlobalBounds().width / 2);
-		xShieP2 = xCharP2;
-	}
 
 }
 
-sf::Vector2i Character::mousePosition(sf::RenderWindow& window) 
-{
-	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-	return mousePos;
-}
+
 
 void Character::verifActiveShield(bool clic)
 {
