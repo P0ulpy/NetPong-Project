@@ -29,17 +29,14 @@ private:
 
 	//Game objects
 	std::vector<PongBall*> _pongBalls;
-	std::unique_ptr<Character> _character;
+	std::unique_ptr<Character> _character1;
+	std::unique_ptr<Character> _character2;
 	
-	bool activeShieldAutorize = true;
-	float delay = 2.f;
-
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
 
 	//Font and texts
 	sf::Font _font;
-	//sf::Clock clock;
-	float clock = 0;
+	
 
 	void initValues();
 	void initFonts();
