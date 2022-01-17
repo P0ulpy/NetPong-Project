@@ -1,10 +1,10 @@
 #include "Server.hpp"
 
-Server::Server(const HostSettings& hostSettings, PoPossibEngin* engine) :
-	_hostSettings(hostSettings),
-	_serverSocket(ServerSocket(this)),
-	_engine(engine),
-	_serverThread(sf::Thread(&Server::threadEntry, this))
+Server::Server(const HostSettings& hostSettings, PoPossibEngin* engine)
+    : _hostSettings(hostSettings)
+	, _serverSocket(ServerSocket(this))
+	, _engine(engine)
+	, _serverThread(sf::Thread(&Server::threadEntry, this))
 {
 
 }

@@ -1,11 +1,9 @@
 ﻿#include "Engine/Engine.hpp"
-#include "Utils/EventEmitter.hpp"
-
-EventEmitter eventEmitter;
+#include "Logger/Logger.hpp"
 
 int main(int argc, char** argv)
 {
-    PoPossibEngin engine = PoPossibEngin(
+    PoPossibEngin engine(
         EngineConfig(
             EngineConfig::WindowConfig(
                 sf::VideoMode(1200, 900),

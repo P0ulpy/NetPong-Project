@@ -19,6 +19,8 @@ public:
 	[[nodiscard]] const EventEmitter& getEventEmitter() const;
 
 private:
+	std::string _id = "undefined";
+
 	ClientConnectionSettings _clientConnectionSettings;
 	PoPossibEngin* _engine = nullptr;
 
@@ -28,7 +30,8 @@ private:
 	void registerListeners();
 
 	sf::Thread _listenThread;
-	void listenEvents();
+
+    [[noreturn]] void listenEvents();
 
 	void onConnected(sf::Packet packet);
 };

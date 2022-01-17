@@ -4,6 +4,7 @@
 
 #include "../Server.hpp"
 #include "../../SocketEvents.hpp"
+#include "../../../../Logger/Logger.hpp"
 
 ServerSocket::ServerSocket(Server* server) :
 	_server(server),
@@ -14,11 +15,11 @@ ServerSocket::ServerSocket(Server* server) :
 
 	if(_listener.listen(hostSettings.port) != sf::Socket::Done)
 	{
-		std::cout << "Error during server listner port binding" << std::endl;
+		Logger::Log("Error during server listner port binding");
 		return;
 	}
 
-	std::cout << "Server listening on " << hostSettings.port << std::endl;
+	Logger::Log(std::string("Server listening on ") + std::to_string(hostSettings.port));
 
 	_connectionsListenThread.launch();
 	_listenEventsThread.launch();
@@ -35,11 +36,11 @@ ServerSocket::~ServerSocket()
 	}
 }
 
-const EventEmitter& ServerSocket::getEventEmitter() const { return _eventEmitter; }
+//const EventEmitter& ServerSocket::getEventEmitter() const { return _eventEmitter; }
 
 const std::map<std::string, sf::TcpSocket*>& ServerSocket::getClients() const { return _clients; }
 
-void ServerSocket::connectionsListenEntry()
+[[noreturn]] void ServerSocket::connectionsListenEntry()
 {
 	while(true)
 	{
@@ -47,18 +48,18 @@ void ServerSocket::connectionsListenEntry()
 
 		if (_listener.accept(*newClient) != sf::Socket::Done)
 		{
-			std::cout << "Erreur lors de l'acceptation du client" << std::endl;
+			Logger::Log("Erreur lors de l'acceptation du client");
 			continue;
 		}
 
-		std::cout << "Connection d'un nouveau client\nip : " << newClient->getRemoteAddress() << std::endl;
+		Logger::Log(std::string("Connection d'un nouveau client\nip : ") + newClient->getRemoteAddress().toString());
 
-		// TODO : génération d'UUID
+		// TODO : gÃ©nÃ©ration d'UUID
 		// temp
 
 		std::string UUID = "michel ";
 		UUID += std::to_string(_clients.size());
-		std::cout << _clients.size() << std::endl;
+        Logger::Log(UUID);
 
 		mutex.lock();
 		_clients[UUID] = newClient;
@@ -68,7 +69,7 @@ void ServerSocket::connectionsListenEntry()
 	}
 }
 
-void ServerSocket::listenEvents()
+[[noreturn]] void ServerSocket::listenEvents()
 {
 	while (true)
 	{
@@ -77,7 +78,7 @@ void ServerSocket::listenEvents()
 			)
 		)
 		{
-			for (auto socketClientPair : _clients)
+			for (const auto& socketClientPair : _clients)
 			{
 				std::string id = socketClientPair.first;
 				sf::TcpSocket* socket = socketClientPair.second;
@@ -91,15 +92,21 @@ void ServerSocket::listenEvents()
 					{
 					case sf::Socket::Done:
 						{
+							//TESTS
+
 							SocketEvents event;
 							std::string data;
 
 							packet >> (int&)event;
 							packet >> data;
 
-							std::cout << "data recieved :" << std::endl;
-							std::cout << event << std::endl;
-							std::cout << data << std::endl;
+							std::cout
+                                    << "data recieved :"
+                                    << event
+							        << data
+                                    << std::endl;
+
+							//TESTS
 						}
 					break;
 
@@ -109,11 +116,9 @@ void ServerSocket::listenEvents()
 						break;
 					case sf::Socket::Disconnected:
 						_clientsSocketSelector.remove(*socket);
-						_eventEmitter.emit(SocketEvents::Disconnected);
 						break;
 					case sf::Socket::Error:
 						_clientsSocketSelector.remove(*socket);
-						_eventEmitter.emit(SocketEvents::Disconnected);
 						break;
 					default:
 						break;
@@ -123,9 +128,10 @@ void ServerSocket::listenEvents()
 		}
 	}
 }
-
-void ServerSocket::propagateEvent(sf::TcpSocket& socket, sf::Packet& packet)
+void ServerSocket::emit(SocketEvents event, sf::TcpSocket& socket, sf::Packet data)
 {
+
+
 	/*sf::Packet packet;
 	if (socket.receive(packet) != sf::Socket::Done)
 	{
@@ -143,20 +149,18 @@ void ServerSocket::propagateEvent(sf::TcpSocket& socket, sf::Packet& packet)
 	}*/
 }
 
-void ServerSocket::registerListeners()
+void ServerSocket::registerListeners(sf::TcpSocket* clientSocket)
 {
 	
 }
 
 void ServerSocket::onClientConnection(sf::TcpSocket* clientSocket)
 {
-	std::cout << "Client connecte !" << std::endl;
-
-	//clientSocket->setBlocking(false);
+	Logger::Log("Client connecte !");
 
 	// TESTS
 
-	sf::Packet hello;
+	/*sf::Packet hello;
 	hello << SocketEvents::Connected;
 	hello << "Hello World";
 
@@ -165,7 +169,7 @@ void ServerSocket::onClientConnection(sf::TcpSocket* clientSocket)
 		std::cout << "Error during hello" << std::endl;
 	}
 
-	/*sf::Packet packet;
+	sf::Packet packet;
 	if (clientSocket->receive(packet) != sf::Socket::Done)
 	{
 		std::cout << "Error during packet reception" << std::endl;

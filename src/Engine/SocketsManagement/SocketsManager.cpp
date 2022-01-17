@@ -3,8 +3,8 @@
 #include "Server/Server.hpp"
 #include "Client/ClientSocket.hpp"
 
-SocketManager::SocketManager(PoPossibEngin& engine) :
-	_engine(engine)
+SocketManager::SocketManager(PoPossibEngin& engine)
+    : _engine(engine)
 {
 	
 }
@@ -35,3 +35,5 @@ Server* SocketManager::getServerInstance() const
 {
 	return _serverInstance;
 }
+const bool SocketManager::isHost() const { return (_serverInstance); }
+const bool SocketManager::isClient() const { return (_socketClient); }
