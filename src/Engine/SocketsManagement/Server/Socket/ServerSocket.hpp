@@ -27,10 +27,12 @@ private:
 	sf::Mutex mutex;
 
 	sf::Thread _connectionsListenThread;
-	void connectionsListenEntry();
+
+    [[noreturn]] void connectionsListenEntry();
 
 	sf::Thread _listenEventsThread;
-	void listenEvents();
+
+    [[noreturn]] void listenEvents();
 
 	void emit(SocketEvents event, sf::TcpSocket& socket, sf::Packet data);
 

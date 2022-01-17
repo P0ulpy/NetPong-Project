@@ -14,6 +14,8 @@
 #include "Scenes/MainGameScene.hpp"
 #include "Scenes/SocketConnectionScene.hpp"
 
+#include "../Logger/Logger.hpp"
+
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
     : _engineConfig(engineConfig)
 	, _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this))
@@ -88,16 +90,16 @@ void PoPossibEngin::pollEvents()
 
 void PoPossibEngin::renderThreadEntry()
 {
-	std::cout << "Render Thread Entry" << std::endl;
+	Logger::Log("Render Thread Entry");
 
 	renderThread_InitWindow();
 
-	std::cout << "Engine Initilized" << std::endl;
+	Logger::Log("Engine Initilized");
 	_engineState = INITIALIZED;
 
 	// TEMPORAIRE
 	//loadScene(MainGame);
-	loadScene(MainGame);
+	loadScene(SocketConnection);
 
 	renderThreadUpdate();
 }
@@ -184,7 +186,7 @@ void PoPossibEngin::renderThreadDebugInfo()
 
 void PoPossibEngin::logicThreadEntry()
 {
-	std::cout << "Render Thread Entry" << std::endl;
+	Logger::Log("Render Thread Entry");
 
 	/*while (true)
 	{

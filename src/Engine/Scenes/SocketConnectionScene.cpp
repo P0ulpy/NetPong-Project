@@ -3,8 +3,8 @@
 #include "imgui.h"
 #include "../SocketsManagement/Server/Server.hpp"
 
-SocketConnectionScene::SocketConnectionScene(PoPossibEngin& poPossibEngin) :
-	Scene(poPossibEngin, SceneConfig())
+SocketConnectionScene::SocketConnectionScene(PoPossibEngin& poPossibEngin)
+	: Scene(poPossibEngin, SceneConfig())
 {
 
 }

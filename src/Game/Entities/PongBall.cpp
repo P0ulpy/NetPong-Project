@@ -4,6 +4,7 @@
 
 #include "PhantomBall.hpp"
 #include "../Terrains/PolygonTerrain.hpp"
+#include "../../Logger/Logger.hpp"
 
 
 //--- Constructors - Destructor ---
@@ -88,7 +89,7 @@ void PongBall::updateCollision(const float& deltaTime)
 {
 	if(!_ballShape.getGlobalBounds().intersects(sf::Rect<float>(0,0,1200,900)))
 	{
-		std::cout << "Out of window !" << std::endl;
+		Logger::Log("Out of window !");
 		_ballShape.setPosition(_initialPosition);
 	}
 
@@ -309,7 +310,7 @@ void PongBall::displayPhantomBall()
 
 	if(!isPhantomBallDisplayed)
 	{
-		std::cout << "ERROR PongBall.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! " << std::endl;
+		Logger::Log("ERROR PongBall.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
 	}
 }
 
@@ -359,7 +360,7 @@ bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float
 	if (lineLineCollision(x1, y1, x2, y2, cx + ballEdgeCollTestStartX, cy + ballEdgeCollTestStartY,
 		_ballDestination->getPosition().x, _ballDestination->getPosition().y, outIntersectionPoint))
 	{
-		std::cout << "Traverse !! " << std::endl;
+		Logger::Log("Traverse !! ");
 		outImpactPoint = outIntersectionPoint;
 		return true;
 	}
@@ -367,7 +368,7 @@ bool PongBall::lineCircleCollision(float x1, float y1, float x2, float y2, float
 	if (lineLineCollision(x1, y1, x2, y2, _oldPosition.x + ballEdgeCollTestStartX, _oldPosition.y + ballEdgeCollTestStartY,
 		_ballShape.getPosition().x + ballEdgeCollTestStartX, _ballShape.getPosition().y + ballEdgeCollTestStartY, outIntersectionPoint))
 	{
-		std::cout << "Traverse old position !! " << std::endl;
+		Logger::Log("Traverse old position !! ");
 		outImpactPoint = outIntersectionPoint;
 		return true;
 	}
