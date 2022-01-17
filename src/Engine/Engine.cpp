@@ -83,7 +83,6 @@ SocketManager& PoPossibEngin::getSocketManager() { return _socketManager; }
 
 #pragma endregion GET/SET
 
-
 void PoPossibEngin::pollEvents()
 {
 	_inputManager.updateEvents(*_renderWindow);
@@ -136,7 +135,8 @@ void PoPossibEngin::renderThreadUpdate()
 {
 	if(_renderWindow == nullptr)
 	{
-		throw std::exception("_renderWindow not initialized");
+        Logger::Err("_renderWindow not initialized");
+        throw std::exception("_renderWindow not initialized");
 	}
 
 	while (_renderWindow->isOpen())
@@ -194,7 +194,7 @@ void PoPossibEngin::renderThreadDebugInfo()
 
 void PoPossibEngin::logicThreadEntry()
 {
-	Logger::Log("Render Thread Entry");
+	Logger::Log("Logic Thread Entry");
 
 	/*while (true)
 	{

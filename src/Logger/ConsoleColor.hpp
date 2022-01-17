@@ -56,8 +56,8 @@ namespace ConsoleColor
     };
 
     template <class _Elem, class _Traits>
-    std::basic_ostream<_Elem,_Traits>&
-    operator<<(std::basic_ostream<_Elem,_Traits>& i, color& c)
+    std::basic_ostream<_Elem, _Traits>&
+    operator<<(std::basic_ostream<_Elem, _Traits>& i, color& c)
     {
         HANDLE hStdout=GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(hStdout,c.m_color);

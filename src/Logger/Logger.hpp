@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <mutex>
 
 enum LogType {
     LOG_INFO,
@@ -24,7 +25,10 @@ class Logger {
 public:
     static std::vector<LogEntry> messages;
     static void Log(const std::string& message);
+    static void Warn(const std::string& message);
     static void Err(const std::string& message);
+private:
+    static std::mutex _mutex;
 };
 
 #define NETPONG_PROJECT_LOGGER_HPP
