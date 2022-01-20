@@ -68,4 +68,10 @@ private:
 	void drawTerrain2();
 	void drawTerrain3();
 	void drawTerrain4();
+	void drawTerrain5();
+	void drawTerrain6();
+	void drawTerrain7();
+	void drawTerrain8();
+	void drawTerrain9();
+	void drawTerrain10();
 };
