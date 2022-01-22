@@ -29,6 +29,7 @@ ClientSocket::ClientSocket(const ClientConnectionSettings& clientConnectionSetti
 
 ClientSocket::~ClientSocket()
 {
+    _eventEmitter.emit(Disconnected);
 	_listenThread.terminate();
 }
 
@@ -88,19 +89,13 @@ void ClientSocket::onConnected(sf::Packet packet)
 	std::string message;
 	packet >> message;
 
-	Logger::Log(
-        "OnConnected : "
-        + message
-    );
+	Logger::Log("OnConnected : " + message);
 
 	sf::Packet sendPacket;
 
 	if (_socket.send(packet) != sf::Socket::Done)
 	{
-		Logger::Err(
-            "Error while sending data : "
-            + message
-        );
+		Logger::Err("Error while sending data : " + message);
 	}
 
 	// TESTS

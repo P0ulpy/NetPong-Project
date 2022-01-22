@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "../Server.hpp"
-#include "../../SocketEvents.hpp"
 #include "../../../../Logger/Logger.hpp"
 
 ServerSocket::ServerSocket(Server* server) :
@@ -11,15 +10,15 @@ ServerSocket::ServerSocket(Server* server) :
 	_connectionsListenThread(sf::Thread(&ServerSocket::connectionsListenEntry, this)),
 	_listenEventsThread(sf::Thread(&ServerSocket::listenEvents, this))
 {
-	const HostSettings& hostSettings = server->getHostSettings();
+    const HostSettings& hostSettings = server->getHostSettings();
 
-	if(_listener.listen(hostSettings.port) != sf::Socket::Done)
+    if(_listener.listen(hostSettings.port) != sf::Socket::Done)
 	{
-		Logger::Log("Error during server listner port binding");
-		return;
-	}
+        Logger::Log("Error during server listner port binding");
+        return;
+    }
 
-	Logger::Log(std::string("Server listening on ") + std::to_string(hostSettings.port));
+	Logger::Log("Server listening on " + std::to_string(hostSettings.port));
 
 	_connectionsListenThread.launch();
 	_listenEventsThread.launch();
@@ -52,7 +51,7 @@ const std::map<std::string, sf::TcpSocket*>& ServerSocket::getClients() const { 
 			continue;
 		}
 
-		Logger::Log(std::string("Connection d'un nouveau client\nip : ") + newClient->getRemoteAddress().toString());
+		Logger::Log(std::string("Connection d'un nouveau client | ip : ") + newClient->getRemoteAddress().toString());
 
 		// TODO : génération d'UUID
 		// temp
@@ -73,10 +72,7 @@ const std::map<std::string, sf::TcpSocket*>& ServerSocket::getClients() const { 
 {
 	while (true)
 	{
-		if (_clientsSocketSelector.wait(
-				sf::milliseconds(_server->getHostSettings().socketConnectionTimeout)
-			)
-		)
+		if (_clientsSocketSelector.wait(sf::milliseconds(_server->getHostSettings().socketConnectionTimeout)))
 		{
 			for (const auto& socketClientPair : _clients)
 			{
@@ -108,13 +104,13 @@ const std::map<std::string, sf::TcpSocket*>& ServerSocket::getClients() const { 
 
 							//TESTS
 						}
-					break;
-
+                        break;
 					case sf::Socket::NotReady:
 						break;
 					case sf::Socket::Partial:
 						break;
 					case sf::Socket::Disconnected:
+                        Logger::Log("Client disconnected | id: " + id);
 						_clientsSocketSelector.remove(*socket);
 						break;
 					case sf::Socket::Error:
@@ -126,6 +122,10 @@ const std::map<std::string, sf::TcpSocket*>& ServerSocket::getClients() const { 
 				}
 			}
 		}
+        else
+        {
+
+        }
 	}
 }
 void ServerSocket::emit(SocketEvents event, sf::TcpSocket& socket, sf::Packet data)
