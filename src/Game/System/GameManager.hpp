@@ -13,8 +13,8 @@ class GameManager
 private	:
 	MainGameScene* _mainGameScene;
 
-	int _tempScorePlayer1;
-	int _tempScorePlayer2;
+	int _scorePlayer1;
+	int _scorePlayer2;
 	bool _isRoundEnded;
 
 	int _currentRound;
@@ -36,11 +36,12 @@ public:
 
 	void player1WinsRound();
 	void player2WinsRound();
+	void playerDrawRound();
 
 	void player1WinsGame();
 	void player2WinsGame();
 
-	void startRoundStartCountdown();
+	void startRoundStartCountdown() const;
 	void endRound();
 	void startRoundEndTimer();
 	void restartRound(const float& deltaTime);

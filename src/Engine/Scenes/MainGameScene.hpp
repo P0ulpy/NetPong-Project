@@ -29,8 +29,7 @@ private:
 
 	//Game objects
 	std::vector<PongBall*> _pongBalls;
-	std::unique_ptr<Character> _character1;
-	std::unique_ptr<Character> _character2;
+	std::vector<Character*> _players;
 	
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
 

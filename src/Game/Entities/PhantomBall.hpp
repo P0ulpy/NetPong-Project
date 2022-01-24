@@ -18,6 +18,7 @@ public:
 	void show();
 	void hide();
 
+	void setFillColor(const sf::Color& newColor);
 	bool isDisplayed() const;
 
 private:

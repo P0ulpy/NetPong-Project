@@ -2,18 +2,15 @@
 
 #include <iostream>
 
-#include "PhantomBall.hpp"
 #include "../../Utils/Utils.hpp"
 #include "../Terrains/PolygonTerrain.hpp"
 #include "../../Logger/Logger.hpp"
+#include "../Effects/PhantomBallEffect.hpp"
 
 constexpr int BALL_SIZE = 20;
 
 constexpr int MAX_NUM_BOUNCES = 2;
 constexpr float BOOST_DURATION = 2.f;
-
-constexpr int MAX_PHANTOM_BALLS = 20;
-constexpr float DURATION_BETWEEN_PHANTOM_BALLS = .025f;
 
 constexpr float INITIAL_SPEED = 220.f;
 
@@ -25,6 +22,8 @@ PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrai
 	initShapes(window);
 	initBoost();
 	initPhantomEffect();
+
+	setActive(true);
 }
 
 PongBall::~PongBall()
@@ -35,18 +34,14 @@ PongBall::~PongBall()
 //--- Initializers ---
 void PongBall::initVariables()
 {
-	setActive(true);
-
 	_velocity = Utils::normalize(sf::Vector2f(1.f, 1.5f));
 	_initialSpeed = INITIAL_SPEED;
 	_currentSpeed = _initialSpeed;
 	_maxSpeed = 10000.f;
 
-	_texture = std::make_unique<sf::Texture>();
-	_sprite = std::make_unique<sf::Sprite>();
-
 	_ballSize = BALL_SIZE;
 	_ballColor = sf::Color(65, 90, 255, 255);
+	_ballInactiveColor = sf::Color(200, 200, 200, 255);
 
 	_speedMultiplierBonus = 1.f;
 }
@@ -79,9 +74,8 @@ void PongBall::initBoost()
 
 void PongBall::initPhantomEffect()
 {
-	createPhantomBalls();
-
-	startPhantomBallEffect();
+	_phantomBallEffect = std::make_unique<PhantomBallEffect>(*this);
+	_phantomBallEffect->begin();
 }
 
 //--- Updating ---
@@ -129,24 +123,7 @@ void PongBall::updateBoost(const float& deltaTime)
 
 void PongBall::updatePhantomEffect(const float& deltaTime)
 {
-	if(_hasPhantomEffect)
-	{
-		_currentTimePhantomBallCooldown += deltaTime;
-
-		if (_currentTimePhantomBallCooldown > DURATION_BETWEEN_PHANTOM_BALLS)
-		{
-			displayPhantomBall();
-			_currentTimePhantomBallCooldown = 0;
-		}
-	}
-
-	for (const auto& phantomBall : _phantomBalls)
-	{
-		if (phantomBall->isDisplayed())
-		{
-			phantomBall->update(deltaTime);
-		}
-	}
+	_phantomBallEffect->update(deltaTime);
 }
 
 //--- Rendering ---
@@ -163,25 +140,7 @@ void PongBall::render(sf::RenderTarget& target) const
 
 void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
 {
-	for (const auto& phantomBall : _phantomBalls)
-	{
-		if (phantomBall->isDisplayed())
-		{
-			phantomBall->render(target);
-		}
-	}
-}
-
-void PongBall::updateAndRenderPhantomEffect(sf::RenderTarget& target, const float& deltaTime)
-{
-	for (const auto& phantomBall : _phantomBalls)
-	{
-		if (phantomBall->isDisplayed())
-		{
-			phantomBall->update(deltaTime);
-			phantomBall->render(target);
-		}
-	}
+	_phantomBallEffect->render(target);
 }
 
 bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2)
@@ -195,9 +154,13 @@ bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2)
 		const sf::Vector2f surfaceVector = Utils::normalize(sf::Vector2f(x2 - x1, y2 - y1));
 		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
 
+		float remainingTime = Utils::getDistance(_ballShape.getPosition(), outImpactPoint) / Utils::getDistance(_ballShape.getPosition(), _ballDestination->getPosition());
 		const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
-		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius(),
-			outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius());
+
+		remainingTime = std::min(1.f, remainingTime);
+
+		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius() + _velocity.x * remainingTime,
+			outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius() + _velocity.y * remainingTime);
 
 		addNumBounceAndUpdateVisibility();
 
@@ -205,6 +168,14 @@ bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2)
 	}
 
 	return false;
+}
+
+void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity)
+{
+	_ballShape.setPosition(position);
+	_velocity = normVelocity;
+
+	setActive(true);
 }
 
 void PongBall::resetBallDestAndOldPos(const float& deltaTime)
@@ -225,15 +196,6 @@ void PongBall::setSpeedMultiplierBonus(float pSpeedMultiplierBonus)
 	}
 }
 
-void PongBall::addSpeedMultiplierBonus(float pSpeedMultiplierBonus)
-{
-	if ((_speedMultiplierBonus + pSpeedMultiplierBonus) * _currentSpeed < _maxSpeed)
-	{
-		_speedMultiplierBonus += pSpeedMultiplierBonus;
-		setSpeed(_initialSpeed * _speedMultiplierBonus);
-	}
-}
-
 void PongBall::resetSpeedMultiplierBonus()
 {
 	_speedMultiplierBonus = 1;
@@ -248,11 +210,12 @@ void PongBall::setActive(bool isActive)
 	if(_isActive)
 	{
 		_currentNumBounces = 0;
-		startPhantomBallEffect();
+		setCanKill(false);
+		_phantomBallEffect->begin();
 	}
 	else
 	{
-		stopPhantomBallEffect();
+		_phantomBallEffect->stop();
 		resetSpeedMultiplierBonus();
 	}
 }
@@ -262,16 +225,39 @@ bool PongBall::isActive() const
 	return _isActive;
 }
 
+void PongBall::setCanKill(bool canKill)
+{
+	_canKill = canKill;
+
+	if(_canKill)
+	{
+		_ballShape.setFillColor(_ballColor);
+
+		_phantomBallEffect->setPhantomBallFillColour(_ballColor);
+	}
+	else
+	{
+		_ballShape.setFillColor(_ballInactiveColor);
+
+		_phantomBallEffect->setPhantomBallFillColour(_ballInactiveColor);
+	}
+}
+
+bool PongBall::canKill() const
+{
+	return _canKill;
+}
+
 void PongBall::addNumBounceAndUpdateVisibility()
 {
 	_currentNumBounces++;
-
+	setCanKill(true);//Once the ball had bounced the ball can kill the player
+	
 	if(_currentNumBounces > MAX_NUM_BOUNCES)
 	{
 		setActive(false);
 	}
 }
-
 
 void PongBall::setSpeed(float pSpeed)
 {
@@ -303,46 +289,6 @@ void PongBall::startBoostBall(float speedBoostBonus)
 
 	_speedMultiplierBonus = speedBoostBonus;
 	setSpeedMultiplierBonus(_speedMultiplierBonus);
-}
-
-//--- Phantom balls effect ---
-void PongBall::createPhantomBalls()
-{
-	for (int i = 0; i < MAX_PHANTOM_BALLS; i++)
-	{
-		_phantomBalls.push_back(std::make_unique<PhantomBall>(*this));
-	}
-}
-
-void PongBall::displayPhantomBall()
-{
-	bool isPhantomBallDisplayed = false;
-	//Recherche de la premiere PhantomBall qui n'est pas affich�e dans la liste
-	for (const auto& phantomBall : _phantomBalls)
-	{
-		if (!phantomBall->isDisplayed())
-		{
-			phantomBall->show();
-			isPhantomBallDisplayed = true;
-			break;
-		}
-	}
-
-	if(!isPhantomBallDisplayed)
-	{
-		Logger::Log("ERROR PongBall.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
-	}
-}
-
-void PongBall::startPhantomBallEffect()
-{
-	_hasPhantomEffect = true;
-	_currentTimePhantomBallCooldown = 0;
-}
-
-void PongBall::stopPhantomBallEffect()
-{
-	_hasPhantomEffect = false;
 }
 
 // LINE/CIRCLE

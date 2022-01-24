@@ -62,6 +62,11 @@ void PhantomBall::hide()
 	_isDisplayed = false;
 }
 
+void PhantomBall::setFillColor(const sf::Color& newColor)
+{
+	_currentFillColor = newColor;
+}
+
 void PhantomBall::show()
 {
 	setAndUpdateShapeAlpha(INITIAL_ALPHA);

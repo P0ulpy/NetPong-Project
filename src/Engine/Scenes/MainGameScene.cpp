@@ -84,52 +84,52 @@ void MainGameScene::updateInputs(const float& deltaTime)
 	// Joueur 1
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
-		_character1->direction(true, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[0]->direction(true, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 	
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
-		_character1->direction(false, true, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[0]->direction(false, true, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 	
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 	{
-		_character1->direction(false, false, true, false, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[0]->direction(false, false, true, false, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 	
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	{
-		_character1->direction(false, false, false, true, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[0]->direction(false, false, false, true, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 	else
 	{
-		_character1->direction(false, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[0]->direction(false, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 
 
 	// Joueur 2
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 	{
-		_character2->direction(true, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[1]->direction(true, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
-		_character2->direction(false, true, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[1]->direction(false, true, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
 	{
-		_character2->direction(false, false, true, false, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[1]->direction(false, false, true, false, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
-		_character2->direction(false, false, false, true, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[1]->direction(false, false, false, true, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 	else
 	{
-		_character2->direction(false, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
+		_players[1]->direction(false, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
 	}
 
 
@@ -137,15 +137,15 @@ void MainGameScene::updateInputs(const float& deltaTime)
 
 void MainGameScene::initValues()
 {
-	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls);
+	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls, _players);
 
 	for (int i = 0 ; i < NUM_MAX_PONGBALL ; i++)
 	{
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain));
 	}
 
-	_character1 = std::make_unique<Character>(_poPossibEngin->getRenderWindow(),450,200,sf::Color::Red);
-	_character2 = std::make_unique<Character>(_poPossibEngin->getRenderWindow(),450,700,sf::Color::Blue);
+	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 200, sf::Color::Red));
+	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 700, sf::Color::Blue));
 
 	_gameManager = std::make_shared<GameManager>(this);
 }
@@ -172,19 +172,16 @@ void MainGameScene::update(const float& deltaTime)
 		pongBall->update(deltaTime);
 	}
 
-	_character1->setMousePosition(_poPossibEngin->getMousePosition());
-	_character2->setMousePosition(_poPossibEngin->getMousePosition());
-
-	_character1->update(deltaTime);
-	_character2->update(deltaTime);
-
-
+	for (const auto player : _players)
+	{
+		player->setMousePosition(_poPossibEngin->getMousePosition());
+		player->update(deltaTime);
+	}
 }
 
 void MainGameScene::render(sf::RenderTarget* target)
 {
 	_gameManager->render(*target);
-
 	_polygonTerrain->render(*target);
 
 	for (const auto pongBall : _pongBalls)
@@ -192,8 +189,10 @@ void MainGameScene::render(sf::RenderTarget* target)
 		pongBall->render(*target);
 	}
 
-	_character1->render(*target);
-	_character2->render(*target);
+	for (const auto player : _players)
+	{
+		player->render(*target);
+	}
 }
 
 PolygonTerrain* MainGameScene::getPolygonTerrain() const

@@ -21,6 +21,11 @@ void RoundStartCountdown::initValues()
 	stopBeginCountdown();
 }
 
+void RoundStartCountdown::displayNextMessage() const
+{
+	std::cout << _countDownMessages.at(_currentCountdownMessageIndex).data() << std::endl;
+}
+
 void RoundStartCountdown::update(const float& deltaTime)
 {
 	if (_isStartCountdownActive)
@@ -37,7 +42,7 @@ void RoundStartCountdown::update(const float& deltaTime)
 			}
 			else
 			{
-				std::cout << _countDownMessages.at(_currentCountdownMessageIndex).data() << std::endl;
+				displayNextMessage();
 			}
 		}
 	}

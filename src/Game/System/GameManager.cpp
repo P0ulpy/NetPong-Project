@@ -62,34 +62,25 @@ void GameManager::render(sf::RenderTarget& target) const
 
 void GameManager::player1WinsRound()
 {
-	//Incrémenter le score
-	//std::cout << _player1.getName() << " wins ! " << std::endl;
-	_tempScorePlayer1++;
-	if(_tempScorePlayer1 >= NUM_ROUNDS_TO_WIN)
+	_scorePlayer1++;
+	if(_scorePlayer1 >= NUM_ROUNDS_TO_WIN)
 	{
-		std::cout << "Player 1 won the game !!\n\nRestarting game\n";
-		std::cout << "Score player 1 : " << _tempScorePlayer1 << " | Score player 2 : " << _tempScorePlayer2 << std::endl;
-		resetGame();
+		player1WinsGame();
 	}
 	else
 	{
 		std::cout << "Player 1 won the round !!\n\n";
 	}
+
 	endRound();
 }
 
 void GameManager::player2WinsRound()
 {
-	//Incrémenter le score
-	//std::cout << _player2.getName() << " wins ! " << std::endl;
-	_tempScorePlayer2++;
-	if (_tempScorePlayer2 >= NUM_ROUNDS_TO_WIN)
+	_scorePlayer2++;
+	if (_scorePlayer2 >= NUM_ROUNDS_TO_WIN)
 	{
-		std::cout << "Player 2 won the game !!\n\nRestarting game\n";
-
-		std::cout << "Score player 1 : " << _tempScorePlayer1 << " | Score player 2 : " << _tempScorePlayer2 << std::endl;
-
-		resetGame();
+		player2WinsGame();
 	}
 	else
 	{
@@ -99,7 +90,27 @@ void GameManager::player2WinsRound()
 	endRound();
 }
 
-void GameManager::startRoundStartCountdown()
+void GameManager::playerDrawRound()
+{
+	std::cout << "No one wins !\n";
+	endRound();
+}
+
+void GameManager::player1WinsGame()
+{
+	std::cout << "Player 1 won the game !!\n\nRestarting game\n";
+	std::cout << "Score player 1 : " << _scorePlayer1 << " | Score player 2 : " << _scorePlayer2 << std::endl;
+	resetGame();
+}
+
+void GameManager::player2WinsGame()
+{
+	std::cout << "Player 2 won the game !!\n\nRestarting game\n";
+	std::cout << "Score player 1 : " << _scorePlayer1 << " | Score player 2 : " << _scorePlayer2 << std::endl;
+	resetGame();
+}
+
+void GameManager::startRoundStartCountdown() const
 {
 	_roundStartCountdown->startBeginCountdown();
 }
@@ -127,8 +138,6 @@ void GameManager::restartRound(const float& deltaTime)
 void GameManager::resetGame()
 {
 	_currentRound = 0;
-	_tempScorePlayer1 = _tempScorePlayer2 = 0;
-	//_player1.setScore(0);
-	//_player2.setScore(0);
+	_scorePlayer1 = _scorePlayer2 = 0;
 }
 

@@ -2,12 +2,13 @@
 
 #include "SFML/Graphics.hpp"
 
+class Character;
 class PongBall;
 
 class PolygonTerrain
 {
 public:
-	PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBalls);
+	PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBalls, const std::vector<Character*>& players);
 	virtual ~PolygonTerrain();
 
 	//Functions
@@ -46,6 +47,7 @@ private:
 	const sf::RenderWindow* _window;
 
 	const std::vector<PongBall*>& _pongBalls;
+	const std::vector<Character*>& _players;
 
 	sf::ConvexShape _terrainShape;
 	sf::Rect<float> _playableArea;
@@ -64,6 +66,7 @@ private:
 	void setPointAndUpdateCurrentPoint( DrawDirection drawDirection, Orientation orientation, int pointDistance, int& currentPointDrawned);
 	void selectAndDrawRandomTerrain();
 	void initTerrainOrigin();
+
 	void drawTerrain1();
 	void drawTerrain2();
 	void drawTerrain3();
