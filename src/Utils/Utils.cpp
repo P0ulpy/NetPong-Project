@@ -1,8 +1,6 @@
 #include "Utils.hpp"
 #include <math.h>
 
-constexpr float PI = 3.14159265359f;
-
 //----------- MATHS -----------
 float Utils::getDistance(float x1, float y1, float x2, float y2)
 {
