@@ -80,6 +80,4 @@ void Character::direction(int isleft, int isright, int up, int down, const sf::R
 
 	_velocity = sf::Vector2f(xCharDirection, yCharDirection);
 	moveEntity(_velocity, deltaTime);
-	_velocity = sf::Vector2f(xCanonDirection, yCanonDirection);
-	moveEntity(_velocity, deltaTime);
 }
