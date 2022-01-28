@@ -3,28 +3,26 @@
 #include "math.h"
 #include <windows.h>
 #include "string"
+#include "../../Utils/Utils.hpp"
 
-constexpr int SPEED = 250;
 
 Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color color)
 {
-	xChar = xSpawn;
-	xShie = xSpawn;
-	yChar = ySpawn;
-	yShie = ySpawn;
-	_currentSpeed = SPEED;
-	charac.setPosition(xChar, yChar);
-	shield.setPosition(xChar, yChar);
+	charac.setPosition(xSpawn, ySpawn);
+	canon.setPosition(xSpawn, ySpawn);
 	charac.setRadius(36);
-	shield.setSize(sf::Vector2f(70, 15));
+	canon.setSize(sf::Vector2f(50, 20));
 	charac.setFillColor(color);
-	shield.setFillColor(sf::Color::White);
+	canon.setFillColor(sf::Color::White);
+	
 
 	sf::FloatRect characSize = charac.getGlobalBounds();
-	sf::FloatRect shieldSize = shield.getGlobalBounds();
+	sf::FloatRect canonSize = canon.getGlobalBounds();
 
 	charac.setOrigin((characSize.width / 2), (characSize.height / 2));
-	shield.setOrigin(shieldSize.width / 2, (shieldSize.height / 2) + (characSize.height / 2));
+	canon.setOrigin(canonSize.width / 2 + (characSize.height / 2), (canonSize.height / 2));
+
+	
 
 	
 }
@@ -42,28 +40,16 @@ void Character::setMousePosition(sf::Vector2i mouse)
 
 void Character::update(const float& deltaTime)
 {
-	_velocity = sf::Vector2f(xChar, yChar);
-	moveEntity(_velocity, deltaTime);
-	_velocity = sf::Vector2f(xShie, yShie);
-	moveEntity(_velocity, deltaTime);
-
-
-	setCharacterRotation(mousePosition);
-	setShieldRotation(mousePosition);
-
+	setCharacterRotation(mousePosition,deltaTime);
+	setCanonRotation(mousePosition,deltaTime);
 }
 
 
 
-void Character::moveEntity(const sf::Vector2f& position, const float& deltaTime) 
+void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime) 
 {
-	//std::cout << "Déplacement : " << position.y << std::endl;
-	charac.setPosition(position);
-	//characP2.move(velocity * _currentSpeed * deltaTime);
-	shield.setPosition(position);
-	//shieldP2.move(velocity * _currentSpeed * deltaTime);
-
-	
+	charac.move(Utils::normalize(direction) * SPEED * deltaTime);
+	canon.move(Utils::normalize(direction) * SPEED * deltaTime);
 }
 
 
@@ -73,36 +59,15 @@ void Character::moveEntity(const sf::Vector2f& position, const float& deltaTime)
 
 void Character::render(sf::RenderTarget& target)const
 {
+	target.draw(canon);
 	target.draw(charac);
-	target.draw(shield);
-}
-
-
-
-
-
-void Character::initParam(sf::RenderWindow& window) {
-
-	charac.setRadius(36);
-	shield.setSize(sf::Vector2f(70,15));
-	charac.setFillColor(sf::Color::Red);
-	shield.setFillColor(sf::Color::White);
-
-	sf::FloatRect characSize = charac.getGlobalBounds();
-	sf::FloatRect shieldSize = shield.getGlobalBounds();
-
-	charac.setOrigin((characSize.width / 2), (characSize.height/ 2));
-	shield.setOrigin(shieldSize.width /2, (shieldSize.height /2)+ (characSize.height  /2));
-	
 	
 }
 
 
 
 
-
-
-void Character::setCharacterRotation(sf::Vector2i mousePos)
+void Character::setCharacterRotation(sf::Vector2i mousePos ,const float& deltaTime)
 {
 	sf::Vector2f curPos = charac.getPosition();
 	float dx = curPos.x - mousePos.x;
@@ -116,68 +81,60 @@ void Character::setCharacterRotation(sf::Vector2i mousePos)
 
 
 
-void Character::setShieldRotation(sf::Vector2i mousePos)
+void Character::setCanonRotation(sf::Vector2i mousePos, const float& deltaTime)
 {
-	sf::Vector2f curPos = charac.getPosition();
+	sf::Vector2f curPos = canon.getPosition();
 	float dx = curPos.x - mousePos.x;
 	float dy = curPos.y - mousePos.y;
 
-	float rotation = ((atan2(dy, dx)) * 180.0 / PI) - 90;
-	shield.setRotation(rotation);
+	float rotation = ((atan2(dy, dx)) * 180.0 / PI);
+	canon.setRotation(rotation);
 }
 
 
 
 
-void Character::direction(bool isleft, bool isright, bool up, bool down, const sf::Rect<float>& terrain, float deltaTime)
+void Character::direction(int isleft, int isright, int up, int down, const sf::Rect<float>& terrain, float deltaTime)
 {
-	leftFlag = isleft;
-	rightFlag = isright;
-	upFlag = up;
-	downFlag = down;
-	//std::cout << "Gauche : " << leftFlag << std::endl;
-	//std::cout << "Droite : " << rightFlag << std::endl;
-	//std::cout << "Haut : " << upFlag << std::endl;
-	//std::cout << "Bas : " << downFlag << std::endl;
-	//std::cout<<std::endl;
+	
 
-	if (leftFlag) {
-		xChar -= (SPEED * deltaTime);
-		xShie -= (SPEED * deltaTime);
-	}
-	if (rightFlag) {
-		xChar = xChar + (SPEED * deltaTime);
-		xShie = xChar + (SPEED * deltaTime);
-	}
-	if (upFlag) {
-		yChar -= (SPEED * deltaTime);
-		yShie -= (SPEED * deltaTime);
-	}
-	if (downFlag) {
-		yChar += (SPEED * deltaTime);
-		yShie += (SPEED * deltaTime);
-	}
+	xCharDirection = -isleft + isright;
+	xCanonDirection = -isleft + isright;
+	yCharDirection = -up + down;
+	yCanonDirection = -up + down;
 
+	_velocity = sf::Vector2f(xCharDirection, yCharDirection);
+	moveEntity(_velocity, deltaTime);
+	_velocity = sf::Vector2f(xCanonDirection, yCanonDirection);
+	moveEntity(_velocity, deltaTime);
 
-	if (xChar > terrain.width - (charac.getGlobalBounds().width / 2 ))
+	
+	//Si les coordonnées en x du milieu du personnage sont supérieurs a la largeur du terrain on stop le personnage contre le mur  
+	
+	
+	if (charac.getPosition().x > terrain.width - (charac.getGlobalBounds().width / 2))
 	{
-		xChar = terrain.width - (charac.getGlobalBounds().width / 2);
-		xShie = xChar;
+		charac.setPosition(terrain.width - (charac.getGlobalBounds().width / 2),charac.getPosition().y);
+		canon.setPosition(charac.getPosition().x, canon.getPosition().y);
 	}
-
-	if (xChar < terrain.left + (charac.getGlobalBounds().width / 2))
+	// En gros : Si les coordonnées en x du milieu du personnage sont inférieurs a la gauche du terrain on stop le personnage contre le mur  
+	if (charac.getPosition().x < terrain.left + (charac.getGlobalBounds().width / 2))
 	{
-		xChar = terrain.left + (charac.getGlobalBounds().width / 2);
-		xShie = xChar;
+		charac.setPosition(terrain.left + (charac.getGlobalBounds().width / 2), charac.getPosition().y);
+		canon.setPosition(charac.getPosition().x, canon.getPosition().y);
+	}
+	
+	if (charac.getPosition().y < terrain.top - (charac.getGlobalBounds().width / 2))
+	{
+		charac.setPosition( charac.getPosition().x, terrain.top - (charac.getGlobalBounds().width / 2));
+		canon.setPosition( canon.getPosition().x, charac.getPosition().y);
+	}
+	
+	if (charac.getPosition().y > terrain.height + (charac.getGlobalBounds().width / 2))
+	{
+		charac.setPosition(charac.getPosition().x, terrain.height + (charac.getGlobalBounds().width / 2));
+		canon.setPosition(canon.getPosition().x, charac.getPosition().y);
 	}
 
 
-
-}
-
-
-
-void Character::verifActiveShield(bool clic)
-{
-	isActive = clic;
 }

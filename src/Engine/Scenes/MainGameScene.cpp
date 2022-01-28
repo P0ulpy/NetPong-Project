@@ -82,55 +82,18 @@ void MainGameScene::updateInputs(const float& deltaTime)
 	*/
 
 	// Joueur 1
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	{
-		_players[0]->direction(true, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-	
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-	{
-		_players[0]->direction(false, true, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-	
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-	{
-		_players[0]->direction(false, false, true, false, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-	
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-	{
-		_players[0]->direction(false, false, false, true, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-	else
-	{
-		_players[0]->direction(false, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))	_character1->direction(1, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))_character1->direction(0, 1, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))	_character1->direction(0, 0, 1, 0, _polygonTerrain->getPlayableArea(), deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))	_character1->direction(0, 0, 0, 1, _polygonTerrain->getPlayableArea(), deltaTime);
+	else												_character1->direction(0, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
 
 	// Joueur 2
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-	{
-		_players[1]->direction(true, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-	{
-		_players[1]->direction(false, true, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
-	{
-		_players[1]->direction(false, false, true, false, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-	{
-		_players[1]->direction(false, false, false, true, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
-	else
-	{
-		_players[1]->direction(false, false, false, false, _polygonTerrain->getPlayableArea(), deltaTime);
-	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))_character2->direction(1, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))_character2->direction(0, 1, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))_character2->direction(0, 0, 1, 0, _polygonTerrain->getPlayableArea(), deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))_character2->direction(0, 0, 0, 1, _polygonTerrain->getPlayableArea(), deltaTime);
+	else											_character2->direction(0, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
 
 
 }
