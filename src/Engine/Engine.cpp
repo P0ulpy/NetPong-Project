@@ -106,8 +106,8 @@ void PoPossibEngin::renderThreadEntry()
 	_engineState = INITIALIZED;
 
 	// TEMPORAIRE
-	//loadScene(MainGame);
-	loadScene(SocketConnection);
+	loadScene(MainGame);
+	//loadScene(SocketConnection);
 
 	renderThreadUpdate();
 }

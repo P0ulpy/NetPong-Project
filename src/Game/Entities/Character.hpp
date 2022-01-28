@@ -9,12 +9,12 @@ class Character : public Entity
 private:
 
 	
-	sf::Texture sh;
+	sf::Texture ca;
 	sf::Texture ch;
 	//	Joueur 1
 	sf::CircleShape charac;
-	sf::RectangleShape shield;
-
+	sf::RectangleShape canon;
+	
 
 	bool leftFlag = false;
 	bool rightFlag = false;
@@ -25,14 +25,16 @@ private:
 	bool isActive = false;
 
 
-	//Position du joueur 1 
-	int xChar;
-	int xShie;
-	int yChar;
-	int yShie;
+	//Position du joueur
+	int xCharDirection = 0;
+	int xCanonDirection = 0;
+	int yCharDirection = 0;
+	int yCanonDirection = 0;
 
+
+	float rotationCanon = 90.0f;
 	sf::Vector2i mousePosition;
-	
+	const float SPEED = 200.0f;
 
 
 public:
@@ -52,24 +54,18 @@ public:
 
 
 	// On change la rotation du personnage en fonction de la position de la souris
-	void setCharacterRotation(sf::Vector2i mousePos);
+	void setCharacterRotation(sf::Vector2i mousePos, const float& deltaTime);
 
 
 	// On change la position du bouclier en fonction de la position de la souris
-	void setShieldRotation(sf::Vector2i mousePos);
+	void setCanonRotation(sf::Vector2i mousePos, const float& deltaTime);
 
 
 	// On défini la direction du personnage grâce aux inputs
-	void direction(bool left, bool right,bool up, bool down, const sf::Rect<float>& terrain, float deltaTime);
+	void direction(int isleft, int isright, int up, int down, const sf::Rect<float>& terrain, float deltaTime);
 
 
-	// On défini les paramètres des deux personnages
-	void initParam(sf::RenderWindow& window);
 
-	
-	// On vérifie si le bouclier est actif ou non
-	void verifActiveShield(bool isActive);
-	
 ;
 
 	// Update des personnage
