@@ -25,7 +25,7 @@ public:
 	void render(sf::RenderTarget& target) const;
 	void renderPhantomEffect(sf::RenderTarget& target) const;
 
-	bool hitWallIfCollision(float x1, float y1, float x2, float y2);
+	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
 
 	void shoot(sf::Vector2f position, sf::Vector2f normVelocity);
 
@@ -45,8 +45,10 @@ public:
 	void setSpeedMultiplierBonus(float pSpeedMultiplierBonus);
 	void resetSpeedMultiplierBonus();
 
-	bool linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const;
+	bool linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;
 	void resetBallDestAndOldPos(const float& deltaTime);
+
+	void addNumBounceAndUpdateVisibility();
 
 private:
 	//Ball rendering
@@ -84,7 +86,6 @@ private:
 
 	//Functions
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime);
-	void addNumBounceAndUpdateVisibility();
 
 	//Initializers
 	void initVariables();

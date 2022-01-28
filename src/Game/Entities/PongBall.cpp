@@ -34,7 +34,7 @@ PongBall::~PongBall()
 //--- Initializers ---
 void PongBall::initVariables()
 {
-	_velocity = Utils::normalize(sf::Vector2f(1.f, 1.5f));
+	_velocity = Utils::normalize(sf::Vector2f(1.f,1.5f));
 	_initialSpeed = INITIAL_SPEED;
 	_currentSpeed = _initialSpeed;
 	_maxSpeed = 10000.f;
@@ -143,26 +143,24 @@ void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
 	_phantomBallEffect->render(target);
 }
 
-bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2)
+bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)
 {
 	sf::Vector2f outImpactPoint{ 0,0 };
 
-	bool hit = linePongBallCollision(x1, y1, x2, y2, outImpactPoint);
+	bool hit = linePongBallCollision(x1, y1, x2, y2, outImpactPoint, remainingTime);
 
 	if (hit)
 	{
 		const sf::Vector2f surfaceVector = Utils::normalize(sf::Vector2f(x2 - x1, y2 - y1));
-		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
-
-		float remainingTime = Utils::getDistance(_ballShape.getPosition(), outImpactPoint) / Utils::getDistance(_ballShape.getPosition(), _ballDestination->getPosition());
 		const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
 
-		remainingTime = std::min(1.f, remainingTime);
+		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
 
-		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius() + _velocity.x * remainingTime,
-			outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius() + _velocity.y * remainingTime);
+		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius() + _velocity.x * (remainingTime),
+								outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius() + _velocity.y * (remainingTime));
 
-		addNumBounceAndUpdateVisibility();
+		_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
+			std::abs(_ballShape.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
 
 		return true;
 	}
@@ -292,7 +290,7 @@ void PongBall::startBoostBall(float speedBoostBonus)
 }
 
 // LINE/CIRCLE
-bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const
+bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const
 {
 	sf::Vector2f outIntersectionPoint{};
 
@@ -317,6 +315,7 @@ bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf:
 	{
 		outImpactPoint.x = closestX;
 		outImpactPoint.y = closestY;
+		remainingTime -= remainingTime * distance / _ballShape.getRadius();
 		return true;
 	}
 
@@ -328,16 +327,20 @@ bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf:
 	{
 		Logger::Log("Traverse !! ");
 		outImpactPoint = outIntersectionPoint;
+		remainingTime -= remainingTime * Utils::getDistance(_ballShape.getPosition(), outImpactPoint) /
+										Utils::getDistance(_ballShape.getPosition(), _ballDestination->getPosition());
+		std::cout << remainingTime << std::endl;
+
 		return true;
 	}
 
-	if (Utils::lineLineCollision(x1, y1, x2, y2, _oldPosition.x + ballEdgeCollTestStartX, _oldPosition.y + ballEdgeCollTestStartY,
-		_ballShape.getPosition().x + ballEdgeCollTestStartX, _ballShape.getPosition().y + ballEdgeCollTestStartY, outIntersectionPoint))
-	{
-		Logger::Log("Traverse old position !! ");
-		outImpactPoint = outIntersectionPoint;
-		return true;
-	}
+	//if (Utils::lineLineCollision(x1, y1, x2, y2, _oldPosition.x + ballEdgeCollTestStartX, _oldPosition.y + ballEdgeCollTestStartY,
+	//	_ballShape.getPosition().x + ballEdgeCollTestStartX, _ballShape.getPosition().y + ballEdgeCollTestStartY, outIntersectionPoint))
+	//{
+	//	Logger::Log("Traverse old position !! ");
+	//	outImpactPoint = outIntersectionPoint;
+	//	return true;
+	//}
 
 
 	return false;
