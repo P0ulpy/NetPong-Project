@@ -39,8 +39,7 @@ public:
 	// On change la position du bouclier en fonction de la position de la souris
 	void setCanonRotation(sf::Vector2i mousePos, const float& deltaTime);
 
-
-	// On défini la direction du personnage grâce aux inputs
+	// On dï¿½fini la direction du personnage grï¿½ce aux inputs
 	void direction(int isleft, int isright, int up, int down, const sf::Rect<float>& terrain, float deltaTime);
 
 };
