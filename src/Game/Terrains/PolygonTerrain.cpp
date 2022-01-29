@@ -64,6 +64,24 @@ void PolygonTerrain::updateCollision(const float& deltaTime) const
 
 			if (hasCollisionOccured) break;
 		}
+		//Collision player
+		for (int i = 0; i < pointCount; i++)
+		{
+			const float xA = getPointPosition(i).x;
+			const float yA = getPointPosition(i).y;
+			const float xB = getPointPosition((i + 1) % pointCount).x;
+			const float yB = getPointPosition((i + 1) % pointCount).y;
+
+			for (const auto player : _players)
+			{
+				if (player->hitWallIfCollision(xA, yA, xB, yB, remainingTime, deltaTime))
+				{
+					//std::cout << "Collision avec mur du joueur"<< std::endl;
+				}
+			}
+
+			if (hasCollisionOccured) break;
+		}
 
 	} while (hasCollisionOccured);
 

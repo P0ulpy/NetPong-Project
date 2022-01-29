@@ -24,6 +24,13 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+	{
+
+		_pongBalls[0]->shoot(_players[0]->shootDepart(), _players[0]->shootDirection(_poPossibEngin->getMousePosition()));
+	}
+
+
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
@@ -75,7 +82,7 @@ void MainGameScene::initValues()
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain));
 	}
 
-	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 200, sf::Color::Red));
+	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 400, sf::Color::Red));
 	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 700, sf::Color::Blue));
 
 	_gameManager = std::make_shared<GameManager>(this);
