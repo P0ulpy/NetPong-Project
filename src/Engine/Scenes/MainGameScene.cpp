@@ -24,12 +24,7 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
-	{
-
-		_pongBalls[0]->shoot(_players[0]->shootDepart(), _players[0]->shootDirection(_poPossibEngin->getMousePosition()));
-	}
-
+	
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
@@ -70,6 +65,17 @@ void MainGameScene::updateInputs(const float& deltaTime)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))_players[1]->direction(0, 0, 0, 1, _polygonTerrain->getPlayableArea(), deltaTime);
 	else											_players[1]->direction(0, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
 
+
+	//Shoot
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+	{
+		if (_players[1]->isInCooldown() == false && _players[1]->isReloading() == false)
+		{
+			_pongBalls[0]->shoot(_players[1]->shootDepart(), _players[1]->shootDirection(_poPossibEngin->getMousePosition()));
+			_players[1]->ammoCount(-1);
+			_players[1]->activateCooldown(true);
+		}
+	}
 
 }
 
