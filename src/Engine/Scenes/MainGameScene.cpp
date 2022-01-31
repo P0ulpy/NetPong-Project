@@ -10,11 +10,16 @@
 
 constexpr int NUM_MAX_PONGBALL = 500;
 
+constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 75;
+
+
 MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
 {
 	initValues();
 	initFonts();
+
+	setPlayersToDefaultSpawnPoints();
 }
 
 MainGameScene::~MainGameScene()
@@ -83,10 +88,10 @@ void MainGameScene::initValues()
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
 	}
 
-	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 400, sf::Color::Red));
+	_players.emplace_back(new Character(sf::Color::Red));
 	_players.back()->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
 
-	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 700, sf::Color::Blue));
+	_players.emplace_back(new Character(sf::Color::Blue));
 	_players.back()->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
 
 	_gameManager = std::make_shared<GameManager>(this);
@@ -164,7 +169,7 @@ PolygonTerrain* MainGameScene::getPolygonTerrain() const
 	return _polygonTerrain.get();
 }
 
-void MainGameScene::hideAllPongBalls()
+void MainGameScene::hideAllPongBalls() const
 {
 	for (auto pongBall : _pongBalls)
 	{
@@ -175,6 +180,15 @@ void MainGameScene::hideAllPongBalls()
 void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush)
 {
 	_inactivePongBalls.push(pongBallToPush);
+}
+
+void MainGameScene::setPlayersToDefaultSpawnPoints() const
+{
+	_players[0]->setPosition(_poPossibEngin->getRenderWindow().getSize().x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
+		_poPossibEngin->getRenderWindow().getSize().y / 2);
+
+	_players[1]->setPosition(_poPossibEngin->getRenderWindow().getSize().x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET, 
+		_poPossibEngin->getRenderWindow().getSize().y / 2);
 }
 
 

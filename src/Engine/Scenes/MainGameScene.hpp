@@ -19,12 +19,14 @@ public:
 
 	void updateInputs(const float& deltaTime);
 	void start() override {};
-	void update(const float& deltaTime);
-	void render(sf::RenderTarget* target = nullptr);
+	void update(const float& deltaTime) override;
+	void render(sf::RenderTarget* target = nullptr) override;
 
 	PolygonTerrain* getPolygonTerrain() const;
-	void hideAllPongBalls();
+	void hideAllPongBalls() const;
 	void pushInactivePongBall(PongBall* pongBallToPush);
+
+	void setPlayersToDefaultSpawnPoints() const;
 
 private:
 	std::vector<sf::Texture> _textures;

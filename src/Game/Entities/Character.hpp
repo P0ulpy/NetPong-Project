@@ -38,7 +38,7 @@ private:
 	int _ammos = 2;
 
 public:
-	Character(sf::RenderWindow& window,int xSpawn, int ySpawn, sf::Color color);
+	Character(sf::Color color);
 	~Character();
 
 	void setMousePosition(sf::Vector2i mouse);
@@ -70,5 +70,6 @@ public:
 
 	void ammoCount(int ammo);
 
-
+	//Spawn
+	void setPosition(int xSpawn, int ySpawn);
 };

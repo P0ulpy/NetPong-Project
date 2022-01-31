@@ -130,8 +130,10 @@ void GameManager::restartRound(const float& deltaTime)
 {
 	_isRoundEnded = false;
 	_currentTimeBeforeStartingNewRound = 0;
-	std::cout << "Oulala je change le terrain" << std::endl;
+
 	_mainGameScene->getPolygonTerrain()->drawRandomTerrain();
+	_mainGameScene->setPlayersToDefaultSpawnPoints();
+
 	startRoundStartCountdown();
 }
 

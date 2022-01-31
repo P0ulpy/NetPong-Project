@@ -19,32 +19,32 @@ constexpr int SHOOT_ZONE_RADIUS = 5 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_X = 25 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_Y = 15 * CHARAC_GLOBAL_SIZE;
 
-Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color color)
+constexpr int DEFAULT_SPAWN_POS_X = 500;
+constexpr int DEFAULT_SPAWN_POS_Y = 500;
+
+Character::Character(sf::Color color)
 {
 	//Préparation du personnage
-	charac.setPosition(xSpawn, ySpawn);
 	charac.setRadius(CHARAC_RADIUS);
 	charac.setFillColor(color);
 
 	//Préparation du canon
-	canon.setPosition(xSpawn, ySpawn);
 	canon.setSize(sf::Vector2f(CANON_SIZE_X, CANON_SIZE_Y));
 	canon.setFillColor(sf::Color::White);
 
 	//Préparation de la zone d'où la balle part
 	shootZone.setRadius(SHOOT_ZONE_RADIUS);
-	shootZone.setPosition(xSpawn,ySpawn);
 	shootZone.setFillColor(sf::Color::Magenta);
 
-	//Préparation des indicateurs de munitions
 	//Première munition
-	firstAmmo.setPosition(xSpawn, ySpawn);
 	firstAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	firstAmmo.setFillColor(sf::Color::White);
+
 	//Deuxième munition
-	secondAmmo.setPosition(xSpawn, ySpawn);
 	secondAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	secondAmmo.setFillColor(sf::Color::White);
+
+	setPosition(DEFAULT_SPAWN_POS_X, DEFAULT_SPAWN_POS_Y);
 
 	//Modification des origines
 	sf::FloatRect characSize = charac.getGlobalBounds();
@@ -72,6 +72,17 @@ void Character::setMousePosition(sf::Vector2i mouse)
 {
 	mousePosition = mouse;
 }
+
+
+void Character::setPosition(int xSpawn, int ySpawn)
+{
+	charac.setPosition(xSpawn, ySpawn);
+	canon.setPosition(xSpawn, ySpawn);
+	shootZone.setPosition(xSpawn, ySpawn);
+	firstAmmo.setPosition(xSpawn, ySpawn);
+	secondAmmo.setPosition(xSpawn, ySpawn);
+}
+
 
 void Character::update(const float& deltaTime)
 {
