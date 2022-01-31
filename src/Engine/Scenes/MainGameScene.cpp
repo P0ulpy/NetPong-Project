@@ -24,7 +24,6 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
-	
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
@@ -54,41 +53,25 @@ void MainGameScene::updateInputs(const float& deltaTime)
 			pongBall->startBoostBall(128.f);
 
 	// Joueur 1
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))	_players[0]->direction(1, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))_players[0]->direction(0, 1, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))	_players[0]->direction(0, 0, 1, 0, _polygonTerrain->getPlayableArea(), deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))	_players[0]->direction(0, 0, 0, 1, _polygonTerrain->getPlayableArea(), deltaTime);
-	else												_players[0]->direction(0, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))	_players[0]->direction(1, 0, 0, 0, deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))_players[0]->direction(0, 1, 0, 0, deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))	_players[0]->direction(0, 0, 1, 0, deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))	_players[0]->direction(0, 0, 0, 1, deltaTime);
+	else												_players[0]->direction(0, 0, 0, 0, deltaTime);
 
 	// Joueur 2
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))_players[1]->direction(1, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))_players[1]->direction(0, 1, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))_players[1]->direction(0, 0, 1, 0, _polygonTerrain->getPlayableArea(), deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))_players[1]->direction(0, 0, 0, 1, _polygonTerrain->getPlayableArea(), deltaTime);
-	else											_players[1]->direction(0, 0, 0, 0, _polygonTerrain->getPlayableArea(), deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))_players[1]->direction(1, 0, 0, 0, deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))_players[1]->direction(0, 1, 0, 0, deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))_players[1]->direction(0, 0, 1, 0, deltaTime);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))_players[1]->direction(0, 0, 0, 1, deltaTime);
+	else											_players[1]->direction(0, 0, 0, 0, deltaTime);
 
 
 	//Shoot
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
-	{
-		if(!_inactivePongBalls.empty())
-		{
-			int playerIndex = 1;// = 1 OU 0
-
-			if (!_players[playerIndex]->isInCooldown() && !_players[playerIndex]->isReloading())
-			{
-				_inactivePongBalls.top()->shoot(_players[playerIndex]->shootDepart(),
-												  _players[playerIndex]->shootDirection(_poPossibEngin->getMousePosition()),
-															  _players[playerIndex]->GetFillColor());
-
-				_players[playerIndex]->ammoCount(-1);
-				_players[playerIndex]->activateCooldown(true);
-
-				_inactivePongBalls.pop();
-			}
-		}
-	}
-
+		makePlayerShoot(0);
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
+		makePlayerShoot(1);
 }
 
 void MainGameScene::initValues()
@@ -97,11 +80,14 @@ void MainGameScene::initValues()
 
 	for (int i = 0 ; i < NUM_MAX_PONGBALL ; i++)
 	{
-		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain, *this));
+		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
 	}
 
 	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 400, sf::Color::Red));
+	_players.back()->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
+
 	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 700, sf::Color::Blue));
+	_players.back()->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
 
 	_gameManager = std::make_shared<GameManager>(this);
 }
@@ -111,6 +97,28 @@ void MainGameScene::initFonts()
 	if (!_font.loadFromFile("./Assets/arial.ttf"))
 	{
 		std::cout << "ERROR FONT NOT LOADED - MainGameScene.cpp" << std::endl;
+	}
+}
+
+void MainGameScene::makePlayerShoot(int playerIndex)
+{// TODO : Ce serait mieux que ce soit le joueur qui tire, et pas la MainGameScene
+
+	if (playerIndex < 0 || playerIndex > _players.size() - 1) return;
+	if (_inactivePongBalls.empty()) return;
+
+	if (!_players[playerIndex]->isInCooldown() && !_players[playerIndex]->isReloading())
+	{
+		_inactivePongBalls.top()->shoot(
+			_players[playerIndex]->shootDepart(),
+			_players[playerIndex]->shootDirection(_poPossibEngin->getMousePosition()),
+			_players[playerIndex]->getNormalAmmoColor(),
+			_players[playerIndex]->getInactiveAmmoColor()
+		);
+
+		_players[playerIndex]->ammoCount(-1);
+		_players[playerIndex]->activateCooldown(true);
+
+		_inactivePongBalls.pop();
 	}
 }
 
@@ -168,3 +176,5 @@ void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush)
 {
 	_inactivePongBalls.push(pongBallToPush);
 }
+
+

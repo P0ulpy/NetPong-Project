@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <stack>
 
 #include "SFML/Graphics/RenderTarget.hpp"
 
@@ -11,7 +12,8 @@ class PhantomBallEffect
 {
 private:
 	const PongBall& _ballParent;
-	std::vector<std::unique_ptr<PhantomBall>> _phantomBalls;
+	std::vector<PhantomBall*> _phantomBalls;
+	std::stack<PhantomBall*> _inactivePhantomBalls;
 	float _currentTimePhantomBallCooldown;
 	bool _hasPhantomEffect;
 
@@ -29,4 +31,7 @@ public:
 	void createPhantomBalls();
 
 	void setPhantomBallFillColour(const sf::Color& newColor) const;
+	const PongBall& getPongBallParent() const;
+
+	void pushInactivePhantomBall(PhantomBall* phantomBall);
 };

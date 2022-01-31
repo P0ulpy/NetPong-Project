@@ -13,11 +13,11 @@ constexpr int BALL_SIZE = 20;
 constexpr int MAX_NUM_BOUNCES = 3;
 constexpr float BOOST_DURATION = 2.f;
 
-constexpr float INITIAL_SPEED = 330.f;
+constexpr float INITIAL_SPEED = 350.f;
 
 //--- Constructors - Destructor ---
-PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain, MainGameScene& mainGameScene)
-	: _terrainArea(terrain), _polygonTerrain(&polyTerrain), _mainGameScene(&mainGameScene)
+PongBall::PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene)
+	: _mainGameScene(&mainGameScene), _polygonTerrain(mainGameScene.getPolygonTerrain())
 {
 	initVariables();
 	initShapes(window);
@@ -28,9 +28,7 @@ PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrai
 }
 
 PongBall::~PongBall()
-{
-
-}
+{ }
 
 //--- Initializers ---
 void PongBall::initVariables()
@@ -60,6 +58,7 @@ void PongBall::initShapes(const sf::RenderWindow& window)
 
 	_oldPosition = _ballShape.getPosition();
 
+	//FOR DEBUG PURPOSES
 	_ballDestination = new sf::CircleShape();
 	_ballDestination->setRadius(5.f);
 	_ballDestination->setFillColor(sf::Color::Red);
@@ -135,7 +134,7 @@ void PongBall::render(sf::RenderTarget& target) const
 	if(_isActive)
 	{
 		target.draw(_ballShape);
-		target.draw(*_ballDestination);
+		//target.draw(*_ballDestination);
 	}
 }
 
@@ -169,14 +168,12 @@ bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, float&
 	return false;
 }
 
-void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity, sf::Color color)
+void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity, const sf::Color& colorNormal, const sf::Color& colorInactive)
 {
 	_ballShape.setPosition(position);
 	_velocity = normVelocity;
-	_ballColor = color;
-	_ballInactiveColor = sf::Color(std::max(static_cast<int>(_ballColor.r), 175), 
-		std::max(static_cast<int>(_ballColor.g), 175),
-			std::max(static_cast<int>(_ballColor.b), 175), 255);
+	_ballColor = colorNormal;
+	_ballInactiveColor = colorInactive;
 
 	Logger::Log("SHOOT BALL !");
 

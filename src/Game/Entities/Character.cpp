@@ -19,21 +19,23 @@ constexpr int SHOOT_ZONE_RADIUS = 5 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_X = 25 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_Y = 15 * CHARAC_GLOBAL_SIZE;
 
-
 Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color color)
 {
 	//Préparation du personnage
 	charac.setPosition(xSpawn, ySpawn);
 	charac.setRadius(CHARAC_RADIUS);
 	charac.setFillColor(color);
+
 	//Préparation du canon
 	canon.setPosition(xSpawn, ySpawn);
 	canon.setSize(sf::Vector2f(CANON_SIZE_X, CANON_SIZE_Y));
 	canon.setFillColor(sf::Color::White);
+
 	//Préparation de la zone d'où la balle part
 	shootZone.setRadius(SHOOT_ZONE_RADIUS);
 	shootZone.setPosition(xSpawn,ySpawn);
 	shootZone.setFillColor(sf::Color::Magenta);
+
 	//Préparation des indicateurs de munitions
 	//Première munition
 	firstAmmo.setPosition(xSpawn, ySpawn);
@@ -44,11 +46,10 @@ Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color
 	secondAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	secondAmmo.setFillColor(sf::Color::White);
 
-
+	//Modification des origines
 	sf::FloatRect characSize = charac.getGlobalBounds();
 	sf::FloatRect canonSize = canon.getGlobalBounds();
 	sf::FloatRect ammoSize = firstAmmo.getGlobalBounds();
-
 
 	charac.setOrigin((characSize.width / 2), (characSize.height / 2));
 	canon.setOrigin(canonSize.width / 2 + (characSize.height / 2), (canonSize.height / 2));
@@ -62,19 +63,15 @@ Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color
 	_characDestination->setFillColor(sf::Color::Red);
 	_characDestination->setOrigin(_characDestination->getGlobalBounds().width / 2.f, _characDestination->getGlobalBounds().height / 2.f);
 	_characDestination->setPosition(charac.getPosition());
-
 }
 
 Character::~Character()
-{
-
-}
+{ }
 
 void Character::setMousePosition(sf::Vector2i mouse)
 {
 	mousePosition = mouse;
 }
-
 
 void Character::update(const float& deltaTime)
 {
@@ -124,8 +121,6 @@ void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime
 	secondAmmo.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
 }
 
-
-
 void Character::render(sf::RenderTarget& target)const
 {
 	target.draw(canon);
@@ -139,13 +134,7 @@ void Character::render(sf::RenderTarget& target)const
 	{
 		target.draw(secondAmmo);
 	}
-	
-	
-
 }
-
-
-
 
 void Character::setRotation(sf::Vector2i mousePos)
 {
@@ -160,10 +149,7 @@ void Character::setRotation(sf::Vector2i mousePos)
 	secondAmmo.setRotation(_rotation);
 }
 
-
-
-
-void Character::direction(int isleft, int isright, int up, int down, const sf::Rect<float>& terrain, float deltaTime)
+void Character::direction(int isleft, int isright, int up, int down, float deltaTime)
 {
 	xCharDirection = -isleft + isright;
 	yCharDirection = -up + down;
@@ -199,8 +185,6 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 
 		secondAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
 			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
-
-
 
 		return true;
 	}
@@ -255,8 +239,6 @@ bool Character::characterCollisionWall(float x1, float y1, float x2, float y2, s
 	return false;
 }
 
-
-
 void Character::ammoCount(int ammo)
 {
 	_ammos = _ammos + ammo;
@@ -284,9 +266,20 @@ void Character::activateReloading(bool activateReload)
 	_isReloading = activateReload;
 }
 
-sf::Color Character::GetFillColor() const
+void Character::setAmmosColor(sf::Color normalColor, sf::Color inactiveColor)
 {
-	return charac.getFillColor();
+	_ammoColorNormal = normalColor;
+	_ammoColorInactive = inactiveColor;
+}
+
+sf::Color Character::getInactiveAmmoColor() const
+{
+	return _ammoColorInactive;
+}
+
+sf::Color Character::getNormalAmmoColor() const
+{
+	return _ammoColorNormal;
 }
 
 bool Character::isInCooldown()

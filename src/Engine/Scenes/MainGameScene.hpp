@@ -42,4 +42,5 @@ private:
 
 	void initValues();
 	void initFonts();
+	void makePlayerShoot(int playerIndex);
 };

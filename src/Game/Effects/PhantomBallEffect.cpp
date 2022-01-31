@@ -34,7 +34,7 @@ void PhantomBallEffect::update(const float& deltaTime)
 	//Even if there is no phantomEffect, we update phantomBalls that are still displayed on the screen
 	for (const auto& phantomBall : _phantomBalls)
 	{
-		if (phantomBall->isDisplayed())
+		if (phantomBall->isActive())
 		{
 			phantomBall->update(deltaTime);
 		}
@@ -45,7 +45,7 @@ void PhantomBallEffect::render(sf::RenderTarget& target) const
 {
 	for (const auto& phantomBall : _phantomBalls)
 	{
-		if (phantomBall->isDisplayed())
+		if (phantomBall->isActive())
 		{
 			phantomBall->render(target);
 		}
@@ -65,30 +65,21 @@ void PhantomBallEffect::stop()
 
 void PhantomBallEffect::displayPhantomBall()
 {
-	bool isPhantomBallDisplayed = false;
-
+	if(_inactivePhantomBalls.empty())
+	{
+		Logger::Log("ERROR PhantomBallEffect.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
+		return;
+	}
 	//Recherche de la premiere PhantomBall qui n'est pas affichée dans la liste
-	for (const auto& phantomBall : _phantomBalls)
-	{
-		if (!phantomBall->isDisplayed())
-		{
-			phantomBall->show();
-			isPhantomBallDisplayed = true;
-			break;
-		}
-	}
-
-	if (!isPhantomBallDisplayed)
-	{
-		Logger::Log("ERROR PongBall.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
-	}
+	_inactivePhantomBalls.top()->setIsActive(true);
+	_inactivePhantomBalls.pop();
 }
 
 void PhantomBallEffect::createPhantomBalls()
 {
 	for (int i = 0; i < MAX_PHANTOM_BALLS; i++)
 	{
-		_phantomBalls.push_back(std::make_unique<PhantomBall>(_ballParent));
+		_phantomBalls.emplace_back(new PhantomBall(this));
 	}
 }
 
@@ -98,4 +89,14 @@ void PhantomBallEffect::setPhantomBallFillColour(const sf::Color& newColor) cons
 	{
 		phantomBall->setFillColor(newColor);
 	}
+}
+
+const PongBall& PhantomBallEffect::getPongBallParent() const
+{
+	return _ballParent;
+}
+
+void PhantomBallEffect::pushInactivePhantomBall(PhantomBall* phantomBall)
+{
+	_inactivePhantomBalls.push(phantomBall);
 }

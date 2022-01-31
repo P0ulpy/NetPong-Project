@@ -13,9 +13,13 @@ private:
 	//For collision testing purposes
 	sf::CircleShape* _characDestination;
 
+	//Ammos
 	sf::RectangleShape firstAmmo;
 	sf::RectangleShape secondAmmo;
 
+	//PongBall colors
+	sf::Color _ammoColorNormal;
+	sf::Color _ammoColorInactive;
 
 	//Direction du joueur
 	int xCharDirection = 0;
@@ -32,8 +36,6 @@ private:
 	sf::Vector2i mousePosition;
 
 	int _ammos = 2;
-
-
 
 public:
 	Character(sf::RenderWindow& window,int xSpawn, int ySpawn, sf::Color color);
@@ -53,10 +55,12 @@ public:
 	void activateCooldown(bool activate);
 	void activateReloading(bool activateReload);
 
-	sf::Color GetFillColor() const;
+	void setAmmosColor(sf::Color normalColor, sf::Color inactiveColor);
+	sf::Color getInactiveAmmoColor() const;
+	sf::Color getNormalAmmoColor() const;
 
 	// On d�fini la direction du personnage gr�ce aux inputs
-	void direction(int isleft, int isright, int up, int down, const sf::Rect<float>& terrain, float deltaTime);
+	void direction(int isleft, int isright, int up, int down, float deltaTime);
 
 	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
 	bool characterCollisionWall(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;

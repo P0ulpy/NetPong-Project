@@ -9,26 +9,26 @@ class PhantomBallEffect;
 class PolygonCollisionResult;
 class MainGameScene;
 
-class PongBall
+class PongBall : public Entity
 {
 public:
 	//Constructors - Destructors
-	PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain, MainGameScene& mainGameScene);
+	PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene);
 	virtual ~PongBall();
 
 	//Functions
-	void update(const float& deltaTime);
+	void update(const float& deltaTime) override;
 	void updateCollision(const float& deltaTime);
 	void updateMovement(const float& deltaTime);
 	void updateBoost(const float& deltaTime);
 	void updatePhantomEffect(const float& deltaTime);
 
-	void render(sf::RenderTarget& target) const;
+	void render(sf::RenderTarget& target) const override;
 	void renderPhantomEffect(sf::RenderTarget& target) const;
 
 	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
 
-	void shoot(sf::Vector2f position, sf::Vector2f normVelocity, sf::Color color = sf::Color::White);
+	void shoot(sf::Vector2f position, sf::Vector2f normVelocity, const sf::Color& colorNormal = sf::Color::Green, const sf::Color& colorInactive = sf::Color::White);
 
 	//Getters - Setters
 	sf::CircleShape getShape() const;
@@ -69,11 +69,6 @@ private:
 	sf::Vector2f _oldPosition;
 
 	//Ball physics
-	sf::Vector2f _velocity;
-	float _currentSpeed;
-	float _initialSpeed;
-	float _maxSpeed;
-
 	float _speedMultiplierBonus;
 	int _currentNumBounces;
 	bool _canKill;
@@ -90,7 +85,7 @@ private:
 	std::unique_ptr<PhantomBallEffect> _phantomBallEffect;
 
 	//Functions
-	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime);
+	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime) override;
 
 	//Initializers
 	void initVariables();
