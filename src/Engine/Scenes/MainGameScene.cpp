@@ -8,7 +8,7 @@
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
 
-constexpr int NUM_MAX_PONGBALL = 1;
+constexpr int NUM_MAX_PONGBALL = 500;
 
 MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -25,11 +25,13 @@ MainGameScene::~MainGameScene()
 void MainGameScene::updateInputs(const float& deltaTime)
 {
 	
-
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
 		_gameManager->player2WinsRound();
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::I))
+		for (const auto pongBall : _pongBalls)
+			pongBall->stopPhantomBallEffect();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
 		for (const auto pongBall : _pongBalls)
 			pongBall->setActive(true);
@@ -69,11 +71,21 @@ void MainGameScene::updateInputs(const float& deltaTime)
 	//Shoot
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
 	{
-		if (_players[1]->isInCooldown() == false && _players[1]->isReloading() == false)
+		if(!_inactivePongBalls.empty())
 		{
-			_pongBalls[0]->shoot(_players[1]->shootDepart(), _players[1]->shootDirection(_poPossibEngin->getMousePosition()));
-			_players[1]->ammoCount(-1);
-			_players[1]->activateCooldown(true);
+			int playerIndex = 1;// = 1 OU 0
+
+			if (!_players[playerIndex]->isInCooldown() && !_players[playerIndex]->isReloading())
+			{
+				_inactivePongBalls.top()->shoot(_players[playerIndex]->shootDepart(),
+												  _players[playerIndex]->shootDirection(_poPossibEngin->getMousePosition()),
+															  _players[playerIndex]->GetFillColor());
+
+				_players[playerIndex]->ammoCount(-1);
+				_players[playerIndex]->activateCooldown(true);
+
+				_inactivePongBalls.pop();
+			}
 		}
 	}
 
@@ -85,7 +97,7 @@ void MainGameScene::initValues()
 
 	for (int i = 0 ; i < NUM_MAX_PONGBALL ; i++)
 	{
-		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain));
+		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), _polygonTerrain->getPlayableArea(), *_polygonTerrain, *this));
 	}
 
 	_players.emplace_back(new Character(_poPossibEngin->getRenderWindow(), 450, 400, sf::Color::Red));
@@ -150,4 +162,9 @@ void MainGameScene::hideAllPongBalls()
 	{
 		pongBall->setActive(false);
 	}
+}
+
+void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush)
+{
+	_inactivePongBalls.push(pongBallToPush);
 }

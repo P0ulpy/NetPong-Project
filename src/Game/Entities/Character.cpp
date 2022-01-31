@@ -6,28 +6,42 @@
 #include "../../Utils/Utils.hpp"
 #include "../Entities/PongBall.hpp"
 
+constexpr float CHARAC_SPEED = 300.f;
+
+constexpr float DURATION_BETWEEN_SHOOTS = 0.3;
+constexpr float COOLDOWN_RELOAD_FIRST_BALL = 0.75f;
+constexpr float COOLDOWN_RELOAD_SECOND_BALL = COOLDOWN_RELOAD_FIRST_BALL * 2;
+
+constexpr float CHARAC_GLOBAL_SIZE = 1.5f;
+constexpr int CHARAC_RADIUS = 18 * CHARAC_GLOBAL_SIZE;
+constexpr int AMMO_SIDE_SIZE = 10 * CHARAC_GLOBAL_SIZE;
+constexpr int SHOOT_ZONE_RADIUS = 5 * CHARAC_GLOBAL_SIZE;
+constexpr int CANON_SIZE_X = 25 * CHARAC_GLOBAL_SIZE;
+constexpr int CANON_SIZE_Y = 15 * CHARAC_GLOBAL_SIZE;
+
+
 Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color color)
 {
 	//Préparation du personnage
 	charac.setPosition(xSpawn, ySpawn);
-	charac.setRadius(36);
+	charac.setRadius(CHARAC_RADIUS);
 	charac.setFillColor(color);
 	//Préparation du canon
 	canon.setPosition(xSpawn, ySpawn);
-	canon.setSize(sf::Vector2f(50, 30));
+	canon.setSize(sf::Vector2f(CANON_SIZE_X, CANON_SIZE_Y));
 	canon.setFillColor(sf::Color::White);
 	//Préparation de la zone d'où la balle part
-	shootZone.setRadius(10);
+	shootZone.setRadius(SHOOT_ZONE_RADIUS);
 	shootZone.setPosition(xSpawn,ySpawn);
 	shootZone.setFillColor(sf::Color::Magenta);
 	//Préparation des indicateurs de munitions
 	//Première munition
 	firstAmmo.setPosition(xSpawn, ySpawn);
-	firstAmmo.setSize(sf::Vector2f(20, 20));
+	firstAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	firstAmmo.setFillColor(sf::Color::White);
 	//Deuxième munition
 	secondAmmo.setPosition(xSpawn, ySpawn);
-	secondAmmo.setSize(sf::Vector2f(20, 20));
+	secondAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	secondAmmo.setFillColor(sf::Color::White);
 
 
@@ -41,6 +55,13 @@ Character::Character(sf::RenderWindow& window,  int xSpawn, int ySpawn,sf::Color
 	shootZone.setOrigin(canonSize.width, 0);
 	firstAmmo.setOrigin( -(characSize.width/2) - ammoSize.width/2,ammoSize.height/2 + ammoSize.height);
 	secondAmmo.setOrigin( -(characSize.width / 2) - ammoSize.width/2,ammoSize.height/2 - ammoSize.height);
+
+	//Test for collision
+	_characDestination = new sf::CircleShape();
+	_characDestination->setRadius(5.f);
+	_characDestination->setFillColor(sf::Color::Red);
+	_characDestination->setOrigin(_characDestination->getGlobalBounds().width / 2.f, _characDestination->getGlobalBounds().height / 2.f);
+	_characDestination->setPosition(charac.getPosition());
 
 }
 
@@ -60,9 +81,9 @@ void Character::update(const float& deltaTime)
 	setRotation(mousePosition);
 	if (_cooldownActivated)
 	{
-		if (_cooldownShoot >= 0 && _cooldownShoot < 1)_cooldownShoot = _cooldownShoot + deltaTime;
+		if (_cooldownShoot >= 0 && _cooldownShoot < DURATION_BETWEEN_SHOOTS) _cooldownShoot = _cooldownShoot + deltaTime;
 
-		if (_cooldownShoot > 1)
+		if (_cooldownShoot > DURATION_BETWEEN_SHOOTS)
 		{
 			activateCooldown(false);
 			_cooldownShoot = 0;
@@ -72,16 +93,16 @@ void Character::update(const float& deltaTime)
 
 	if (_isReloading)
 	{
-		if (_reloadingTime >= 0 && _reloadingTime < 1.5) 
+		if (_reloadingTime >= 0 && _reloadingTime < COOLDOWN_RELOAD_FIRST_BALL)
 		{
 			_reloadingTime = _reloadingTime + deltaTime;
 		}
-		if (_reloadingTime >= 1.5 && _reloadingTime < 3)
+		if (_reloadingTime >= COOLDOWN_RELOAD_FIRST_BALL && _reloadingTime < COOLDOWN_RELOAD_SECOND_BALL)
 		{
 			_reloadingTime = _reloadingTime + deltaTime;
 			_ammos = 1;
 		}
-		if (_reloadingTime > 3)
+		if (_reloadingTime > COOLDOWN_RELOAD_SECOND_BALL)
 		{
 			activateReloading(false);
 			_reloadingTime = 0;
@@ -89,16 +110,18 @@ void Character::update(const float& deltaTime)
 		}
 
 	}
-	
+
+	_characDestination->setPosition(std::abs(charac.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
+		std::abs(charac.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
 }
 
 void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime) 
 {
-	charac.move(Utils::normalize(direction) * SPEED * deltaTime);
-	canon.move(Utils::normalize(direction) * SPEED * deltaTime);
-	shootZone.move(Utils::normalize(direction) * SPEED * deltaTime);
-	firstAmmo.move(Utils::normalize(direction) * SPEED * deltaTime);
-	secondAmmo.move(Utils::normalize(direction) * SPEED * deltaTime);
+	charac.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
+	canon.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
+	shootZone.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
+	firstAmmo.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
+	secondAmmo.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
 }
 
 
@@ -214,6 +237,21 @@ bool Character::characterCollisionWall(float x1, float y1, float x2, float y2, s
 		return true;
 	}
 
+	//Continous collision detection
+	float ballEdgeCollTestStartX = (_velocity.x > 0 ? -charac.getRadius() : charac.getRadius()) * std::abs(_velocity.x);
+	float ballEdgeCollTestStartY = (_velocity.y > 0 ? -charac.getRadius() : charac.getRadius()) * std::abs(_velocity.y);
+
+	if (Utils::lineLineCollision(x1, y1, x2, y2, charac.getPosition().x + ballEdgeCollTestStartX, charac.getPosition().y + ballEdgeCollTestStartY,
+		_characDestination->getPosition().x, _characDestination->getPosition().y, outIntersectionPoint))
+	{
+		outImpactPoint = outIntersectionPoint;
+		remainingTime -= remainingTime * Utils::getDistance(charac.getPosition(), outImpactPoint) /
+			Utils::getDistance(charac.getPosition(), _characDestination->getPosition());
+		std::cout << remainingTime << std::endl;
+
+		return true;
+	}
+
 	return false;
 }
 
@@ -244,6 +282,11 @@ void Character::activateCooldown(bool activate)
 void Character::activateReloading(bool activateReload)
 {
 	_isReloading = activateReload;
+}
+
+sf::Color Character::GetFillColor() const
+{
+	return charac.getFillColor();
 }
 
 bool Character::isInCooldown()

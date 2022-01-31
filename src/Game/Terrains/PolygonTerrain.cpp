@@ -55,7 +55,8 @@ void PolygonTerrain::updateCollision(const float& deltaTime) const
 					{
 						std::cout << "prout remaining time " << remainingTime << std::endl;
 					}
-					//pongBall->addNumBounceAndUpdateVisibility();
+
+					pongBall->addNumBounceAndUpdateVisibility();
 					hasCollisionOccured = true;
 					hasOnceCollisionOccured = true;
 					break;
@@ -64,28 +65,26 @@ void PolygonTerrain::updateCollision(const float& deltaTime) const
 
 			if (hasCollisionOccured) break;
 		}
-		//Collision player
-		for (int i = 0; i < pointCount; i++)
+	} while (hasCollisionOccured && remainingTime > 0.f);
+
+	//Collision player
+	for (int i = 0; i < pointCount; i++)
+	{
+		const float xA = getPointPosition(i).x;
+		const float yA = getPointPosition(i).y;
+		const float xB = getPointPosition((i + 1) % pointCount).x;
+		const float yB = getPointPosition((i + 1) % pointCount).y;
+
+		for (const auto player : _players)
 		{
-			const float xA = getPointPosition(i).x;
-			const float yA = getPointPosition(i).y;
-			const float xB = getPointPosition((i + 1) % pointCount).x;
-			const float yB = getPointPosition((i + 1) % pointCount).y;
-
-			for (const auto player : _players)
+			if (player->hitWallIfCollision(xA, yA, xB, yB, remainingTime, deltaTime))
 			{
-				if (player->hitWallIfCollision(xA, yA, xB, yB, remainingTime, deltaTime))
-				{
-					//std::cout << "Collision avec mur du joueur"<< std::endl;
-				}
+				//std::cout << "Collision avec mur du joueur"<< std::endl;
 			}
-
-			if (hasCollisionOccured) break;
 		}
 
-	} while (hasCollisionOccured);
-
-
+		if (hasCollisionOccured) break;
+	}
 	//for (const auto player : _players)
 	//{
 	//	if (player->hitWallIfCollision(xA, yA, xB, yB)) break;
@@ -413,7 +412,7 @@ void PolygonTerrain::drawRandomTerrain()
 {
 	_terrainShape.setOrigin(sf::Vector2f(0, 0));
 
-	drawTerrain3();
+	selectAndDrawRandomTerrain();
 
 	initEdgesRegistration();
 	initTerrainOrigin();

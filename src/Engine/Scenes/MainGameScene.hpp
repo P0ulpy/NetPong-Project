@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stack>
 #include "Scene.hpp"
 
 class GameManager;
@@ -23,19 +24,21 @@ public:
 
 	PolygonTerrain* getPolygonTerrain() const;
 	void hideAllPongBalls();
+	void pushInactivePongBall(PongBall* pongBallToPush);
+
 private:
 	std::vector<sf::Texture> _textures;
 	std::shared_ptr<GameManager> _gameManager;
 
 	//Game objects
 	std::vector<PongBall*> _pongBalls;
+	std::stack<PongBall*> _inactivePongBalls;
 	std::vector<Character*> _players;
 	
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
 
 	//Font and texts
 	sf::Font _font;
-	
 
 	void initValues();
 	void initFonts();

@@ -10,6 +10,9 @@ private:
 	sf::RectangleShape canon;
 	sf::CircleShape shootZone;
 
+	//For collision testing purposes
+	sf::CircleShape* _characDestination;
+
 	sf::RectangleShape firstAmmo;
 	sf::RectangleShape secondAmmo;
 
@@ -27,7 +30,6 @@ private:
 	float _reloadingTime = 0;
 
 	sf::Vector2i mousePosition;
-	const float SPEED = 200.0f;
 
 	int _ammos = 2;
 
@@ -51,6 +53,7 @@ public:
 	void activateCooldown(bool activate);
 	void activateReloading(bool activateReload);
 
+	sf::Color GetFillColor() const;
 
 	// On d�fini la direction du personnage gr�ce aux inputs
 	void direction(int isleft, int isright, int up, int down, const sf::Rect<float>& terrain, float deltaTime);

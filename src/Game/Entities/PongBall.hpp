@@ -7,12 +7,13 @@
 class PolygonTerrain;
 class PhantomBallEffect;
 class PolygonCollisionResult;
+class MainGameScene;
 
 class PongBall
 {
 public:
 	//Constructors - Destructors
-	PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain);
+	PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain, MainGameScene& mainGameScene);
 	virtual ~PongBall();
 
 	//Functions
@@ -27,7 +28,7 @@ public:
 
 	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
 
-	void shoot(sf::Vector2f position, sf::Vector2f normVelocity);
+	void shoot(sf::Vector2f position, sf::Vector2f normVelocity, sf::Color color = sf::Color::White);
 
 	//Getters - Setters
 	sf::CircleShape getShape() const;
@@ -49,8 +50,12 @@ public:
 	void resetBallDestAndOldPos(const float& deltaTime);
 
 	void addNumBounceAndUpdateVisibility();
+	void stopPhantomBallEffect();
 
 private:
+	//MainGameScene
+	MainGameScene* _mainGameScene;
+
 	//Ball rendering
 	bool _isActive;
 

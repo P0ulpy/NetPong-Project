@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "../../Engine/Scenes/MainGameScene.hpp"
 #include "../../Utils/Utils.hpp"
 #include "../Terrains/PolygonTerrain.hpp"
 #include "../../Logger/Logger.hpp"
@@ -9,21 +10,21 @@
 
 constexpr int BALL_SIZE = 20;
 
-constexpr int MAX_NUM_BOUNCES = 2;
+constexpr int MAX_NUM_BOUNCES = 3;
 constexpr float BOOST_DURATION = 2.f;
 
-constexpr float INITIAL_SPEED = 220.f;
+constexpr float INITIAL_SPEED = 330.f;
 
 //--- Constructors - Destructor ---
-PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain)
-	: _terrainArea(terrain), _polygonTerrain(&polyTerrain)
+PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain, MainGameScene& mainGameScene)
+	: _terrainArea(terrain), _polygonTerrain(&polyTerrain), _mainGameScene(&mainGameScene)
 {
 	initVariables();
 	initShapes(window);
 	initBoost();
 	initPhantomEffect();
 
-	setActive(true);
+	setActive(false);
 }
 
 PongBall::~PongBall()
@@ -168,10 +169,16 @@ bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, float&
 	return false;
 }
 
-void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity)
+void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity, sf::Color color)
 {
 	_ballShape.setPosition(position);
 	_velocity = normVelocity;
+	_ballColor = color;
+	_ballInactiveColor = sf::Color(std::max(static_cast<int>(_ballColor.r), 175), 
+		std::max(static_cast<int>(_ballColor.g), 175),
+			std::max(static_cast<int>(_ballColor.b), 175), 255);
+
+	Logger::Log("SHOOT BALL !");
 
 	setActive(true);
 }
@@ -203,6 +210,8 @@ void PongBall::resetSpeedMultiplierBonus()
 
 void PongBall::setActive(bool isActive)
 {
+	if (_isActive == isActive) return;
+
 	_isActive = isActive;
 
 	if(_isActive)
@@ -215,6 +224,7 @@ void PongBall::setActive(bool isActive)
 	{
 		_phantomBallEffect->stop();
 		resetSpeedMultiplierBonus();
+		_mainGameScene->pushInactivePongBall(this);
 	}
 }
 
@@ -255,6 +265,11 @@ void PongBall::addNumBounceAndUpdateVisibility()
 	{
 		setActive(false);
 	}
+}
+
+void PongBall::stopPhantomBallEffect()
+{
+	_phantomBallEffect->stop();
 }
 
 void PongBall::setSpeed(float pSpeed)
