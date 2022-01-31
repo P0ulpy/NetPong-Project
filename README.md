@@ -53,5 +53,5 @@ sudo apt install g++ gdb make ninja-build rsync zip
 *avec cmake directement*
 
 ```bash
-cmake -B out -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build out/debug --target NetPong-Project
 ```
