@@ -166,6 +166,7 @@ bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, float&
 	}
 
 	return false;
+
 }
 
 void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity, const sf::Color& colorNormal, const sf::Color& colorInactive)

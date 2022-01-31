@@ -333,7 +333,7 @@ void PolygonTerrain::drawTerrain5() //CARRE AVEC ANGLES CREUSES
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, FIFTEEN, edgeLenght2, currentPoint);
 }
 
-void PolygonTerrain::drawTerrain6() //OCTOGON ORIENTÉ
+void PolygonTerrain::drawTerrain6() //OCTOGON ORIENTï¿½
 {
 	int edgeLenght = 16;
 	int edgeLenght2 = 12;

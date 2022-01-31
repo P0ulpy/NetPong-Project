@@ -26,15 +26,19 @@ private:
 	int yCharDirection = 0;
 	//Rotation du joueur
 	float _rotation;
-	float _cooldownShoot = 0;
-
+	//Cadence de tir
 	bool _cooldownActivated = false;
-	bool _isReloading = false;
+	float _cooldownShoot = 0;
+	float _endCooldown = 1;
 
+	//Rechargement des balles
+	bool _isReloading = false;
 	float _reloadingTime = 0;
+	float _endReloading = 3;
 
 	sf::Vector2i mousePosition;
 
+	//Nombre de balles max
 	int _ammos = 2;
 
 public:

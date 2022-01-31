@@ -24,23 +24,23 @@ constexpr int DEFAULT_SPAWN_POS_Y = 500;
 
 Character::Character(sf::Color color)
 {
-	//Préparation du personnage
+	//Prï¿½paration du personnage
 	charac.setRadius(CHARAC_RADIUS);
 	charac.setFillColor(color);
 
-	//Préparation du canon
+	//Prï¿½paration du canon
 	canon.setSize(sf::Vector2f(CANON_SIZE_X, CANON_SIZE_Y));
 	canon.setFillColor(sf::Color::White);
 
-	//Préparation de la zone d'où la balle part
+	//Prï¿½paration de la zone d'oï¿½ la balle part
 	shootZone.setRadius(SHOOT_ZONE_RADIUS);
 	shootZone.setFillColor(sf::Color::Magenta);
 
-	//Première munition
+	//Premiï¿½re munition
 	firstAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	firstAmmo.setFillColor(sf::Color::White);
 
-	//Deuxième munition
+	//Deuxiï¿½me munition
 	secondAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	secondAmmo.setFillColor(sf::Color::White);
 
@@ -253,7 +253,6 @@ bool Character::characterCollisionWall(float x1, float y1, float x2, float y2, s
 void Character::ammoCount(int ammo)
 {
 	_ammos = _ammos + ammo;
-	std::cout << "Ammos = " << _ammos << std::endl;
 }
 
 sf::Vector2f Character::shootDirection(sf::Vector2i mousePos)
