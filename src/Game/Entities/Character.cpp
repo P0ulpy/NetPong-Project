@@ -173,7 +173,7 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 {
 	sf::Vector2f outImpactPoint{ 0,0 };
 
-	bool hit = characterCollisionWall(x1, y1, x2, y2, outImpactPoint, remainingTime);
+	bool hit = characterCollision(x1, y1, x2, y2, outImpactPoint, remainingTime);
 
 	if (hit)
 	{
@@ -203,7 +203,7 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 	return false;
 }
 
-bool Character::characterCollisionWall(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const
+bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const
 {
 	sf::Vector2f outIntersectionPoint{};
 
@@ -302,4 +302,9 @@ bool Character::isReloading()
 	return _isReloading;
 }
 
+//x = position en x, y = position en y et z = rayon 
+sf::Vector3f Character::getPositionAndRadiusCharac() 
+{
+	return sf::Vector3f(charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2);
+}
 
