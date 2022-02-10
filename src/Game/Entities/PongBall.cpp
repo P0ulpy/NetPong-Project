@@ -22,7 +22,10 @@ PongBall::PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene)
 	initVariables();
 	initShapes(window);
 	initBoost();
-	initPhantomEffect();
+
+	_phantomBallEffect = std::make_unique<PhantomBallEffect>(*this);
+
+	startPhantomBallEffect();
 
 	setActive(false);
 }
@@ -72,9 +75,8 @@ void PongBall::initBoost()
 	_currentTimeBoost = 0.f;
 }
 
-void PongBall::initPhantomEffect()
+void PongBall::startPhantomBallEffect()
 {
-	_phantomBallEffect = std::make_unique<PhantomBallEffect>(*this);
 	_phantomBallEffect->begin();
 }
 
