@@ -1,5 +1,3 @@
-#pragma once
-
 #include "imgui-SFML.h"
 
 #include "InputsManager.hpp"

@@ -20,7 +20,7 @@ Cmake est requis pour construire le projet il est téléchargable [ici](https://
 
 ```bash
 sudo apt update
-sudo apt install g++ gdb make ninja-build rsync zip
+sudo apt install g++ gdb make ninja-build rsync zip libx11-dev libxrandr-dev libxi-dev libudev-dev libgl1-mesa-dev
 ```
 
 ### Lancer bootstrap-vcpkg pour initialiser vcpkg
@@ -53,5 +53,5 @@ sudo apt install g++ gdb make ninja-build rsync zip
 *avec cmake directement*
 
 ```bash
-cmake -B out -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build out/debug --target NetPong-Project
 ```

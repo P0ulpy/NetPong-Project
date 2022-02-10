@@ -1,6 +1,7 @@
 #include "PongBall.hpp"
 
 #include <iostream>
+#include <valarray>
 
 #include "PhantomBall.hpp"
 #include "../../Utils/Utils.hpp"

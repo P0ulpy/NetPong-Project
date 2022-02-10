@@ -1,9 +1,9 @@
 #pragma once
 
+#include <memory>
 #include "Scene.hpp"
 
 class GameManager;
-class PolygonCollisionResult;
 class PolygonTerrain;
 class Terrain;
 class PongBall;

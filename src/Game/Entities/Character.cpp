@@ -1,8 +1,5 @@
 #include "Character.hpp"
-#include "iostream"
 #include "math.h"
-#include <windows.h>
-#include "string"
 
 constexpr int SPEED = 250;
 
@@ -57,7 +54,7 @@ void Character::update(const float& deltaTime)
 
 void Character::moveEntity(const sf::Vector2f& position, const float& deltaTime) 
 {
-	//std::cout << "Déplacement : " << position.y << std::endl;
+	//std::cout << "Dï¿½placement : " << position.y << std::endl;
 	charac.setPosition(position);
 	//characP2.move(velocity * _currentSpeed * deltaTime);
 	shield.setPosition(position);

@@ -14,8 +14,9 @@ ClientSocket::ClientSocket(const ClientConnectionSettings& clientConnectionSetti
 		clientConnectionSettings.port
 	) != sf::Socket::Status::Done)
 	{
-		throw std::exception("can't connect to remote");
-	}
+        Logger::Err("can't connect to remote");
+        return;
+    }
 
 	Logger::Log(
             "Connected to remote "

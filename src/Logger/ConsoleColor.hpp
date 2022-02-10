@@ -6,7 +6,10 @@
 #define NETPONG_PROJECT_CONSOLECOLOR_HPP
 
 #include <iostream>
-#include <windows.h>
+
+#ifdef WIN32
+
+#include <Windows.h>
 
 namespace ConsoleColor
 {
@@ -56,13 +59,61 @@ namespace ConsoleColor
     };
 
     template <class _Elem, class _Traits>
-    std::basic_ostream<_Elem, _Traits>&
-    operator<<(std::basic_ostream<_Elem, _Traits>& i, color& c)
+    std::basic_ostream<_Elem,_Traits>&
+    operator<<(std::basic_ostream<_Elem,_Traits>& i, color& c)
     {
         HANDLE hStdout=GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(hStdout,c.m_color);
         return i;
     }
 }
+
+#endif
+
+#ifdef LINUX
+
+namespace ConsoleColor
+{
+    inline std::ostream& blue(std::ostream &s)
+    {
+        return s;
+    }
+
+    inline std::ostream& red(std::ostream &s)
+    {
+        return s;
+    }
+
+    inline std::ostream& green(std::ostream &s)
+    {
+        return s;
+    }
+
+    inline std::ostream& yellow(std::ostream &s)
+    {
+        return s;
+    }
+
+    inline std::ostream& white(std::ostream &s)
+    {
+        return s;
+    }
+
+    /*struct color {
+        color(WORD attribute):m_color(attribute){};
+        WORD m_color;
+    };
+
+    template <class _Elem, class _Traits>
+    std::basic_ostream<_Elem,_Traits>&
+    operator<<(std::basic_ostream<_Elem,_Traits>& i, color& c)
+    {
+        HANDLE hStdout=GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hStdout,c.m_color);
+        return i;
+    }*/
+}
+
+#endif
 
 #endif //NETPONG_PROJECT_CONSOLECOLOR_HPP

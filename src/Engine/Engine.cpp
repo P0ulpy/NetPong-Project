@@ -1,6 +1,3 @@
-
-#pragma once
-
 #include <iostream>
 
 #include <SFML/Window.hpp>
@@ -136,7 +133,7 @@ void PoPossibEngin::renderThreadUpdate()
 	if(_renderWindow == nullptr)
 	{
         Logger::Err("_renderWindow not initialized");
-        throw std::exception("_renderWindow not initialized");
+        return;
 	}
 
 	while (_renderWindow->isOpen())
@@ -207,7 +204,7 @@ void PoPossibEngin::logicThreadEntry()
 
 void PoPossibEngin::logicThreadUpdate()
 {
-	throw std::exception("not implemented");
+	Logger::Err("not implemented");
 }
 
 #pragma endregion LogicThread

@@ -42,4 +42,4 @@ target_link_libraries(NetPong-Project
         rapidjson
     )
 
-file(COPY src/Assets DESTINATION /)
+file(COPY src/Assets DESTINATION ./)
