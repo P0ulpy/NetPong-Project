@@ -28,60 +28,10 @@ void PolygonTerrain::update(const float& deltaTime)
 void PolygonTerrain::updateCollision(const float& deltaTime) const
 {
 	const int pointCount = static_cast<int>(getShape().getPointCount());
-	bool hasCollisionOccured;
-	bool hasOnceCollisionOccured = false;
 	float remainingTime = 1.f;
 
-	//For every sides of the terrain
-	do
-	{
-		hasCollisionOccured = false;
-
-		for (int i = 0; i < pointCount; i++)
-		{
-			const float xA = getPointPosition(i).x;
-			const float yA = getPointPosition(i).y;
-			const float xB = getPointPosition((i + 1) % pointCount).x;
-			const float yB = getPointPosition((i + 1) % pointCount).y;
-
-			for (const auto pongBall : _pongBalls)
-			{
-				if (pongBall->isActive() && pongBall->hitWallIfCollision(xA, yA, xB, yB, remainingTime, deltaTime))
-				{
-					if(hasOnceCollisionOccured)
-					{
-						std::cout << "prout remaining time " << remainingTime << std::endl;
-					}
-
-					pongBall->addNumBounceAndUpdateVisibility();
-					hasCollisionOccured = true;
-					hasOnceCollisionOccured = true;
-					break;
-				}
-			}
-
-			if (hasCollisionOccured) break;
-		}
-	} while (hasCollisionOccured && remainingTime > 0.f);
-
-	//Collision player
-	for (int i = 0; i < pointCount; i++)
-	{
-		const float xA = getPointPosition(i).x;
-		const float yA = getPointPosition(i).y;
-		const float xB = getPointPosition((i + 1) % pointCount).x;
-		const float yB = getPointPosition((i + 1) % pointCount).y;
-
-		for (const auto player : _players)
-		{
-			if (player->hitWallIfCollision(xA, yA, xB, yB, remainingTime, deltaTime))
-			{
-				//std::cout << "Collision avec mur du joueur"<< std::endl;
-			}
-		}
-
-		if (hasCollisionOccured) break;
-	}
+	checkPongBallTerrainCollision(deltaTime);
+	checkPlayerTerrainCollision();
 
 	//A CHANGER
 	for (const auto pongBall : _pongBalls)
@@ -94,6 +44,56 @@ void PolygonTerrain::updateCollision(const float& deltaTime) const
 void PolygonTerrain::render(sf::RenderTarget& target) const
 {
 	target.draw(_terrainShape);
+}
+
+void PolygonTerrain::checkPongBallTerrainCollision(const float& deltaTime) const
+{
+	float remainingTime = 1.f;
+	const int pointCount = static_cast<int>(getShape().getPointCount());
+	bool hasCollisionOccurred;
+
+	do
+	{
+		hasCollisionOccurred = false;
+
+		for (int i = 0; i < pointCount; i++)
+		{
+			const float xA = getPointPosition(i).x;
+			const float yA = getPointPosition(i).y;
+			const float xB = getPointPosition((i + 1) % pointCount).x;
+			const float yB = getPointPosition((i + 1) % pointCount).y;
+
+			for (const auto pongBall : _pongBalls)
+			{
+				if (pongBall->isActive() && pongBall->hitWallIfCollision(xA, yA, xB, yB, remainingTime, deltaTime))
+				{
+					pongBall->addNumBounceAndUpdateVisibility();
+					hasCollisionOccurred = true;
+					break;
+				}
+			}
+
+			if (hasCollisionOccurred) break;
+		}
+	} while (hasCollisionOccurred && remainingTime > 0.f);
+}
+
+void PolygonTerrain::checkPlayerTerrainCollision() const
+{
+	const int pointCount = static_cast<int>(getShape().getPointCount());
+
+	for (int i = 0; i < pointCount; i++)
+	{
+		const float xA = getPointPosition(i).x;
+		const float yA = getPointPosition(i).y;
+		const float xB = getPointPosition((i + 1) % pointCount).x;
+		const float yB = getPointPosition((i + 1) % pointCount).y;
+
+		for (const auto player : _players)
+		{
+			player->hitWallIfCollision(xA, yA, xB, yB);
+		}
+	}
 }
 
 sf::ConvexShape PolygonTerrain::getShape() const
@@ -130,7 +130,8 @@ void PolygonTerrain::initEdgesRegistration()
 sf::Vector2f PolygonTerrain::initPoint(const sf::Vector2f& previousPoint, DrawDirection drawDirection,
 	Orientation orientationDraw, int pointDistance = 1)
 {
-	float directionX, directionY;
+	float directionX = 1;
+	float directionY = 1;
 
 	switch (drawDirection)
 	{
@@ -140,7 +141,10 @@ sf::Vector2f PolygonTerrain::initPoint(const sf::Vector2f& previousPoint, DrawDi
 		case BOTTOM_LEFT_TO_TOP_RIGHT: directionX = 1; directionY = -1; break;
 	}
 
-	sf::Vector2f newPoint = sf::Vector2f(std::cos(Utils::degreeToRadian(orientationDraw)), std::sin(Utils::degreeToRadian(orientationDraw)));
+	sf::Vector2f newPoint = sf::Vector2f(
+		static_cast<float>(std::cos(Utils::degreeToRadian(orientationDraw))), 
+		static_cast<float>(std::sin(Utils::degreeToRadian(orientationDraw)))
+	);
 
 	newPoint.x = previousPoint.x + directionX * newPoint.x * static_cast<float>(pointDistance) * TERRAIN_SIZE_MULTIPLIER;
 	newPoint.y = previousPoint.y + directionY * newPoint.y * static_cast<float>(pointDistance) * TERRAIN_SIZE_MULTIPLIER;
@@ -231,17 +235,17 @@ void PolygonTerrain::drawTerrain1()//OCTOGON
 	int currentPoint = 1;
 
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FOURTY_FIVE, edgeLenght, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FORTY_FIVE, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, NINETY, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FOURTY_FIVE, edgeLenght, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FORTY_FIVE, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FOURTY_FIVE, edgeLenght, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FORTY_FIVE, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, NINETY, edgeLenght, currentPoint);
 
 }
 void PolygonTerrain::drawTerrain2()//CARRE ORIENTE
 {
-	int edgeLenght = 24;
+	int edgeLenght = 30;
 
 	_terrainShape.setPointCount(4);
 	_terrainShape.setPoint(0, sf::Vector2f(0,0));
@@ -261,11 +265,11 @@ void PolygonTerrain::drawTerrain3()//CARRE AVEC ANGLES LEGERS
 	int currentPoint = 1;
 
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FOURTY_FIVE, edgeLenght / 3, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FORTY_FIVE, edgeLenght / 3, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, NINETY, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FOURTY_FIVE, edgeLenght / 3, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FORTY_FIVE, edgeLenght / 3, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint( BOTTOM_RIGHT_TO_TOP_LEFT, FOURTY_FIVE, edgeLenght / 3, currentPoint);
+	setPointAndUpdateCurrentPoint( BOTTOM_RIGHT_TO_TOP_LEFT, FORTY_FIVE, edgeLenght / 3, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, NINETY, edgeLenght, currentPoint);
 }
 
@@ -280,31 +284,31 @@ void PolygonTerrain::drawTerrain4()//TREFLE
 	int currentPoint = 1;
 
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, ZERO, edgeLenght4, currentPoint);
 
-	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FOURTY_FIVE, edgeLenght, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FORTY_FIVE, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, NINETY, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, NINETY, edgeLenght4, currentPoint);
 
-	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, NINETY, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FOURTY_FIVE, edgeLenght, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FORTY_FIVE, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, ZERO, edgeLenght4, currentPoint);
 
-	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FOURTY_FIVE, edgeLenght, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FORTY_FIVE, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, NINETY, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, NINETY, edgeLenght4, currentPoint);
 
-	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, NINETY, edgeLenght, currentPoint);
 }
 
@@ -382,7 +386,7 @@ void PolygonTerrain::drawTerrain8() //HEXAGON PENCHE
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FIFTEEN, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, SEVENTY_FIVE, edgeLenght, currentPoint);
 
-	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FOURTY_FIVE, edgeLenght, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FORTY_FIVE, edgeLenght, currentPoint);
 
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FIFTEEN, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, SEVENTY_FIVE, edgeLenght, currentPoint);
@@ -399,11 +403,11 @@ void PolygonTerrain::drawTerrain9() //CARRE AVEC ANGLES CREUSES ORIENTE
 	int currentPoint = 1;
 
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FOURTY_FIVE, edgeLenght3, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FORTY_FIVE, edgeLenght3, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, NINETY, edgeLenght2, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FOURTY_FIVE, edgeLenght3, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FORTY_FIVE, edgeLenght3, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FOURTY_FIVE, edgeLenght3, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FORTY_FIVE, edgeLenght3, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, NINETY, edgeLenght2, currentPoint);
 }
 
@@ -418,20 +422,20 @@ void PolygonTerrain::drawTerrain10() //PLUS
 
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, ZERO, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, NINETY, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_LEFT_TO_BOTTOM_RIGHT, ZERO, edgeLenght, currentPoint);
 
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, NINETY, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(TOP_RIGHT_TO_BOTTOM_LEFT, NINETY, edgeLenght, currentPoint);
 
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, ZERO, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, NINETY, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, FORTY_FIVE, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_RIGHT_TO_TOP_LEFT, ZERO, edgeLenght, currentPoint);
 
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, NINETY, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, ZERO, edgeLenght, currentPoint);
-	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, FOURTY_FIVE, edgeLenght2, currentPoint);
+	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, FORTY_FIVE, edgeLenght2, currentPoint);
 }

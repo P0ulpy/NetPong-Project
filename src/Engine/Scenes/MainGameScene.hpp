@@ -24,12 +24,8 @@ public:
 
 	PolygonTerrain* getPolygonTerrain() const;
 	void hideAllPongBalls() const;
+	void togglePlayersMovement(bool canTheyMove) const;
 	void pushInactivePongBall(PongBall* pongBallToPush);
-
-	//Red
-	sf::Color _player0color = sf::Color(255, 40, 0);
-	//Blue
-	sf::Color _player1color = sf::Color(0, 40, 255);
 
 	void setPlayersToDefaultSpawnPoints() const;
 
@@ -50,4 +46,5 @@ private:
 	void initValues();
 	void initFonts();
 	void makePlayerShoot(int playerIndex);
+	void checkPlayerPongBallCollision(const PongBall& pongBall) const;
 };

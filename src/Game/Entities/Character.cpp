@@ -83,6 +83,15 @@ void Character::setPosition(int xSpawn, int ySpawn)
 	secondAmmo.setPosition(xSpawn, ySpawn);
 }
 
+void Character::toggleCharacterMove(bool canCharacterMove)
+{
+	_canCharacterMove = canCharacterMove;
+}
+
+bool Character::canCharacterMove() const
+{
+	return _canCharacterMove;
+}
 
 void Character::update(const float& deltaTime)
 {
@@ -116,11 +125,12 @@ void Character::update(const float& deltaTime)
 			_reloadingTime = 0;
 			_ammos = 2;
 		}
-
 	}
 
-	_characDestination->setPosition(std::abs(charac.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
-		std::abs(charac.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
+	_characDestination->setPosition(
+		std::abs(charac.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
+		std::abs(charac.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime
+	);
 }
 
 void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime) 
@@ -162,6 +172,7 @@ void Character::setRotation(sf::Vector2i mousePos)
 
 void Character::direction(int isleft, int isright, int up, int down, float deltaTime)
 {
+	if (!canCharacterMove()) return;
 	xCharDirection = -isleft + isright;
 	yCharDirection = -up + down;
 
@@ -169,11 +180,11 @@ void Character::direction(int isleft, int isright, int up, int down, float delta
 	moveEntity(_velocity, deltaTime);
 }
 
-bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)
+bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2)
 {
 	sf::Vector2f outImpactPoint{ 0,0 };
 
-	bool hit = characterCollision(x1, y1, x2, y2, outImpactPoint, remainingTime);
+	bool hit = characterCollision(x1, y1, x2, y2, outImpactPoint);
 
 	if (hit)
 	{
@@ -182,20 +193,20 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 
 		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
 
-		charac.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		charac.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
-		canon.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		canon.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
-		shootZone.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		shootZone.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
-		firstAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		firstAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
-		secondAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		secondAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
 		return true;
 	}
@@ -203,7 +214,7 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 	return false;
 }
 
-bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const
+bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const
 {
 	sf::Vector2f outIntersectionPoint{};
 
@@ -228,7 +239,6 @@ bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::V
 	{
 		outImpactPoint.x = closestX;
 		outImpactPoint.y = closestY;
-		remainingTime -= remainingTime * distance / charac.getRadius();
 		return true;
 	}
 
@@ -240,9 +250,7 @@ bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::V
 		_characDestination->getPosition().x, _characDestination->getPosition().y, outIntersectionPoint))
 	{
 		outImpactPoint = outIntersectionPoint;
-		remainingTime -= remainingTime * Utils::getDistance(charac.getPosition(), outImpactPoint) /
-			Utils::getDistance(charac.getPosition(), _characDestination->getPosition());
-		std::cout << remainingTime << std::endl;
+		Utils::getDistance(charac.getPosition(), _characDestination->getPosition());
 
 		return true;
 	}

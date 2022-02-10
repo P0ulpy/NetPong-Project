@@ -16,7 +16,7 @@ public:
 	~ClientSocket();
 
 	[[nodiscard]] const ClientConnectionSettings& getClientConnectionSettings() const;
-	[[nodiscard]] const EventEmitter& getEventEmitter() const;
+	[[nodiscard]] EventEmitter& getEventEmitter() const;
 
 private:
 	std::string _id = "undefined";

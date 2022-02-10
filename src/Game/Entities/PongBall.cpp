@@ -145,7 +145,7 @@ void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
 	_phantomBallEffect->render(target);
 }
  
-bool PongBall::hitPlayer(float c2x, float c2y, float c2r, sf::Color color2)
+bool PongBall::hitPlayer(float c2x, float c2y, float c2r, sf::Color color2) const
 {
 	if (_canKill && _isActive && color2 != _ballColor)
 	{
@@ -153,7 +153,6 @@ bool PongBall::hitPlayer(float c2x, float c2y, float c2r, sf::Color color2)
 	}
 
 	return false;
-	
 }
 
 bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)

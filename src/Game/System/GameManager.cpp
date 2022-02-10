@@ -18,14 +18,12 @@ GameManager::GameManager(MainGameScene* pMainGameScene)
 }
 
 GameManager::~GameManager()
-{
-
-}
+{ }
 
 void GameManager::initValues()
 {
 	_gameUI = std::make_unique<GameUI>();
-	_roundStartCountdown = std::make_unique<RoundStartCountdown>();
+	_roundStartCountdown = std::make_unique<RoundStartCountdown>(*_mainGameScene);
 
 	_currentTimeBeforeStartingNewRound = 0;
 
@@ -118,6 +116,7 @@ void GameManager::startRoundStartCountdown() const
 void GameManager::endRound()
 {
 	_mainGameScene->hideAllPongBalls();
+	_mainGameScene->togglePlayersMovement(false);
 	startRoundEndTimer();
 }
 

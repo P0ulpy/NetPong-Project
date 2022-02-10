@@ -6,6 +6,8 @@
 class Character : public Entity
 {
 private:
+	bool _canCharacterMove { true };
+
 	sf::CircleShape charac;
 	sf::RectangleShape canon;
 	sf::CircleShape shootZone;
@@ -16,8 +18,6 @@ private:
 	//Ammos
 	sf::RectangleShape firstAmmo;
 	sf::RectangleShape secondAmmo;
-
-
 
 	//PongBall colors
 	sf::Color _ammoColorNormal;
@@ -58,8 +58,6 @@ public:
 	bool isInCooldown();
 	bool isReloading();
 
-	
-	
 	void activateCooldown(bool activate);
 	void activateReloading(bool activateReload);
 
@@ -70,8 +68,8 @@ public:
 	// On d�fini la direction du personnage gr�ce aux inputs
 	void direction(int isleft, int isright, int up, int down, float deltaTime);
 
-	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
-	bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;
+	bool hitWallIfCollision(float x1, float y1, float x2, float y2);
+	bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const;
 
 	sf::Vector2f shootDirection(sf::Vector2i mousePos);
 	sf::Vector2f shootDepart();
@@ -81,4 +79,8 @@ public:
 
 	//Spawn
 	void setPosition(int xSpawn, int ySpawn);
+
+	//IsActive
+	void toggleCharacterMove(bool canCharacterMove);
+	bool canCharacterMove() const;
 };

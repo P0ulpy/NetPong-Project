@@ -26,7 +26,7 @@ public:
 	void render(sf::RenderTarget& target) const override;
 	void renderPhantomEffect(sf::RenderTarget& target) const;
 
-	bool hitPlayer(float c2x, float c2y, float c2r, sf::Color color2);
+	bool hitPlayer(float c2x, float c2y, float c2r, sf::Color color2) const;
 
 	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
 

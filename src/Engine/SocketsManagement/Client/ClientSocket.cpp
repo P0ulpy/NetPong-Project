@@ -33,7 +33,7 @@ ClientSocket::~ClientSocket()
 }
 
 const ClientConnectionSettings& ClientSocket::getClientConnectionSettings() const { return _clientConnectionSettings; }
-const EventEmitter& ClientSocket::getEventEmitter() const { return _eventEmitter; }
+//EventEmitter& ClientSocket::getEventEmitter() const { return _eventEmitter; }
 
 void ClientSocket::registerListeners()
 {

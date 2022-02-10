@@ -6,12 +6,18 @@
 #include "../../Game/Entities/Character.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
-#include "../../Utils/Utils.hpp"
+#include "../SocketsManagement/Client/ClientSocket.hpp"
 
-constexpr int NUM_MAX_PONGBALL = 500;
+#define COLOR_PLAYER_1 sf::Color(255, 40, 0)
+#define INACTIVE_AMMO_COLOR_PLAYER1 sf::Color(255, 160, 160)
+#define NORMAL_AMMO_COLOR_PLAYER1 sf::Color(220, 40, 0)
 
-constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 75;
+#define COLOR_PLAYER_2 sf::Color(0, 40, 255)
+#define INACTIVE_AMMO_COLOR_PLAYER2 sf::Color(160, 160, 235)
+#define NORMAL_AMMO_COLOR_PLAYER2 sf::Color(0, 40, 220)
 
+constexpr int NUM_MAX_PONGBALL = 12;
+constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 125;
 
 MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -23,13 +29,10 @@ MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 }
 
 MainGameScene::~MainGameScene()
-{
-
-}
+{ }
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
-
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
@@ -92,11 +95,11 @@ void MainGameScene::initValues()
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
 	}
 	
-	_players.emplace_back(new Character(_player0color));
-	_players.back()->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
+	_players.emplace_back(new Character(COLOR_PLAYER_1));
+	_players.back()->setAmmosColor(NORMAL_AMMO_COLOR_PLAYER1, INACTIVE_AMMO_COLOR_PLAYER1);
 
-	_players.emplace_back(new Character(_player1color));
-	_players.back()->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
+	_players.emplace_back(new Character(COLOR_PLAYER_2));
+	_players.back()->setAmmosColor(NORMAL_AMMO_COLOR_PLAYER2, INACTIVE_AMMO_COLOR_PLAYER2);
 
 	_gameManager = std::make_shared<GameManager>(this);
 }
@@ -111,8 +114,13 @@ void MainGameScene::initFonts()
 
 void MainGameScene::makePlayerShoot(int playerIndex)
 {
-	if (playerIndex < 0 || playerIndex > _players.size() - 1) return;
-	if (_inactivePongBalls.empty()) return;
+	if (playerIndex < 0 ||
+		playerIndex > _players.size() - 1 ||
+		_inactivePongBalls.empty() ||
+		!_players[playerIndex]->canCharacterMove())
+	{
+		return;
+	}
 
 	if (!_players[playerIndex]->isInCooldown() && !_players[playerIndex]->isReloading())
 	{
@@ -130,6 +138,19 @@ void MainGameScene::makePlayerShoot(int playerIndex)
 	}
 }
 
+void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
+{
+	for (const auto player : _players)
+	{
+		const sf::Vector3f positionAndRadiusCharac = player->getPositionAndRadiusCharac();
+
+		if (pongBall.hitPlayer(positionAndRadiusCharac.x,positionAndRadiusCharac.y,positionAndRadiusCharac.z,player->getNormalAmmoColor()))
+		{
+			std::cout << "Player hit !" << std::endl;
+		}
+	}
+}
+
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs(deltaTime);
@@ -142,21 +163,8 @@ void MainGameScene::update(const float& deltaTime)
 	for (const auto pongBall : _pongBalls)
 	{
 		pongBall->update(deltaTime);
-		
-		
-		if (pongBall->hitPlayer(_players[0]->getPositionAndRadiusCharac().x, _players[0]->getPositionAndRadiusCharac().y, _players[0]->getPositionAndRadiusCharac().z, _player0color))
-		{
 
-			std::cout << "Player red hit" << std::endl;
-
-		}
-
-		if (pongBall->hitPlayer(_players[1]->getPositionAndRadiusCharac().x, _players[1]->getPositionAndRadiusCharac().y, _players[1]->getPositionAndRadiusCharac().z, _player1color))
-		{
-
-			std::cout << "Player blue hit" << std::endl;
-
-		}
+		checkPlayerPongBallCollision(*pongBall);
 	}
 
 	for (const auto player : _players)
@@ -164,11 +172,6 @@ void MainGameScene::update(const float& deltaTime)
 		player->setMousePosition(_poPossibEngin->getMousePosition());
 		player->update(deltaTime);
 	}
-
-	
-	
-	
-
 }
 
 void MainGameScene::render(sf::RenderTarget* target)
@@ -197,6 +200,14 @@ void MainGameScene::hideAllPongBalls() const
 	for (auto pongBall : _pongBalls)
 	{
 		pongBall->setActive(false);
+	}
+}
+
+void MainGameScene::togglePlayersMovement(bool canTheyMove) const
+{
+	for (const auto player : _players)
+	{
+		player->toggleCharacterMove(canTheyMove);
 	}
 }
 
