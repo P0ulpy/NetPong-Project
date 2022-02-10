@@ -57,7 +57,7 @@ void Character::update(const float& deltaTime)
 
 void Character::moveEntity(const sf::Vector2f& position, const float& deltaTime) 
 {
-	//std::cout << "Déplacement : " << position.y << std::endl;
+	//std::cout << "Dï¿½placement : " << position.y << std::endl;
 	charac.setPosition(position);
 	//characP2.move(velocity * _currentSpeed * deltaTime);
 	shield.setPosition(position);
@@ -122,7 +122,7 @@ void Character::setShieldRotation(sf::Vector2i mousePos)
 	float dx = curPos.x - mousePos.x;
 	float dy = curPos.y - mousePos.y;
 
-	float rotation = ((atan2(dy, dx)) * 180.0 / PI) - 90;
+	float rotation = (atan2(dy, dx) * 180.0 / PI) - 90;
 	shield.setRotation(rotation);
 }
 

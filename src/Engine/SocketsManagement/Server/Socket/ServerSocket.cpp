@@ -5,16 +5,16 @@
 #include "../Server.hpp"
 #include "../../../../Logger/Logger.hpp"
 
-ServerSocket::ServerSocket(Server* server) :
-	_server(server),
-	_connectionsListenThread(sf::Thread(&ServerSocket::connectionsListenEntry, this)),
-	_listenEventsThread(sf::Thread(&ServerSocket::listenEvents, this))
+ServerSocket::ServerSocket(Server* server)
+    : _server(server)
+	, _connectionsListenThread(sf::Thread(&ServerSocket::connectionsListenEntry, this))
+	, _listenEventsThread(sf::Thread(&ServerSocket::listenEvents, this))
 {
     const HostSettings& hostSettings = server->getHostSettings();
 
     if(_listener.listen(hostSettings.port) != sf::Socket::Done)
 	{
-        Logger::Log("Error during server listner port binding");
+        Logger::Err("Error during server listener port binding");
         return;
     }
 
@@ -28,98 +28,79 @@ ServerSocket::~ServerSocket()
 {
 	_connectionsListenThread.terminate();
 	_listenEventsThread.terminate();
-
-	for(auto socket : _clients)
-	{
-		delete socket.second;
-	}
 }
 
-//const EventEmitter& ServerSocket::getEventEmitter() const { return _eventEmitter; }
-
-const std::map<std::string, sf::TcpSocket*>& ServerSocket::getClients() const { return _clients; }
+const std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients() const { return _clients; }
 
 [[noreturn]] void ServerSocket::connectionsListenEntry()
 {
-	while(true)
-	{
-		auto newClient = new sf::TcpSocket();
+    Logger::SetThreadLabel("ServerSocket-ConnectionListen");
 
-		if (_listener.accept(*newClient) != sf::Socket::Done)
+    while(true)
+	{
+		auto newClientSocket = new sf::TcpSocket();
+
+		if (_listener.accept(*newClientSocket) != sf::Socket::Done)
 		{
 			Logger::Log("Erreur lors de l'acceptation du client");
 			continue;
 		}
 
-		Logger::Log(std::string("Connection d'un nouveau client | ip : ") + newClient->getRemoteAddress().toString());
-
 		// TODO : génération d'UUID
-		// temp
 
 		std::string UUID = "michel ";
 		UUID += std::to_string(_clients.size());
         Logger::Log(UUID);
 
-		mutex.lock();
-		_clients[UUID] = newClient;
-		_clientsSocketSelector.add(*newClient);
-		onClientConnection(newClient);
-		mutex.unlock();
+        {
+            std::lock_guard lockGuard(_mutex);
+
+            _clients[UUID] = std::make_unique<Client>(UUID, newClientSocket);
+            _clientsSocketSelector.add(*newClientSocket);
+        }
+
+		onClientConnection(*_clients[UUID].get());
 	}
 }
 
 [[noreturn]] void ServerSocket::listenEvents()
 {
-	while (true)
-	{
-		if (_clientsSocketSelector.wait(sf::milliseconds(_server->getHostSettings().socketConnectionTimeout)))
-		{
-			for (const auto& socketClientPair : _clients)
-			{
-				std::string id = socketClientPair.first;
-				sf::TcpSocket* socket = socketClientPair.second;
+    Logger::SetThreadLabel("ServerSocket-ListenEvents");
 
-				if (_clientsSocketSelector.isReady(*socket))
+    while (true)
+	{
+        if (_clientsSocketSelector.wait())
+		{
+            for (const auto& socketClientPair : _clients)
+			{
+                bool _break = false;
+
+				std::string id = socketClientPair.first;
+				Client& client = *socketClientPair.second;
+
+				if (_clientsSocketSelector.isReady(*client.getSocket()))
 				{
 					sf::Packet packet;
-					sf::Socket::Status status = socket->receive(packet);
+					sf::Socket::Status status = client.getSocket()->receive(packet);
 
 					switch (status)
 					{
 					case sf::Socket::Done:
-						{
-							//TESTS
 
-							SocketEvents event;
-							std::string data;
+                        //
 
-							packet >> (int&)event;
-							packet >> data;
-
-							std::cout
-                                    << "data recieved :"
-                                    << event
-							        << data
-                                    << std::endl;
-
-							//TESTS
-						}
                         break;
-					case sf::Socket::NotReady:
-						break;
-					case sf::Socket::Partial:
-						break;
-					case sf::Socket::Disconnected:
-                        Logger::Log("Client disconnected | id: " + id);
-						_clientsSocketSelector.remove(*socket);
-						break;
+                    case sf::Socket::Disconnected: onClientDisconnect(client); _break = true; break;
 					case sf::Socket::Error:
-						_clientsSocketSelector.remove(*socket);
+                            Logger::Err("Error during packet reception");
+                            onClientDisconnect(client);
+                            _break = true;
 						break;
-					default:
-						break;
-					}
+                    }
 				}
+
+                if(_break)
+                    break;
 			}
 		}
         else
@@ -128,62 +109,70 @@ const std::map<std::string, sf::TcpSocket*>& ServerSocket::getClients() const { 
         }
 	}
 }
-void ServerSocket::emit(SocketEvents event, sf::TcpSocket& socket, sf::Packet data)
+
+void ServerSocket::emit(sf::TcpSocket& socket, SocketEvents event, const sf::Packet& data)
 {
+    sf::Thread sendThread = sf::Thread([this, &socket, &event, &data]()
+    {
+        sf::Packet packet;
+        packet << (int) event;
+        packet.append(data.getData(), data.getDataSize());
 
+        Logger::Log("ClientSocket : Emitting " + std::to_string(packet.getDataSize()) + "o of data for event " +
+                    std::to_string(event));
 
-	/*sf::Packet packet;
-	if (socket.receive(packet) != sf::Socket::Done)
-	{
-		std::cout << "Error during packet reception" << std::endl;
-	}
+        std::lock_guard lockGuard(_mutex);
 
-	int eventID;
-	if (packet >> eventID)
-	{
-		_eventEmitter.emit(eventID, packet);
-	}
-	else
-	{
-		std::cout << "Error can't decapsulate eventID" << std::endl;
-	}*/
+        if (socket.send(packet/*, _clientConnectionSettings.ip, _clientConnectionSettings.port*/) !=
+            sf::Socket::Done)
+        {
+            Logger::Err("Error while sending data | dataSize : " + std::to_string(packet.getDataSize()) + 'o');
+            return;
+        }
+    });
+
+    sendThread.launch();
+}
+
+void ServerSocket::emitToAll(SocketEvents event, const sf::Packet& data)
+{
+    // we asynchronously send data
+    sf::Thread sendThread = sf::Thread([this, &event, &data]()
+    {
+        for(const auto& socketClientPair : _clients)
+        {
+            emit(*socketClientPair.second->getSocket(), event, data);
+        }
+    });
+
+    sendThread.launch();
 }
 
 void ServerSocket::registerListeners(sf::TcpSocket* clientSocket)
 {
-	
+
 }
 
-void ServerSocket::onClientConnection(sf::TcpSocket* clientSocket)
+void ServerSocket::onClientConnection(const Client& client)
 {
-	Logger::Log("Client connecte !");
+    Logger::Log(
+            std::string("New Client Connected | ip : ")
+            + client.getSocket()->getRemoteAddress().toString()
+            + " id : " + client.getId()
+    );
 
-	// TESTS
+	sf::Packet initSocketConfig;
+    initSocketConfig << client.getId();
+    // TODO : Set Player default position / values
 
-	/*sf::Packet hello;
-	hello << SocketEvents::Connected;
-	hello << "Hello World";
+    emit(*client.getSocket(), SocketEvents::Connected, initSocketConfig);
+    emitToAll(SocketEvents::NewPlayerConnected, initSocketConfig);
+}
 
-	if(clientSocket->send(hello) != sf::Socket::Done)
-	{
-		std::cout << "Error during hello" << std::endl;
-	}
+void ServerSocket::onClientDisconnect(const Client &client)
+{
+    Logger::Log("Client disconnected | id : " + client.getId());
 
-	sf::Packet packet;
-	if (clientSocket->receive(packet) != sf::Socket::Done)
-	{
-		std::cout << "Error during packet reception" << std::endl;
-	}
-
-	SocketEvents event;
-	std::string data;
-
-	packet >> (int&)event;
-	packet >> data;
-
-	std::cout << "data recieved :" << std::endl;
-	std::cout << event << std::endl;
-	std::cout << data << std::endl;
-
-	*/
+    _clientsSocketSelector.remove(*client.getSocket());
+    _clients.erase(client.getId());
 }

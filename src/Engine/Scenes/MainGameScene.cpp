@@ -161,7 +161,7 @@ void MainGameScene::initFonts()
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs(deltaTime);
-	_poPossibEngin->setMousePosition();
+	_poPossibEngin->getInputsManager().setMousePosition();
 	
 	_gameManager->update(deltaTime);
 
@@ -172,13 +172,11 @@ void MainGameScene::update(const float& deltaTime)
 		pongBall->update(deltaTime);
 	}
 
-	_character1->setMousePosition(_poPossibEngin->getMousePosition());
-	_character2->setMousePosition(_poPossibEngin->getMousePosition());
+	_character1->setMousePosition(_poPossibEngin->getInputsManager().updateMousePosition());
+	_character2->setMousePosition(_poPossibEngin->getInputsManager().updateMousePosition());
 
 	_character1->update(deltaTime);
 	_character2->update(deltaTime);
-
-
 }
 
 void MainGameScene::render(sf::RenderTarget* target)

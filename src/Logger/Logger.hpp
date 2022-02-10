@@ -5,6 +5,7 @@
 #ifndef NETPONG_PROJECT_LOGGER_HPP
 
 #include <vector>
+#include <map>
 #include <string>
 #include <thread>
 #include <mutex>
@@ -27,8 +28,13 @@ public:
     static void Log(const std::string& message);
     static void Warn(const std::string& message);
     static void Err(const std::string& message);
+
+    static void SetThreadLabel(const std::string& label);
+    static void SetThreadLabel(const std::string& label, std::thread::id threadID);
 private:
     static std::mutex _mutex;
+
+    static std::map<std::thread::id, std::string> _threadsLabels;
 };
 
 #define NETPONG_PROJECT_LOGGER_HPP

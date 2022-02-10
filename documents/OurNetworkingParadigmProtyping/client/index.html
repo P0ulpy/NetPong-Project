@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+    <meta charset="UTF-8">
+    <title>Airplanes - Dead Rekoning</title>
+    <meta name="Access-Control-Allow-Origin" content="true">
+
+    <script defer src="vendors/socket.io.min.js"></script>
+    <script src="vendors/p5.min.js"></script>
+    <script src="assets/util.js"></script>
+
+    <style>
+        body {
+            background-color: rgb(13, 17, 23);
+        }
+    </style>
+</head>
+<body>
+    <footer>
+        <script type="module">
+
+            import * as main from "./assets/main.js";
+
+            window.preload = main.preload;
+            window.setup = main.setup;
+            window.draw = main.draw;
+
+            document.airplane = main.airplane;
+
+        </script>
+    </footer>
+</body>
+</html>

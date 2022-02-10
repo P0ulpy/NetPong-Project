@@ -5,12 +5,12 @@
 class SocketConnectionScene : public Scene
 {
 public:
-	SocketConnectionScene(PoPossibEngin& poPossibEngin);
-	~SocketConnectionScene();
+	explicit SocketConnectionScene(PoPossibEngin& poPossibEngin);
+	~SocketConnectionScene() override;
 
-	void start();
-	void update(const float& deltaTime);
-	void render(sf::RenderTarget* renderTarget = nullptr);
+	void start() final;
+	void update(const float& deltaTime) final;
+	void render(sf::RenderTarget* renderTarget = nullptr) final;
 
 private:
 	bool joinWindowOpen = false;

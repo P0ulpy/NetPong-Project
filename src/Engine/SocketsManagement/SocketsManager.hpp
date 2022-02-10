@@ -22,10 +22,12 @@ struct ClientConnectionSettings
 {
     std::string ip = "127.0.0.1";
     uint16_t port = 25565;
+	int32_t connectionTimeout = 1000;
 
-    explicit ClientConnectionSettings(std::string pIP = "127.0.0.1", uint16_t pPort = 25565)
+    explicit ClientConnectionSettings(std::string pIP = "127.0.0.1", uint16_t pPort = 25565, uint32_t connectionTimeout = 1000)
             : ip(std::move(pIP))
-            , port(pPort) {}
+            , port(pPort)
+			, connectionTimeout(connectionTimeout) {}
 };
 
 class SocketManager
@@ -41,8 +43,8 @@ public:
 
 	[[nodiscard]] ClientSocket* getSocketClient() const;
 	[[nodiscard]] Server* getServerInstance() const;
-	[[nodiscard]] const bool isHost() const;
-	[[nodiscard]] const bool isClient() const;
+	[[nodiscard]] bool isHost() const;
+	[[nodiscard]] bool isClient() const;
 
 private:
 	PoPossibEngin& _engine;

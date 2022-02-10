@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "../../../Logger/Logger.hpp"
 
 Server::Server(const HostSettings& hostSettings, PoPossibEngin* engine)
     : _hostSettings(hostSettings)
@@ -16,5 +17,5 @@ const ServerSocket& Server::getServerSocket() const { return _serverSocket; }
 
 void Server::threadEntry()
 {
-
+    Logger::SetThreadLabel("ServerMainThread");
 }

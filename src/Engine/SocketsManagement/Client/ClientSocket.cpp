@@ -1,5 +1,4 @@
 #include "ClientSocket.hpp"
-#include "../SocketEvents.hpp"
 #include "../../../Logger/Logger.hpp"
 
 #include <iostream>
@@ -11,18 +10,15 @@ ClientSocket::ClientSocket(const ClientConnectionSettings& clientConnectionSetti
 {
 	if(_socket.connect(
 		clientConnectionSettings.ip, 
-		clientConnectionSettings.port
+		clientConnectionSettings.port,
+        sf::milliseconds(clientConnectionSettings.connectionTimeout)
 	) != sf::Socket::Status::Done)
 	{
-		throw std::exception("can't connect to remote");
+        Logger::Log("can't connect to remote");
+        return;
 	}
 
-	Logger::Log(
-            "Connected to remote "
-            + clientConnectionSettings.ip
-            + ":"
-            + std::to_string(clientConnectionSettings.port)
-    );
+	Logger::Log("Connected to remote " + clientConnectionSettings.ip + ":" + std::to_string(clientConnectionSettings.port));
 
 	registerListeners();
 }
@@ -38,13 +34,23 @@ const EventEmitter& ClientSocket::getEventEmitter() const { return _eventEmitter
 
 void ClientSocket::registerListeners()
 {
-	_eventEmitter.on(SocketEvents::Connected, [this](sf::Packet packet) -> void { onConnected(packet); });
+    _eventEmitter.on(SocketEvents::Connected, [this](sf::Packet packet) -> void { onConnected(packet); });
+    _eventEmitter.on(SocketEvents::Disconnected, [this](sf::Packet packet) -> void
+    {
+        Logger::Log("Disconnected");
+    });
+    _eventEmitter.on(SocketEvents::NewPlayerConnected, [this](sf::Packet packet) -> void
+    {
+        Logger::Log("New Player connected");
+    });
 	_listenThread.launch();
 }
 
 [[noreturn]] void ClientSocket::listenEvents()
 {
-	while(true)
+    Logger::SetThreadLabel("ClientSocket-Listen");
+
+    while(true)
 	{
 		sf::Packet packet;
 		if(_socket.receive(packet) != sf::Socket::Done)
@@ -55,14 +61,12 @@ void ClientSocket::registerListeners()
 		int eventID;
 		if(packet >> eventID)
 		{
-			if (eventID > SocketEvents::Count || eventID < 0)
+			if (eventID >= SocketEvents::Count || eventID < 0)
 			{
-				Logger::Err(
-                    std::string("Can't emit event \"")
-                    + std::to_string(eventID)
-                    + std::string("\" eventID is invalid")
-                );
+				Logger::Err("Can't emit event \"" + std::to_string(eventID) + "\" eventID is invalid");
 			}
+
+            std::lock_guard lockGuard(_mutex);
 
 			_eventEmitter.emit(eventID, packet);
 		}
@@ -78,25 +82,31 @@ void ClientSocket::onConnected(sf::Packet packet)
 	std::string socketID;
 	if (!(packet >> socketID))
 	{
-		Logger::Err("Error can't decapsulate client socketID");
+		Logger::Err("Error can't decapsulate client socketID" + socketID);
 		return;
 	}
 
 	_id = socketID;
+}
 
-	// TESTS
+void ClientSocket::send(SocketEvents event, const sf::Packet& data)
+{
+    // we asynchronously send data
+    sf::Thread sendThread = sf::Thread([this, &event, &data]()
+    {
+        sf::Packet packet;
+        packet << (int)event;
+        packet << data;
 
-	std::string message;
-	packet >> message;
+        Logger::Log("ClientSocket : Sending " + std::to_string(packet.getDataSize()) + "o of data for event" + std::to_string(event));
 
-	Logger::Log("OnConnected : " + message);
+        std::lock_guard lockGuard(_mutex);
 
-	sf::Packet sendPacket;
+        if (_socket.send(packet/*, _clientConnectionSettings.ip, _clientConnectionSettings.port*/) != sf::Socket::Done)
+        {
+            Logger::Err("Error while sending data | dataSize : " + std::to_string(packet.getDataSize()));
+        }
+    });
 
-	if (_socket.send(packet) != sf::Socket::Done)
-	{
-		Logger::Err("Error while sending data : " + message);
-	}
-
-	// TESTS
+    sendThread.launch();
 }

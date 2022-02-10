@@ -35,5 +35,5 @@ Server* SocketManager::getServerInstance() const
 {
 	return _serverInstance;
 }
-const bool SocketManager::isHost() const { return (_serverInstance); }
-const bool SocketManager::isClient() const { return (_socketClient); }
+bool SocketManager::isHost() const { return (_serverInstance); }
+bool SocketManager::isClient() const { return (_socketClient); }

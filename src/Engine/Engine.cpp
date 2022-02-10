@@ -20,7 +20,6 @@ PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
     : _engineConfig(engineConfig)
 	, _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this))
 	, _logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
-	, _socketManager(SocketManager(*this))
 {
 	/*
 	if (_instance != nullptr)
@@ -51,17 +50,15 @@ void PoPossibEngin::stop()
 	_renderThread.terminate();
 	_logicThread.terminate();
 
-	_renderWindow->close();
+    ImGui::SFML::Shutdown();
+    _renderWindow->close();
 }
 
 PoPossibEngin::~PoPossibEngin()
 {
 	delete _renderWindow;
 	delete _currScene;
-
-	ImGui::SFML::Shutdown();
 }
-
 
 #pragma region GET/SET
 
@@ -78,16 +75,16 @@ sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
 
 float PoPossibEngin::getDeltaTime() const { return _deltaTime; }
 
-InputsManager& PoPossibEngin::getInputsManager() { return _inputManager; }
+InputsManager& PoPossibEngin::getInputsManager() { return _inputsManager; }
 SocketManager& PoPossibEngin::getSocketManager() { return _socketManager; }
 
 #pragma endregion GET/SET
 
 void PoPossibEngin::pollEvents()
 {
-	_inputManager.updateEvents(*_renderWindow);
+	_inputsManager.updateEvents(*_renderWindow);
 
-	if(_inputManager.getEvent(sf::Event::Closed))
+	if(_inputsManager.getEvent(sf::Event::Closed))
 	{
 		stop();
 	}
@@ -97,6 +94,7 @@ void PoPossibEngin::pollEvents()
 
 void PoPossibEngin::renderThreadEntry()
 {
+    Logger::SetThreadLabel("Render-Thread");
 	Logger::Log("Render Thread Entry");
 
 	renderThread_InitWindow();
@@ -135,11 +133,11 @@ void PoPossibEngin::renderThreadUpdate()
 {
 	if(_renderWindow == nullptr)
 	{
-        Logger::Err("_renderWindow not initialized");
-        throw std::exception("_renderWindow not initialized");
+        Logger::Err("_renderWindow not initialized stopping");
+        return;
 	}
 
-	while (_renderWindow->isOpen())
+    while (_renderWindow->isOpen())
 	{
 		if (_engineState == RUNNING)
 		{
@@ -194,33 +192,25 @@ void PoPossibEngin::renderThreadDebugInfo()
 
 void PoPossibEngin::logicThreadEntry()
 {
-	Logger::Log("Logic Thread Entry");
-
-	/*while (true)
-	{
-		if (_engineState == RUNNING)
-		{
-			throw std::exception("not implemented");
-		}
-	}*/
+    Logger::SetThreadLabel("Logic-Thread");
+    Logger::Log("Logic Thread Entry");
 }
 
 void PoPossibEngin::logicThreadUpdate()
 {
-	throw std::exception("not implemented");
+    /*while (true)
+    {
+        if (_engineState == RUNNING)
+        {
+            throw std::exception("not implemented");
+        }
+    }*/
 }
 
 #pragma endregion LogicThread
 
-//Mouse
-void PoPossibEngin::setMousePosition() {	mousePosition = sf::Mouse::getPosition(getRenderWindow());}
-sf::Vector2i PoPossibEngin::getMousePosition() { return mousePosition; }
-
-
 void PoPossibEngin::loadScene(SceneType sceneType)
 {
-	// IMPLEMENTATION TEMPORAIRE
-
 	_engineState = PAUSE;
 
 	Scene* newScene;

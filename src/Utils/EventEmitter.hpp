@@ -33,14 +33,11 @@
 class EventEmitter
 {
 public:
-
     EventEmitter();
-
     ~EventEmitter();
 
     template <typename... Args>
     unsigned int add_listener(unsigned int event_id, std::function<void(Args...)> cb);
-
     unsigned int add_listener(unsigned int event_id, std::function<void()> cb);
 
     template<typename LambdaType>
@@ -50,7 +47,6 @@ public:
 
     template <typename... Args>
     unsigned int on(unsigned int event_id, std::function<void(Args...)> cb);
-
     unsigned int on(unsigned int event_id, std::function<void()> cb);
 
     template<typename LambdaType>
@@ -66,21 +62,18 @@ public:
 protected:
     struct ListenerBase
     {
-        ListenerBase() {}
-
-        ListenerBase(unsigned int i)
+        ListenerBase() = default;
+        explicit ListenerBase(unsigned int i)
             : id(i) {}
 
-        virtual ~ListenerBase() {}
-
+        virtual ~ListenerBase() = default;
         unsigned int id;
     };
 
     template <typename... Args>
     struct Listener : public ListenerBase
     {
-        Listener() {}
-
+        Listener() = default;
         Listener(unsigned int i, std::function<void(Args...)> c)
             : ListenerBase(i), cb(c) {}
 
@@ -93,8 +86,6 @@ protected:
 
     EventEmitter(const EventEmitter&) = delete;
     const EventEmitter& operator = (const EventEmitter&) = delete;
-
-
 
     // http://stackoverflow.com/a/21000981
     template <typename T>
