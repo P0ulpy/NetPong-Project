@@ -144,6 +144,17 @@ void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
 {
 	_phantomBallEffect->render(target);
 }
+ 
+bool PongBall::hitPlayer(float c2x, float c2y, float c2r, sf::Color color2)
+{
+	if (_canKill && _isActive && color2 != _ballColor)
+	{
+		return Utils::circleCircleCollision(_ballShape.getPosition().x, _ballShape.getPosition().y, _ballShape.getRadius(), c2x, c2y, c2r);
+	}
+
+	return false;
+	
+}
 
 bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)
 {
@@ -168,6 +179,7 @@ bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, float&
 	}
 
 	return false;
+
 }
 
 void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity, const sf::Color& colorNormal, const sf::Color& colorInactive)

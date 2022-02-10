@@ -6,6 +6,7 @@
 #include "../../Game/Entities/Character.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
+#include "../../Utils/Utils.hpp"
 
 constexpr int NUM_MAX_PONGBALL = 500;
 
@@ -28,6 +29,7 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
+
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
@@ -89,11 +91,11 @@ void MainGameScene::initValues()
 	{
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
 	}
-
-	_players.emplace_back(new Character(sf::Color::Red));
+	
+	_players.emplace_back(new Character(_player0color));
 	_players.back()->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
 
-	_players.emplace_back(new Character(sf::Color::Blue));
+	_players.emplace_back(new Character(_player1color));
 	_players.back()->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
 
 	_gameManager = std::make_shared<GameManager>(this);
@@ -140,6 +142,21 @@ void MainGameScene::update(const float& deltaTime)
 	for (const auto pongBall : _pongBalls)
 	{
 		pongBall->update(deltaTime);
+		
+		
+		if (pongBall->hitPlayer(_players[0]->getPositionAndRadiusCharac().x, _players[0]->getPositionAndRadiusCharac().y, _players[0]->getPositionAndRadiusCharac().z, _player0color))
+		{
+
+			std::cout << "Player red hit" << std::endl;
+
+		}
+
+		if (pongBall->hitPlayer(_players[1]->getPositionAndRadiusCharac().x, _players[1]->getPositionAndRadiusCharac().y, _players[1]->getPositionAndRadiusCharac().z, _player1color))
+		{
+
+			std::cout << "Player blue hit" << std::endl;
+
+		}
 	}
 
 	for (const auto player : _players)
@@ -147,6 +164,11 @@ void MainGameScene::update(const float& deltaTime)
 		player->setMousePosition(_poPossibEngin->getMousePosition());
 		player->update(deltaTime);
 	}
+
+	
+	
+	
+
 }
 
 void MainGameScene::render(sf::RenderTarget* target)

@@ -17,6 +17,8 @@ private:
 	sf::RectangleShape firstAmmo;
 	sf::RectangleShape secondAmmo;
 
+
+
 	//PongBall colors
 	sf::Color _ammoColorNormal;
 	sf::Color _ammoColorInactive;
@@ -26,15 +28,19 @@ private:
 	int yCharDirection = 0;
 	//Rotation du joueur
 	float _rotation;
-	float _cooldownShoot = 0;
-
+	//Cadence de tir
 	bool _cooldownActivated = false;
-	bool _isReloading = false;
+	float _cooldownShoot = 0;
+	float _endCooldown = 1;
 
+	//Rechargement des balles
+	bool _isReloading = false;
 	float _reloadingTime = 0;
+	float _endReloading = 3;
 
 	sf::Vector2i mousePosition;
 
+	//Nombre de balles max
 	int _ammos = 2;
 
 public:
@@ -52,6 +58,8 @@ public:
 	bool isInCooldown();
 	bool isReloading();
 
+	
+	
 	void activateCooldown(bool activate);
 	void activateReloading(bool activateReload);
 
@@ -63,10 +71,11 @@ public:
 	void direction(int isleft, int isright, int up, int down, float deltaTime);
 
 	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
-	bool characterCollisionWall(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;
+	bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;
 
 	sf::Vector2f shootDirection(sf::Vector2i mousePos);
 	sf::Vector2f shootDepart();
+	sf::Vector3f getPositionAndRadiusCharac();
 
 	void ammoCount(int ammo);
 

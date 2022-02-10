@@ -26,6 +26,11 @@ public:
 	void hideAllPongBalls() const;
 	void pushInactivePongBall(PongBall* pongBallToPush);
 
+	//Red
+	sf::Color _player0color = sf::Color(255, 40, 0);
+	//Blue
+	sf::Color _player1color = sf::Color(0, 40, 255);
+
 	void setPlayersToDefaultSpawnPoints() const;
 
 private:

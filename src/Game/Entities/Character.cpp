@@ -24,23 +24,23 @@ constexpr int DEFAULT_SPAWN_POS_Y = 500;
 
 Character::Character(sf::Color color)
 {
-	//Préparation du personnage
+	//Prï¿½paration du personnage
 	charac.setRadius(CHARAC_RADIUS);
 	charac.setFillColor(color);
 
-	//Préparation du canon
+	//Prï¿½paration du canon
 	canon.setSize(sf::Vector2f(CANON_SIZE_X, CANON_SIZE_Y));
 	canon.setFillColor(sf::Color::White);
 
-	//Préparation de la zone d'où la balle part
+	//Prï¿½paration de la zone d'oï¿½ la balle part
 	shootZone.setRadius(SHOOT_ZONE_RADIUS);
 	shootZone.setFillColor(sf::Color::Magenta);
 
-	//Première munition
+	//Premiï¿½re munition
 	firstAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	firstAmmo.setFillColor(sf::Color::White);
 
-	//Deuxième munition
+	//Deuxiï¿½me munition
 	secondAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	secondAmmo.setFillColor(sf::Color::White);
 
@@ -173,7 +173,7 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 {
 	sf::Vector2f outImpactPoint{ 0,0 };
 
-	bool hit = characterCollisionWall(x1, y1, x2, y2, outImpactPoint, remainingTime);
+	bool hit = characterCollision(x1, y1, x2, y2, outImpactPoint, remainingTime);
 
 	if (hit)
 	{
@@ -203,7 +203,7 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 	return false;
 }
 
-bool Character::characterCollisionWall(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const
+bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const
 {
 	sf::Vector2f outIntersectionPoint{};
 
@@ -253,7 +253,6 @@ bool Character::characterCollisionWall(float x1, float y1, float x2, float y2, s
 void Character::ammoCount(int ammo)
 {
 	_ammos = _ammos + ammo;
-	std::cout << "Ammos = " << _ammos << std::endl;
 }
 
 sf::Vector2f Character::shootDirection(sf::Vector2i mousePos)
@@ -303,4 +302,9 @@ bool Character::isReloading()
 	return _isReloading;
 }
 
+//x = position en x, y = position en y et z = rayon 
+sf::Vector3f Character::getPositionAndRadiusCharac() 
+{
+	return sf::Vector3f(charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2);
+}
 
