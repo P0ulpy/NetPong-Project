@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "../../Game/Entities/PongBall.hpp"
-#include "../../Game/Terrains/Terrain.hpp"
 #include "../../Game/Entities/Character.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
@@ -33,6 +32,9 @@ void MainGameScene::updateInputs(const float& deltaTime)
 		_gameManager->player1WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
 		_gameManager->player2WinsRound();
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::U))
+		for (const auto pongBall : _pongBalls)
+			pongBall->startPhantomBallEffect();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::I))
 		for (const auto pongBall : _pongBalls)
 			pongBall->stopPhantomBallEffect();
@@ -106,8 +108,7 @@ void MainGameScene::initFonts()
 }
 
 void MainGameScene::makePlayerShoot(int playerIndex)
-{// TODO : Ce serait mieux que ce soit le joueur qui tire, et pas la MainGameScene
-
+{
 	if (playerIndex < 0 || playerIndex > _players.size() - 1) return;
 	if (_inactivePongBalls.empty()) return;
 

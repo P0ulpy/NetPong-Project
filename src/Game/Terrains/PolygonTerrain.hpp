@@ -48,6 +48,7 @@ private:
 
 	int _currentTerrain{ 1 };
 	sf::ConvexShape _terrainShape;
+	sf::Vector2f _firstPointPositionOfShape;
 	std::vector<sf::Vector2f> _pointPositions;
 
 	//Initializers

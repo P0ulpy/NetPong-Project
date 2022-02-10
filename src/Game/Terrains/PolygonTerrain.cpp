@@ -53,7 +53,7 @@ void PolygonTerrain::updateCollision(const float& deltaTime) const
 						std::cout << "prout remaining time " << remainingTime << std::endl;
 					}
 
-					pongBall->addNumBounceAndUpdateVisibility();
+					//pongBall->addNumBounceAndUpdateVisibility();
 					hasCollisionOccured = true;
 					hasOnceCollisionOccured = true;
 					break;

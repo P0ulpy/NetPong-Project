@@ -50,6 +50,7 @@ public:
 	void resetBallDestAndOldPos(const float& deltaTime);
 
 	void addNumBounceAndUpdateVisibility();
+	void startPhantomBallEffect();
 	void stopPhantomBallEffect();
 
 private:
@@ -74,7 +75,6 @@ private:
 	bool _canKill;
 
 	//Terrain
-	sf::Rect<float> _terrainArea;
 	PolygonTerrain* _polygonTerrain;
 
 	//Boost
@@ -91,5 +91,4 @@ private:
 	void initVariables();
 	void initShapes(const sf::RenderWindow& window);
 	void initBoost();
-	void initPhantomEffect();
 };
