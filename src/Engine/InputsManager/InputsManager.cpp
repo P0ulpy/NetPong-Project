@@ -1,10 +1,10 @@
 #include "imgui-SFML.h"
+#include "../Engine.hpp"
 
-#include "InputsManager.hpp"
-
-InputsManager::InputsManager()
+InputsManager::InputsManager(PoPossibEngin& engine)
+    : _engine(engine)
 {
-	clearEvents();
+    clearEvents();
 }
 
 void InputsManager::clearEvents()
@@ -44,3 +44,7 @@ bool InputsManager::getEvent(sf::Event::EventType eventType, sf::Event& outEvent
 
 	return false;
 }
+
+//Mouse
+void InputsManager::setMousePosition() { _mousePosition = sf::Mouse::getPosition(_engine.getRenderWindow()); }
+sf::Vector2i InputsManager::updateMousePosition() { return _mousePosition; }

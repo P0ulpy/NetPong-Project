@@ -8,20 +8,17 @@ namespace sf {
 	class TcpSocket;
 }
 
-class Client : protected EventEmitter
+class Client : public EventEmitter
 {
 public:
 	Client(const std::string& id, sf::TcpSocket* socket);
+    Client(const Client&) = delete;
+    const Client& operator = (const Client&) = delete;
 
-	template <typename... Args>
-	unsigned int on(SocketEvents event_id, std::function<void(Args...)> cb) { add_listener(event_id, cb); }
-	unsigned int on(SocketEvents event_id, std::function<void()> cb)		{ add_listener(event_id, cb); }
+    ~Client();
 
-	template<typename LambdaType>
-	unsigned int on(SocketEvents event_id, LambdaType cb)				    { add_listener(event_id, cb); }
-
-	[[nodiscard]] const sf::TcpSocket* getSocket() const					{ return _socket; }
-	[[nodiscard]] const std::string& getId() const							{ return _id; }
+	[[nodiscard]] sf::TcpSocket* getSocket() const;
+	[[nodiscard]] const std::string& getId() const;
 
 private:
 	std::string _id;

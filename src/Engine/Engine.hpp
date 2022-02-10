@@ -17,14 +17,14 @@ struct EngineConfig
 		unsigned int style = sf::Style::Default;
 		unsigned int framerateLimit = 60; // 0 mean automatic (verticalSyncEnabled = true)
 
-		WindowConfig(sf::VideoMode pVideoMode, std::string pTitle = "Render Window", unsigned int pStyle = sf::Style::Default, unsigned int pFramerateLimit = 60)
+		explicit WindowConfig(sf::VideoMode pVideoMode, std::string pTitle = "Render Window", unsigned int pStyle = sf::Style::Default, unsigned int pFramerateLimit = 60)
 			: videoMode(pVideoMode), title(pTitle), style(pStyle), framerateLimit(pFramerateLimit) {}
 	};
 
 	WindowConfig windowConfig;
 
-	EngineConfig(WindowConfig pWindowConfig)
-		: windowConfig(pWindowConfig) {}
+	explicit EngineConfig(WindowConfig pWindowConfig)
+		: windowConfig(std::move(pWindowConfig)) {}
 };
 
 enum EngineState { STOP, INITIALIZING, INITIALIZED, RUNNING, PAUSE };
@@ -35,12 +35,9 @@ enum SceneType { SocketConnection, MainGame };
 class PoPossibEngin
 {
 public:
-	PoPossibEngin() = default;
-	PoPossibEngin(const EngineConfig& engineConfig);
+	explicit PoPossibEngin(const EngineConfig& engineConfig);
 
-	PoPossibEngin(const sf::Thread &renderThread);
-
-	~PoPossibEngin();
+    ~PoPossibEngin();
 
 	void start();
 	void stop();
@@ -48,8 +45,6 @@ public:
 	// get / set
 
 	//[[nodiscard]] static PoPossibEngin& getInstance();
-	sf::Vector2i getMousePosition();
-
 	
 	[[nodiscard]] sf::RenderWindow& getRenderWindow() const;
 	[[nodiscard]] const EngineState& getEngineState() const;
@@ -62,15 +57,11 @@ public:
 
 	[[nodiscard]] InputsManager& getInputsManager();
 	[[nodiscard]] SocketManager& getSocketManager();
-	void setMousePosition();
+
 
 private:
 
 	//static PoPossibEngin* _instance;
-
-	sf::Vector2i mousePosition;
-
-	
 
 	EngineState _engineState = STOP;
 	const EngineConfig& _engineConfig;
@@ -81,16 +72,13 @@ private:
 
 	sf::Clock _deltaClock;
 
-	// TEMP : utilisation de _deltaTime pour le fix du soucis de la valeur de la clock incorecte lors de l'appel de .restart()
 	float _deltaTime = 0;
 
-	void pollEvents();
-
 	// InputManager
+	InputsManager _inputsManager { InputsManager(*this) };
+    void pollEvents();
 
-	InputsManager _inputManager;
-
-	// Threads
+    // Threads
 
 	sf::Thread _renderThread;
 	void renderThreadEntry();
@@ -104,13 +92,10 @@ private:
 	void loadScene(SceneType sceneType);
 
 	// Net
-
-	SocketManager _socketManager;
+	SocketManager _socketManager { SocketManager(*this) };
 
 	// DEBUG
-
 	void renderThreadDebugInfo();
-
 	float _currFrameTimeCount = 0;
 	int _currFrameCount = 0;
 	int _currFrameRate = 0;

@@ -119,7 +119,7 @@ void Character::setShieldRotation(sf::Vector2i mousePos)
 	float dx = curPos.x - mousePos.x;
 	float dy = curPos.y - mousePos.y;
 
-	float rotation = ((atan2(dy, dx)) * 180.0 / PI) - 90;
+	float rotation = (atan2(dy, dx) * 180.0 / PI) - 90;
 	shield.setRotation(rotation);
 }
 
