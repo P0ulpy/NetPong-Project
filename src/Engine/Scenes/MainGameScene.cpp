@@ -4,6 +4,7 @@
 
 #include "../../Game/Entities/PongBall.hpp"
 #include "../../Game/Entities/Character.hpp"
+#include "../../Engine/Animator/AnimatorManager.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
 #include "../../Utils/Utils.hpp"
@@ -29,7 +30,6 @@ MainGameScene::~MainGameScene()
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
-
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
@@ -86,7 +86,7 @@ void MainGameScene::updateInputs(const float& deltaTime)
 void MainGameScene::initValues()
 {
 	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls, _players);
-
+	_animator = std::make_unique<AnimatorManager>();
 	for (int i = 0 ; i < NUM_MAX_PONGBALL ; i++)
 	{
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
@@ -144,17 +144,19 @@ void MainGameScene::update(const float& deltaTime)
 		pongBall->update(deltaTime);
 		
 		
-		if (pongBall->hitPlayer(_players[0]->getPositionAndRadiusCharac().x, _players[0]->getPositionAndRadiusCharac().y, _players[0]->getPositionAndRadiusCharac().z, _player0color))
+		if (pongBall->hitPlayer(_players[0]->getPosition().x, _players[0]->getPosition().y, _players[0]->getRadius(), _player0color))
 		{
+			_players[0]->KillPlayer();
+			_animator->DeathAnimation(_players[0]->getPosition());
 
-			std::cout << "Player red hit" << std::endl;
-
+			
 		}
 
-		if (pongBall->hitPlayer(_players[1]->getPositionAndRadiusCharac().x, _players[1]->getPositionAndRadiusCharac().y, _players[1]->getPositionAndRadiusCharac().z, _player1color))
+		if (pongBall->hitPlayer(_players[1]->getPosition().x, _players[1]->getPosition().y, _players[1]->getRadius(), _player1color))
 		{
 
-			std::cout << "Player blue hit" << std::endl;
+			_players[1]->KillPlayer();
+			_animator->DeathAnimation(_players[1]->getPosition());
 
 		}
 	}
@@ -175,6 +177,8 @@ void MainGameScene::render(sf::RenderTarget* target)
 {
 	_gameManager->render(*target);
 	_polygonTerrain->render(*target);
+	
+
 
 	for (const auto pongBall : _pongBalls)
 	{
@@ -185,6 +189,8 @@ void MainGameScene::render(sf::RenderTarget* target)
 	{
 		player->render(*target);
 	}
+
+	_animator->render(*target);
 }
 
 PolygonTerrain* MainGameScene::getPolygonTerrain() const

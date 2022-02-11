@@ -134,16 +134,19 @@ void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime
 
 void Character::render(sf::RenderTarget& target)const
 {
-	target.draw(canon);
-	target.draw(charac);
-	if (_ammos > 1)
+	if (_isAlive)
 	{
-		target.draw(firstAmmo);
-		target.draw(secondAmmo);
-	}
-	else if (_ammos > 0)
-	{
-		target.draw(secondAmmo);
+		target.draw(canon);
+		target.draw(charac);
+		if (_ammos > 1)
+		{
+			target.draw(firstAmmo);
+			target.draw(secondAmmo);
+		}
+		else if (_ammos > 0)
+		{
+			target.draw(secondAmmo);
+		}
 	}
 }
 
@@ -303,8 +306,21 @@ bool Character::isReloading()
 }
 
 //x = position en x, y = position en y et z = rayon 
-sf::Vector3f Character::getPositionAndRadiusCharac() 
+sf::Vector2f Character::getPosition()
 {
-	return sf::Vector3f(charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2);
+	return sf::Vector2f(charac.getPosition().x, charac.getPosition().y);
 }
+
+
+float Character::getRadius()
+{
+	return charac.getGlobalBounds().width / 2;
+}
+
+void Character::KillPlayer()
+{
+	_isAlive = false;
+}
+
+
 
