@@ -26,6 +26,14 @@ private	:
 
 	void initValues();
 
+	void player1WinsRound();
+	void player2WinsRound();
+	void playerDrawRound();
+
+	void player1WinsGame();
+	void player2WinsGame();
+
+
 public:
 	GameManager(MainGameScene* pMainGameScene);
 	~GameManager();
@@ -34,12 +42,7 @@ public:
 	void updateRoundEndTimer(const float& deltaTime);
 	void render(sf::RenderTarget& target) const;
 
-	void player1WinsRound();
-	void player2WinsRound();
-	void playerDrawRound();
-
-	void player1WinsGame();
-	void player2WinsGame();
+	void makePlayerWin(int numPlayer);
 
 	void startRoundStartCountdown() const;
 	void endRound();

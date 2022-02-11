@@ -35,9 +35,9 @@ MainGameScene::~MainGameScene()
 void MainGameScene::updateInputs(const float& deltaTime)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
-		_gameManager->player1WinsRound();
+		_gameManager->makePlayerWin(1);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
-		_gameManager->player2WinsRound();
+		_gameManager->makePlayerWin(2);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::U))
 		for (const auto pongBall : _pongBalls)
 			pongBall->startPhantomBallEffect();
@@ -141,18 +141,18 @@ void MainGameScene::makePlayerShoot(int playerIndex)
 
 void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 {
-	for (const auto player : _players)
+	for (int currPlayerIndex = 0; currPlayerIndex < _players.size(); ++currPlayerIndex)
 	{
-		const sf::Vector3f positionAndRadiusCharac = player->getPositionAndRadiusCharac();
-
-		if (pongBall.hitPlayer(positionAndRadiusCharac.x,positionAndRadiusCharac.y,positionAndRadiusCharac.z,player->getNormalAmmoColor()))
+		if (pongBall.hitPlayer(_players[currPlayerIndex]->getPosition().x, _players[currPlayerIndex]->getPosition().y, _players[currPlayerIndex]->getRadius(), _players[currPlayerIndex]->getNormalAmmoColor()))
 		{
-			_players->KillPlayer();
-			_animator->DeathAnimation(_players->getPosition());
+			_players[currPlayerIndex]->setPlayerAlive(false);
+			_animator->DeathAnimation(_players[currPlayerIndex]->getPosition());
+			_gameManager->makePlayerWin(currPlayerIndex+1);
 
 			std::cout << "Player hit !" << std::endl;
 		}
 	}
+
 }
 
 void MainGameScene::update(const float& deltaTime)
@@ -201,6 +201,14 @@ void MainGameScene::render(sf::RenderTarget* target)
 PolygonTerrain* MainGameScene::getPolygonTerrain() const
 {
 	return _polygonTerrain.get();
+}
+
+void MainGameScene::displayPlayers(bool isDisplayed) const
+{
+	for (const auto player : _players)
+	{
+		player->setPlayerAlive(isDisplayed);
+	}
 }
 
 void MainGameScene::hideAllPongBalls() const

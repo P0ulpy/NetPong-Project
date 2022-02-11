@@ -88,5 +88,5 @@ public:
 	//IsActive
 	void toggleCharacterMove(bool canCharacterMove);
 	bool canCharacterMove() const;
-	void KillPlayer();
+	void setPlayerAlive(bool isAlive);
 };

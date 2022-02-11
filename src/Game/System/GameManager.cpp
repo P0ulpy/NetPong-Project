@@ -58,6 +58,13 @@ void GameManager::render(sf::RenderTarget& target) const
 	_gameUI->render(target);
 }
 
+void GameManager::makePlayerWin(int numPlayer)
+{
+	numPlayer = std::min(1, std::max(numPlayer, 2));
+
+	numPlayer == 1 ? player1WinsRound() : player2WinsRound();
+}
+
 void GameManager::player1WinsRound()
 {
 	_scorePlayer1++;
@@ -132,6 +139,7 @@ void GameManager::restartRound(const float& deltaTime)
 
 	_mainGameScene->getPolygonTerrain()->drawRandomTerrain();
 	_mainGameScene->setPlayersToDefaultSpawnPoints();
+	_mainGameScene->displayPlayers(true);
 
 	startRoundStartCountdown();
 }

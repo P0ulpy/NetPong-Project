@@ -324,14 +324,9 @@ float Character::getRadius()
 	return charac.getGlobalBounds().width / 2;
 }
 
-float Character::getRadius()
+void Character::setPlayerAlive(bool isAlive)
 {
-	return charac.getGlobalBounds().width / 2;
-}
-
-void Character::KillPlayer()
-{
-	_isAlive = false;
+	_isAlive = isAlive;
 }
 
 

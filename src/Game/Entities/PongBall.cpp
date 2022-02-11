@@ -13,7 +13,7 @@ constexpr int BALL_SIZE = 20;
 constexpr int MAX_NUM_BOUNCES = 3;
 constexpr float BOOST_DURATION = 2.f;
 
-constexpr float INITIAL_SPEED = 350.f;
+constexpr float INITIAL_SPEED = 450.f;
 
 //--- Constructors - Destructor ---
 PongBall::PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene)

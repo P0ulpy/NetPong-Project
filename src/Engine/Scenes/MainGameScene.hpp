@@ -24,6 +24,7 @@ public:
 	void render(sf::RenderTarget* target = nullptr) override;
 
 	PolygonTerrain* getPolygonTerrain() const;
+	void displayPlayers(bool isDisplayed) const;
 	void hideAllPongBalls() const;
 	void togglePlayersMovement(bool canTheyMove) const;
 	void pushInactivePongBall(PongBall* pongBallToPush);
