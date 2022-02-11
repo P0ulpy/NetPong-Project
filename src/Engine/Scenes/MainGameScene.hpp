@@ -10,6 +10,7 @@ class Terrain;
 class PongBall;
 class PoPossibEngin;
 class Character;
+class AnimatorManager;
 
 class MainGameScene : public Scene
 {
@@ -38,7 +39,9 @@ private:
 	std::stack<PongBall*> _inactivePongBalls;
 	std::vector<Character*> _players;
 	
+	
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
+	std::unique_ptr<AnimatorManager> _animator;
 
 	//Font and texts
 	sf::Font _font;

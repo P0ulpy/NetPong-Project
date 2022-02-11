@@ -4,6 +4,7 @@
 
 #include "../../Game/Entities/PongBall.hpp"
 #include "../../Game/Entities/Character.hpp"
+#include "../../Engine/Animator/AnimatorManager.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
 #include "../SocketsManagement/Client/ClientSocket.hpp"
@@ -89,7 +90,7 @@ void MainGameScene::updateInputs(const float& deltaTime)
 void MainGameScene::initValues()
 {
 	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls, _players);
-
+	_animator = std::make_unique<AnimatorManager>();
 	for (int i = 0 ; i < NUM_MAX_PONGBALL ; i++)
 	{
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
@@ -146,6 +147,9 @@ void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 
 		if (pongBall.hitPlayer(positionAndRadiusCharac.x,positionAndRadiusCharac.y,positionAndRadiusCharac.z,player->getNormalAmmoColor()))
 		{
+			_players->KillPlayer();
+			_animator->DeathAnimation(_players->getPosition());
+
 			std::cout << "Player hit !" << std::endl;
 		}
 	}
@@ -178,6 +182,8 @@ void MainGameScene::render(sf::RenderTarget* target)
 {
 	_gameManager->render(*target);
 	_polygonTerrain->render(*target);
+	
+
 
 	for (const auto pongBall : _pongBalls)
 	{
@@ -188,6 +194,8 @@ void MainGameScene::render(sf::RenderTarget* target)
 	{
 		player->render(*target);
 	}
+
+	_animator->render(*target);
 }
 
 PolygonTerrain* MainGameScene::getPolygonTerrain() const

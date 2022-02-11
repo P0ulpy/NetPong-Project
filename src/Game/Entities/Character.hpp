@@ -43,6 +43,9 @@ private:
 	//Nombre de balles max
 	int _ammos = 2;
 
+	//Joueur mort
+	bool _isAlive = true;
+
 public:
 	Character(sf::Color color);
 	~Character();
@@ -73,7 +76,9 @@ public:
 
 	sf::Vector2f shootDirection(sf::Vector2i mousePos);
 	sf::Vector2f shootDepart();
-	sf::Vector3f getPositionAndRadiusCharac();
+	sf::Vector2f getPosition();
+
+	float getRadius();
 
 	void ammoCount(int ammo);
 
@@ -83,4 +88,5 @@ public:
 	//IsActive
 	void toggleCharacterMove(bool canCharacterMove);
 	bool canCharacterMove() const;
+	void KillPlayer();
 };
