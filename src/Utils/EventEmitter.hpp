@@ -102,6 +102,8 @@ protected:
     typename function_traits<L>::f_type make_function(L l) {
         return (typename function_traits<L>::f_type)(l);
     }
+public:
+    const std::multimap<unsigned int, std::shared_ptr<ListenerBase>>& getListeners() { return listeners; }
 };
 
 template <typename... Args>
@@ -129,6 +131,8 @@ unsigned int EventEmitter::on(unsigned int event_id, std::function<void(Args...)
 template <typename... Args>
 void EventEmitter::emit(unsigned int event_id, Args... args)
 {
+    if(!listeners.contains(event_id)) return;
+
     std::list<std::shared_ptr<Listener<Args...>>> handlers;
 
     {

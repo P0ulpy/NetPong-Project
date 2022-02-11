@@ -1,5 +1,6 @@
 #include "ClientSocket.hpp"
 #include "../../../Logger/Logger.hpp"
+#include "PlayerSettings.hpp"
 
 #include <iostream>
 
@@ -31,11 +32,14 @@ ClientSocket::~ClientSocket()
 
 const ClientConnectionSettings& ClientSocket::getClientConnectionSettings() const { return _clientConnectionSettings; }
 const EventEmitter& ClientSocket::getEventEmitter() const { return _eventEmitter; }
+bool ClientSocket::isReady() const { return _ready;}
 
 void ClientSocket::registerListeners()
 {
+    Logger::Log("registering listeners for client socket");
+
     _eventEmitter.on(SocketEvents::Connected, [this](sf::Packet packet) -> void { onConnected(packet); });
-    _eventEmitter.on(SocketEvents::Disconnected, [this](sf::Packet packet) -> void
+    _eventEmitter.on(SocketEvents::Disconnected, [this]() -> void
     {
         Logger::Log("Disconnected");
     });
@@ -43,12 +47,14 @@ void ClientSocket::registerListeners()
     {
         Logger::Log("New Player connected");
     });
+
 	_listenThread.launch();
 }
 
 [[noreturn]] void ClientSocket::listenEvents()
 {
     Logger::SetThreadLabel("ClientSocket-Listen");
+    Logger::Log("Start listening events for ClientSocket");
 
     while(true)
 	{
@@ -77,26 +83,16 @@ void ClientSocket::registerListeners()
 	}
 }
 
-void ClientSocket::onConnected(sf::Packet packet)
-{
-	std::string socketID;
-	if (!(packet >> socketID))
-	{
-		Logger::Err("Error can't decapsulate client socketID" + socketID);
-		return;
-	}
-
-	_id = socketID;
-}
-
 void ClientSocket::send(SocketEvents event, const sf::Packet& data)
 {
+    Logger::Log(&"Firing Net event :" [ (int)event]);
+
     // we asynchronously send data
     sf::Thread sendThread = sf::Thread([this, &event, &data]()
     {
         sf::Packet packet;
         packet << (int)event;
-        packet << data;
+        packet.append(data.getData(), data.getDataSize());
 
         Logger::Log("ClientSocket : Sending " + std::to_string(packet.getDataSize()) + "o of data for event" + std::to_string(event));
 
@@ -104,9 +100,22 @@ void ClientSocket::send(SocketEvents event, const sf::Packet& data)
 
         if (_socket.send(packet/*, _clientConnectionSettings.ip, _clientConnectionSettings.port*/) != sf::Socket::Done)
         {
-            Logger::Err("Error while sending data | dataSize : " + std::to_string(packet.getDataSize()));
+           Logger::Err("Error while sending data | dataSize : " + std::to_string(packet.getDataSize()));
         }
     });
 
     sendThread.launch();
+}
+
+void ClientSocket::onConnected(sf::Packet packet)
+{
+	if (!(packet >> _id))
+	{
+		Logger::Err("Error can't decapsulate client socketID: " + _id);
+		return;
+	}
+
+    Logger::Log("Client socket connected and ready");
+
+    _ready = true;
 }

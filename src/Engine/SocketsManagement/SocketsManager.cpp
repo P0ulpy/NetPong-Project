@@ -1,6 +1,6 @@
 #include "SocketsManager.hpp"
 
-#include "Server/Server.hpp"
+#include "Server/ServerMain.hpp"
 #include "Client/ClientSocket.hpp"
 
 SocketManager::SocketManager(PoPossibEngin& engine)
@@ -19,7 +19,7 @@ PoPossibEngin& SocketManager::getEngine() const { return _engine; }
 
 void SocketManager::startServer(const HostSettings& hostSettings)
 {
-	_serverInstance = new Server(hostSettings, &_engine);
+	_serverInstance = new Server::ServerMain(hostSettings, &_engine);
 }
 
 void SocketManager::connectClient(const ClientConnectionSettings& clientConnectionSettings)
@@ -31,7 +31,7 @@ ClientSocket* SocketManager::getSocketClient() const
 {
 	return _socketClient;
 }
-Server* SocketManager::getServerInstance() const
+Server::ServerMain* SocketManager::getServerInstance() const
 {
 	return _serverInstance;
 }

@@ -2,10 +2,13 @@
 
 #include <iostream>
 
-#include "../Server.hpp"
+#include "../ServerMain.hpp"
 #include "../../../../Logger/Logger.hpp"
+//#include "./../../../SocketsManagement/PacketOverload.hpp"
 
-ServerSocket::ServerSocket(Server* server)
+using namespace Server;
+
+ServerSocket::ServerSocket(ServerMain* server)
     : _server(server)
 	, _connectionsListenThread(sf::Thread(&ServerSocket::connectionsListenEntry, this))
 	, _listenEventsThread(sf::Thread(&ServerSocket::listenEvents, this))
@@ -18,7 +21,7 @@ ServerSocket::ServerSocket(Server* server)
         return;
     }
 
-	Logger::Log("Server listening on " + std::to_string(hostSettings.port));
+	Logger::Log("ServerMain listening on " + std::to_string(hostSettings.port));
 
 	_connectionsListenThread.launch();
 	_listenEventsThread.launch();
@@ -59,7 +62,8 @@ const std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients()
             _clientsSocketSelector.add(*newClientSocket);
         }
 
-		onClientConnection(*_clients[UUID].get());
+        registerListeners(_clients[UUID]->getSocket());
+        onClientConnection(*_clients[UUID].get());
 	}
 }
 
@@ -78,17 +82,32 @@ const std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients()
 				std::string id = socketClientPair.first;
 				Client& client = *socketClientPair.second;
 
-				if (_clientsSocketSelector.isReady(*client.getSocket()))
-				{
+				//if (_clientsSocketSelector.isReady(*client.getSocket()))
+				//{
 					sf::Packet packet;
 					sf::Socket::Status status = client.getSocket()->receive(packet);
 
 					switch (status)
 					{
 					case sf::Socket::Done:
+                    // TODO : Refacto faire des fonctions
+                        {
+                            int eventID;
+                            if(packet >> eventID)
+                            {
+                                if (eventID >= SocketEvents::Count || eventID < 0)
+                                {
+                                    Logger::Err("Can't emit event \"" + std::to_string(eventID) + "\" eventID is invalid");
+                                }
 
-                        //
-
+                                std::lock_guard lockGuard(_mutex);
+                                emit(eventID, packet);
+                            }
+                            else
+                            {
+                                Logger::Err("Error can't decapsulate eventID");
+                            }
+                        }
                         break;
                     case sf::Socket::Disconnected: onClientDisconnect(client); _break = true; break;
 					case sf::Socket::Error:
@@ -97,7 +116,7 @@ const std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients()
                             _break = true;
 						break;
                     }
-				}
+				//}
 
                 if(_break)
                     break;
@@ -105,12 +124,12 @@ const std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients()
 		}
         else
         {
-
+            Logger::Err("Wait time elapsed ?");
         }
 	}
 }
 
-void ServerSocket::emit(sf::TcpSocket& socket, SocketEvents event, const sf::Packet& data)
+void ServerSocket::send(sf::TcpSocket& socket, SocketEvents event, const sf::Packet& data)
 {
     sf::Thread sendThread = sf::Thread([this, &socket, &event, &data]()
     {
@@ -134,14 +153,14 @@ void ServerSocket::emit(sf::TcpSocket& socket, SocketEvents event, const sf::Pac
     sendThread.launch();
 }
 
-void ServerSocket::emitToAll(SocketEvents event, const sf::Packet& data)
+void ServerSocket::sendToAll(SocketEvents event, const sf::Packet& data)
 {
     // we asynchronously send data
     sf::Thread sendThread = sf::Thread([this, &event, &data]()
     {
         for(const auto& socketClientPair : _clients)
         {
-            emit(*socketClientPair.second->getSocket(), event, data);
+            send(*socketClientPair.second->getSocket(), event, data);
         }
     });
 
@@ -150,7 +169,17 @@ void ServerSocket::emitToAll(SocketEvents event, const sf::Packet& data)
 
 void ServerSocket::registerListeners(sf::TcpSocket* clientSocket)
 {
+    on(SocketEvents::PlayerSendSettings, [this](sf::Packet packet) -> void
+    {
+        std::string playerSettings;
+        packet >> playerSettings;
+        // TODO : Set Player default position / values / color
 
+        Logger::Log("New PlayerConnected : " + playerSettings);
+
+        // surely unused in future
+        // emitToAll(SocketEvents::NewPlayerConnected, initSocketConfig);
+    });
 }
 
 void ServerSocket::onClientConnection(const Client& client)
@@ -163,10 +192,8 @@ void ServerSocket::onClientConnection(const Client& client)
 
 	sf::Packet initSocketConfig;
     initSocketConfig << client.getId();
-    // TODO : Set Player default position / values
 
-    emit(*client.getSocket(), SocketEvents::Connected, initSocketConfig);
-    emitToAll(SocketEvents::NewPlayerConnected, initSocketConfig);
+    send(*client.getSocket(), SocketEvents::Connected, initSocketConfig);
 }
 
 void ServerSocket::onClientDisconnect(const Client &client)

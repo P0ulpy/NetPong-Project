@@ -13,8 +13,11 @@ public:
 	void render(sf::RenderTarget* renderTarget = nullptr) final;
 
 private:
-	bool joinWindowOpen = false;
-	bool hostWindowOpen = false;
+	bool _joinWindowOpen = false;
+    bool _hostWindowOpen = false;
+    bool _joining = false;
+
+    bool _oui =false;
 
 	void displayHostWindow();
 	void displayJoinWindow();

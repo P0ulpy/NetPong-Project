@@ -3,7 +3,7 @@
 #include "SocketConnectionScene.hpp"
 
 #include "imgui.h"
-#include "../SocketsManagement/Server/Server.hpp"
+#include "../SocketsManagement/Server/ServerMain.hpp"
 
 LobbyScene::LobbyScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -25,11 +25,11 @@ void LobbyScene::update(const float& deltaTime) {}
 
 void LobbyScene::render(sf::RenderTarget* renderTarget)
 {
-	if (_poPossibEngin->getSocketManager().isHost())
+	if (_poPossibEngin->getSocketManager()->isHost())
 	{
-		auto server = _poPossibEngin->getSocketManager().getServerInstance();
+		auto server = _poPossibEngin->getSocketManager()->getServerInstance();
 
-		ImGui::Begin("Server Infos");
+		ImGui::Begin("ServerMaina Infos");
 
 		ImGui::BeginChild("Clients list");
 

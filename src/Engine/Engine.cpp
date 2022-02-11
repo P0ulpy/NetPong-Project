@@ -15,6 +15,7 @@
 
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
     : _engineConfig(engineConfig)
+	, _socketManager(new SocketManager(*this))
 	, _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this))
 	, _logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
 {
@@ -44,6 +45,9 @@ void PoPossibEngin::stop()
 	delete _currScene;
 	_currScene = nullptr;
 
+	delete _socketManager;
+	_socketManager = nullptr;
+
 	_renderThread.terminate();
 	_logicThread.terminate();
 
@@ -55,6 +59,8 @@ PoPossibEngin::~PoPossibEngin()
 {
 	delete _renderWindow;
 	delete _currScene;
+	delete _socketManager;
+
 }
 
 #pragma region GET/SET
@@ -73,7 +79,7 @@ sf::Thread& PoPossibEngin::getLogicThread() { return _renderThread; }
 float PoPossibEngin::getDeltaTime() const { return _deltaTime; }
 
 InputsManager& PoPossibEngin::getInputsManager() { return _inputsManager; }
-SocketManager& PoPossibEngin::getSocketManager() { return _socketManager; }
+SocketManager* PoPossibEngin::getSocketManager() { return _socketManager; }
 
 #pragma endregion GET/SET
 
@@ -100,8 +106,7 @@ void PoPossibEngin::renderThreadEntry()
 	_engineState = INITIALIZED;
 
 	// TEMPORAIRE
-	loadScene(MainGame);
-	//loadScene(SocketConnection);
+	loadScene(SocketConnection);
 
 	renderThreadUpdate();
 }
@@ -195,7 +200,7 @@ void PoPossibEngin::logicThreadEntry()
 
 void PoPossibEngin::logicThreadUpdate()
 {
-	throw std::exception("not implemented");
+	//throw std::exception("not implemented");
 }
 
 #pragma endregion LogicThread

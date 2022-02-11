@@ -1,4 +1,5 @@
-﻿#include "Engine/Engine.hpp"
+﻿#include <iostream>
+#include "Engine/Engine.hpp"
 #include "Logger/Logger.hpp"
 
 int main(int argc, char** argv)

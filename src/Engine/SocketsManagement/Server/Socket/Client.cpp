@@ -2,6 +2,8 @@
 #include "../../../../Logger/Logger.hpp"
 #include <SFML/Network.hpp>
 
+using namespace Server;
+
 Client::Client(const std::string& id, sf::TcpSocket* socket)
 	: _id(id)
 	, _socket(socket)
@@ -17,3 +19,5 @@ Client::~Client()
 
 sf::TcpSocket *Client::getSocket() const { return _socket; }
 const std::string &Client::getId() const { return _id; }
+const PlayerSettings &Client::getSettings() const { return settings; }
+void Client::setSettings(const PlayerSettings &settings) { Client::settings = settings; }

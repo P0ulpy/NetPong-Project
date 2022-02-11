@@ -118,7 +118,7 @@ void MainGameScene::makePlayerShoot(int playerIndex)
 	{
 		_inactivePongBalls.top()->shoot(
 			_players[playerIndex]->shootDepart(),
-			_players[playerIndex]->shootDirection(_poPossibEngin->getMousePosition()),
+			_players[playerIndex]->shootDirection(_poPossibEngin->getInputsManager().getMousePosition()),
 			_players[playerIndex]->getNormalAmmoColor(),
 			_players[playerIndex]->getInactiveAmmoColor()
 		);
@@ -161,7 +161,7 @@ void MainGameScene::update(const float& deltaTime)
 
 	for (const auto player : _players)
 	{
-		player->setMousePosition(_poPossibEngin->getMousePosition());
+		player->setMousePosition(_poPossibEngin->getInputsManager().getMousePosition());
 		player->update(deltaTime);
 	}
 
