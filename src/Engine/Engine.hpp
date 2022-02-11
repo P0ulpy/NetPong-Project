@@ -56,7 +56,7 @@ public:
 	[[nodiscard]] float getDeltaTime() const;
 
 	[[nodiscard]] InputsManager& getInputsManager();
-	[[nodiscard]] SocketManager& getSocketManager();
+	[[nodiscard]] SocketManager* getSocketManager();
 
 
 private:
@@ -92,7 +92,7 @@ private:
 	void loadScene(SceneType sceneType);
 
 	// Net
-	SocketManager _socketManager { SocketManager(*this) };
+	SocketManager* _socketManager;
 
 	// DEBUG
 	void renderThreadDebugInfo();

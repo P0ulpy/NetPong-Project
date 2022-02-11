@@ -3,8 +3,11 @@
 #include <utility>
 
 class PoPossibEngin;
-class Server;
 class ClientSocket;
+
+namespace Server {
+    class ServerMain;
+}
 
 struct HostSettings
 {
@@ -42,7 +45,7 @@ public:
 	[[nodiscard]] PoPossibEngin& getEngine() const;
 
 	[[nodiscard]] ClientSocket* getSocketClient() const;
-	[[nodiscard]] Server* getServerInstance() const;
+	[[nodiscard]] Server::ServerMain* getServerInstance() const;
 	[[nodiscard]] bool isHost() const;
 	[[nodiscard]] bool isClient() const;
 
@@ -50,5 +53,5 @@ private:
 	PoPossibEngin& _engine;
 
 	ClientSocket* _socketClient = nullptr;
-	Server* _serverInstance = nullptr;
+	Server::ServerMain* _serverInstance = nullptr;
 };

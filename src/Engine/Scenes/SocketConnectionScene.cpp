@@ -1,7 +1,10 @@
 #include "SocketConnectionScene.hpp"
 
 #include "imgui.h"
-#include "../SocketsManagement/Server/Server.hpp"
+#include "../SocketsManagement/Server/ServerMain.hpp"
+#include "../SocketsManagement/Client/ClientSocket.hpp"
+#include "../../Logger/Logger.hpp"
+//#include "../SocketsManagement/PacketOverload.hpp"
 
 SocketConnectionScene::SocketConnectionScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -26,29 +29,29 @@ void SocketConnectionScene::render(sf::RenderTarget* renderTarget)
 	ImGui::Begin("Socket connection Info");
 
 	if (ImGui::Button("Host game"))
-	{
-		hostWindowOpen = true;
-		joinWindowOpen = false;
+    {
+        _hostWindowOpen = true;
+        _joinWindowOpen = false;
 	}
 
 	if (ImGui::Button("Join game"))
 	{
-		hostWindowOpen = false;
-		joinWindowOpen = true;
+		_hostWindowOpen = false;
+		_joinWindowOpen = true;
 	}
 
-	if (hostWindowOpen)
+	if (_hostWindowOpen)
 		displayHostWindow();
-	if (joinWindowOpen)
+	if (_joinWindowOpen)
 		displayJoinWindow();
 
 	ImGui::End();
 
-	if(_poPossibEngin->getSocketManager().getServerInstance())
+	if(_poPossibEngin->getSocketManager()->getServerInstance())
 	{
-		auto server = _poPossibEngin->getSocketManager().getServerInstance();
+		auto server = _poPossibEngin->getSocketManager()->getServerInstance();
 
-		ImGui::Begin("Server Infos");
+		ImGui::Begin("ServerMain Infos");
 
 		ImGui::BeginChild("Clients list");
 
@@ -73,31 +76,69 @@ void SocketConnectionScene::displayHostWindow()
 		int port = 25565;
 		ImGui::InputInt("Lobby port", &port);
 
-		if(ImGui::Button("Create lobby"))
+        if(ImGui::Button("Host game") || !_oui)
 		{
-			_poPossibEngin->getSocketManager().startServer(HostSettings(
+			_poPossibEngin->getSocketManager()->startServer(HostSettings(
 				name,
 				port
 			));
+
+            _oui = true;
 		}
 	}
 }
 
 void SocketConnectionScene::displayJoinWindow()
 {
+    auto socketManager = _poPossibEngin->getSocketManager();
+
 	if (ImGui::CollapsingHeader("Join"))
 	{
-		char ip[16] = "127.0.0.1";
-		ImGui::InputTextWithHint("Lobby ip", "127.0.0.1", ip, IM_ARRAYSIZE(ip));
+        auto clientSocket = socketManager->getSocketClient();
 
-		int port = 25565;
-		ImGui::InputInt("Lobby port", &port);
+        if(!clientSocket)
+        {
+            char ip[16] = "127.0.0.1";
+            ImGui::InputTextWithHint("Lobby ip", "127.0.0.1", ip, IM_ARRAYSIZE(ip));
 
-		if (ImGui::Button("Join lobby"))
-		{
-			_poPossibEngin->getSocketManager().connectClient(ClientConnectionSettings(
-                    ip,
-                    port, 0));
-		}
+            int port = 25565;
+            ImGui::InputInt("Lobby port", &port);
+
+            if (ImGui::Button("Connect") && !_joining)
+            {
+                _joining = true;
+
+                Logger::Log("start connecting Client");
+                socketManager->connectClient(ClientConnectionSettings(
+                        ip,
+                        port, 0));
+            }
+        }
+        else
+        {
+            // Connecting to socket server
+            if(!clientSocket->isReady())
+            {
+                ImGui::Text("Connecting...");
+            }
+            // Socket is connected
+            else
+            {
+                char pseudo[16] = "Xx_pseudo_xX";
+                ImGui::InputTextWithHint("Pseudo", "Player...", pseudo, IM_ARRAYSIZE(pseudo));
+
+                if (ImGui::Button("Join game"))
+                {
+                    Logger::Log("Start Joining Game");
+
+                    clientSocket->_playerSettings.name = pseudo;
+
+                    sf::Packet settings;
+                    settings << clientSocket->_playerSettings.name;
+                    clientSocket->send(SocketEvents::PlayerSendSettings, settings);
+                }
+            }
+        }
+
 	}
 }

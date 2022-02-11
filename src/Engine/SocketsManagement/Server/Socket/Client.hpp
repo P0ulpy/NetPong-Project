@@ -3,24 +3,32 @@
 #include <iostream>
 #include "../../../../Utils/EventEmitter.hpp"
 #include "../../SocketEvents.hpp"
+#include "../../Client/PlayerSettings.hpp"
 
 namespace sf {
 	class TcpSocket;
 }
 
-class Client : public EventEmitter
+namespace Server
 {
-public:
-	Client(const std::string& id, sf::TcpSocket* socket);
-    Client(const Client&) = delete;
-    const Client& operator = (const Client&) = delete;
+    class Client : public EventEmitter {
+    public:
+        Client(const std::string &id, sf::TcpSocket *socket);
+        Client(const Client &) = delete;
 
-    ~Client();
+        const Client &operator=(const Client &) = delete;
 
-	[[nodiscard]] sf::TcpSocket* getSocket() const;
-	[[nodiscard]] const std::string& getId() const;
+        ~Client();
 
-private:
-	std::string _id;
-	sf::TcpSocket* _socket = nullptr;
-};
+        [[nodiscard]] sf::TcpSocket *getSocket() const;
+        [[nodiscard]] const std::string &getId() const;
+        [[nodiscard]] const PlayerSettings &getSettings() const;
+        void setSettings(const PlayerSettings &settings);
+
+    private:
+        std::string _id;
+        sf::TcpSocket *_socket = nullptr;
+
+        PlayerSettings settings;
+    };
+}

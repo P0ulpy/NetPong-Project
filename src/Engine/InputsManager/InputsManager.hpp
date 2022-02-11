@@ -15,8 +15,9 @@ public:
 	[[nodiscard]] bool getEvent(sf::Event::EventType eventType);
 	[[nodiscard]] bool getEvent(sf::Event::EventType eventType, sf::Event& outEvent);
 
-    [[nodiscard]] sf::Vector2i updateMousePosition();
+    [[nodiscard]] sf::Vector2<int> updateMousePosition();
     void setMousePosition();
+    sf::Vector2<int> getMousePosition();
 
 private:
     PoPossibEngin& _engine;

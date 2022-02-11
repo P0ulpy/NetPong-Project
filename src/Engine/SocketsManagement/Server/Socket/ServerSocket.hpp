@@ -6,36 +6,37 @@
 #include "../../SocketEvents.hpp"
 #include "Client.hpp"
 
-class Server;
-
-class ServerSocket : public EventEmitter
+namespace Server
 {
-public:
-	explicit ServerSocket(Server* server);
-	~ServerSocket();
+    class ServerMain;
 
-	[[nodiscard]] const std::map<std::string, std::unique_ptr<Client>>& getClients() const;
-	
-private:
-	Server* _server = nullptr;
+    class ServerSocket : public EventEmitter {
+    public:
+        explicit ServerSocket(ServerMain *server);
+        ~ServerSocket();
 
-	sf::TcpListener _listener;
-	void registerListeners(sf::TcpSocket* clientSocket);
+        [[nodiscard]] const std::map<std::string, std::unique_ptr<Client>> &getClients() const;
 
-	std::mutex _mutex;
+    private:
+        ServerMain* _server = nullptr;
 
-    sf::Thread _connectionsListenThread;
-    [[noreturn]] void connectionsListenEntry();
+        sf::TcpListener _listener;
+        void registerListeners(sf::TcpSocket *clientSocket);
 
-    sf::Thread _listenEventsThread;
-    [[noreturn]] void listenEvents();
+        std::mutex _mutex;
+        sf::Thread _connectionsListenThread;
+        [[noreturn]] void connectionsListenEntry();
 
-	void emit(sf::TcpSocket& socket, SocketEvents event, const sf::Packet& data);
-	void emitToAll(SocketEvents event, const sf::Packet& data);
+        sf::Thread _listenEventsThread;
+        [[noreturn]] void listenEvents();
 
-	std::map<std::string, std::unique_ptr<Client>> _clients;
-	sf::SocketSelector _clientsSocketSelector;
+        void send(sf::TcpSocket &socket, SocketEvents event, const sf::Packet &data);
+        void sendToAll(SocketEvents event, const sf::Packet &data);
 
-    void onClientConnection(const Client& client);
-    void onClientDisconnect(const Client& client);
-};
+        std::map<std::string, std::unique_ptr<Client>> _clients;
+        sf::SocketSelector _clientsSocketSelector;
+
+        void onClientConnection(const Client &client);
+        void onClientDisconnect(const Client &client);
+    };
+}

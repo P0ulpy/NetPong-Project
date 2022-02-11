@@ -1,7 +1,6 @@
 #include "Character.hpp"
 #include "iostream"
-#include <math.h>    
-#include <windows.h>
+#include <math.h>
 #include "string"
 #include "../../Utils/Utils.hpp"
 #include "../Entities/PongBall.hpp"

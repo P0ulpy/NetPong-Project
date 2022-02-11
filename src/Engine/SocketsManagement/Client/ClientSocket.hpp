@@ -6,6 +6,7 @@
 #include "../SocketsManager.hpp"
 #include "../../../Utils/EventEmitter.hpp"
 #include "../SocketEvents.hpp"
+#include "PlayerSettings.hpp"
 
 struct ClientConnectionSettings;
 class PoPossibEngin;
@@ -16,16 +17,21 @@ public:
 	ClientSocket(const ClientConnectionSettings& clientConnectionSettings, PoPossibEngin* engine);
 	~ClientSocket();
 
-    // asynchronously fire event in socket server
+    // asynchronously send packet to socket server
     void send(SocketEvents event, const sf::Packet& data);
 
 	[[nodiscard]] const ClientConnectionSettings& getClientConnectionSettings() const;
 	[[nodiscard]] const EventEmitter& getEventEmitter() const;
+    [[nodiscard]] bool isReady() const;
+
+    // TODO: Proprifier (get / set ect)
+    PlayerSettings _playerSettings;
 
 private:
 	std::string _id = "undefined";
+    bool _ready = false;
 
-	ClientConnectionSettings _clientConnectionSettings;
+    ClientConnectionSettings _clientConnectionSettings;
 	PoPossibEngin* _engine = nullptr;
 
     sf::TcpSocket _socket;
