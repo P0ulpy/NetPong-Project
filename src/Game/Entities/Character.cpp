@@ -311,6 +311,10 @@ sf::Vector2f Character::getPosition()
 	return sf::Vector2f(charac.getPosition().x, charac.getPosition().y);
 }
 
+float Character::getRadius()
+{
+	return charac.getGlobalBounds().width / 2;
+}
 
 float Character::getRadius()
 {
