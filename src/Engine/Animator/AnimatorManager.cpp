@@ -44,13 +44,13 @@ void AnimatorManager::BalayageTexture(sf::Image image, sf::Sprite& frame)
 	//Scale 1.5 car trop petit sinon
 	frame.setScale(sf::Vector2f(1.5f, 1.5f));
 
-	//Si on dépasse le nombre de frame par colonne maximum
+	//Si on dépasse le nombre de colonne maximum
 	if (_indexBalayageCol > _nbrFrameRow)
 	{
 		//Retour à la ligne
 		_indexBalayageCol = 0;
 		_indexBalayageRow++;
-		//Si on dépasse le nombre de frame par ligne max
+		//Si on dépasse le nombre de ligne max
 		if (_indexBalayageRow > _nbrFrameCol)
 		{
 			//Fin de l'animation
