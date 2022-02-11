@@ -139,6 +139,8 @@ void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime
 
 void Character::render(sf::RenderTarget& target)const
 {
+
+
 	if (!_isAlive) return;
 	
 	target.draw(canon);

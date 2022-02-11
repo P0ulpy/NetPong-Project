@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(imgui CONFIG REQUIRED)
+find_package(TGUI CONFIG REQUIRED)
 find_package(ImGui-SFML CONFIG REQUIRED)
 find_package(SFML COMPONENTS system window graphics network audio CONFIG REQUIRED)
 find_package(RapidJSON CONFIG REQUIRED)
@@ -33,13 +34,14 @@ file(GLOB_RECURSE src_files
         "src/*.hpp"
         "src/*.cpp"
         )
-add_executable (NetPong-Project ${src_files} "src/Engine/Animator/AnimatorManager.cpp" "src/Engine/Animator/AnimatorManager.hpp")
+add_executable (NetPong-Project ${src_files} "src/Engine/Animator/AnimatorManager.cpp" "src/Engine/Animator/AnimatorManager.hpp" "src/Engine/Scenes/MainMenuScene.cpp" "src/Engine/Scenes/MainMenuScene.hpp")
 
 target_link_libraries(NetPong-Project
         sfml-system sfml-window sfml-graphics sfml-audio sfml-network
         imgui::imgui
         ImGui-SFML::ImGui-SFML
         rapidjson
+        tgui
     )
 
 file(COPY src/Assets DESTINATION /)

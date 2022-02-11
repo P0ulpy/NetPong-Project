@@ -30,7 +30,7 @@ struct EngineConfig
 enum EngineState { STOP, INITIALIZING, INITIALIZED, RUNNING, PAUSE };
 
 // TEMP
-enum SceneType { SocketConnection, MainGame };
+enum SceneType { SocketConnection, MainMenu, MainGame };
 
 class PoPossibEngin
 {
