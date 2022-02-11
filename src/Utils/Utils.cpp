@@ -96,7 +96,7 @@ bool Utils::linePointCollision(float x1, float y1, float x2, float y2, float px,
 
 	// since floats are so minutely accurate, add
 	// a little buffer zone that will give collision
-	const float buffer = 18.f;    // higher # = less accurate
+	const float buffer = 20.f;    // higher # = less accurate
 
 	// if the two distances are equal to the line's 
 	// length, the point is on the line!

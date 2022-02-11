@@ -58,8 +58,8 @@ public:
 
 	// set la rotation des sprites en fonction de la souris
 	void setRotation(sf::Vector2i mousePos);
-	bool isInCooldown();
-	bool isReloading();
+	bool isInCooldown() const;
+	bool isReloading() const;
 
 	void activateCooldown(bool activate);
 	void activateReloading(bool activateReload);
@@ -74,11 +74,11 @@ public:
 	bool hitWallIfCollision(float x1, float y1, float x2, float y2);
 	bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const;
 
-	sf::Vector2f shootDirection(sf::Vector2i mousePos);
-	sf::Vector2f shootDepart();
-	sf::Vector2f getPosition();
+	sf::Vector2f shootDirection(sf::Vector2i mousePos) const;
+	sf::Vector2f shootDepart() const;
+	sf::Vector2f getPosition() const;
 
-	float getRadius();
+	float getRadius() const;
 
 	void ammoCount(int ammo);
 
@@ -89,4 +89,5 @@ public:
 	void toggleCharacterMove(bool canCharacterMove);
 	bool canCharacterMove() const;
 	void setPlayerAlive(bool isAlive);
+	void resetAmmos();
 };

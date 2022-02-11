@@ -7,6 +7,7 @@
 #include <math.h>
 
 constexpr int TERRAIN_SIZE_MULTIPLIER = 20;
+constexpr int TERRAIN_OUTLINE_THICKNESS = 20;
 constexpr int TERRAIN_NUM_EDGES = 8;
 
 constexpr int NUM_TERRAINS = 10;
@@ -27,9 +28,6 @@ void PolygonTerrain::update(const float& deltaTime)
 
 void PolygonTerrain::updateCollision(const float& deltaTime) const
 {
-	const int pointCount = static_cast<int>(getShape().getPointCount());
-	float remainingTime = 1.f;
-
 	checkPongBallTerrainCollision(deltaTime);
 	checkPlayerTerrainCollision();
 
@@ -105,7 +103,7 @@ void PolygonTerrain::initShape()
 {
 	_terrainShape.setFillColor(sf::Color::Black);
 	_terrainShape.setOutlineColor(sf::Color(255,65,225,255));
-	_terrainShape.setOutlineThickness(18.f);
+	_terrainShape.setOutlineThickness(TERRAIN_OUTLINE_THICKNESS);
 
 	drawRandomTerrain();
 }
@@ -245,7 +243,7 @@ void PolygonTerrain::drawTerrain1()//OCTOGON
 }
 void PolygonTerrain::drawTerrain2()//CARRE ORIENTE
 {
-	int edgeLenght = 30;
+	int edgeLenght = 35;
 
 	_terrainShape.setPointCount(4);
 	_terrainShape.setPoint(0, sf::Vector2f(0,0));
@@ -258,7 +256,7 @@ void PolygonTerrain::drawTerrain2()//CARRE ORIENTE
 
 void PolygonTerrain::drawTerrain3()//CARRE AVEC ANGLES LEGERS
 {
-	int edgeLenght = 18;
+	int edgeLenght = 24;
 
 	_terrainShape.setPointCount(8);
 	_terrainShape.setPoint(0, sf::Vector2f(0,0));
@@ -314,7 +312,7 @@ void PolygonTerrain::drawTerrain4()//TREFLE
 
 void PolygonTerrain::drawTerrain5() //CARRE AVEC ANGLES CREUSES
 {
-	int edgeLenght = 18;
+	int edgeLenght = 20;
 	int edgeLenght2 = edgeLenght / 3;
 
 	_terrainShape.setPointCount(12);
@@ -360,7 +358,7 @@ void PolygonTerrain::drawTerrain6() //OCTOGON ORIENT�
 
 void PolygonTerrain::drawTerrain7() //HEXAGON
 {
-	int edgeLenght = 16;
+	int edgeLenght = 20;
 
 	_terrainShape.setPointCount(6);
 	_terrainShape.setPoint(0, sf::Vector2f(0,0));
@@ -377,7 +375,7 @@ void PolygonTerrain::drawTerrain7() //HEXAGON
 
 void PolygonTerrain::drawTerrain8() //HEXAGON PENCHE
 {
-	int edgeLenght = 16;
+	int edgeLenght = 20;
 
 	_terrainShape.setPointCount(6);
 	_terrainShape.setPoint(0, sf::Vector2f(0,0));
@@ -413,7 +411,7 @@ void PolygonTerrain::drawTerrain9() //CARRE AVEC ANGLES CREUSES ORIENTE
 
 void PolygonTerrain::drawTerrain10() //PLUS
 {
-	int edgeLenght = 7;
+	int edgeLenght = 8;
 	int edgeLenght2 = 10;
 
 	_terrainShape.setPointCount(16);

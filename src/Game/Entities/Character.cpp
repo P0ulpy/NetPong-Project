@@ -6,7 +6,7 @@
 #include "../../Utils/Utils.hpp"
 #include "../Entities/PongBall.hpp"
 
-constexpr float CHARAC_SPEED = 300.f;
+constexpr float CHARAC_SPEED = 450.f;
 
 constexpr float DURATION_BETWEEN_SHOOTS = 0.3;
 constexpr float COOLDOWN_RELOAD_FIRST_BALL = 0.75f;
@@ -18,9 +18,6 @@ constexpr int AMMO_SIDE_SIZE = 10 * CHARAC_GLOBAL_SIZE;
 constexpr int SHOOT_ZONE_RADIUS = 5 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_X = 25 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_Y = 15 * CHARAC_GLOBAL_SIZE;
-
-constexpr int DEFAULT_SPAWN_POS_X = 500;
-constexpr int DEFAULT_SPAWN_POS_Y = 500;
 
 Character::Character(sf::Color color)
 {
@@ -43,8 +40,6 @@ Character::Character(sf::Color color)
 	//Deuxi�me munition
 	secondAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	secondAmmo.setFillColor(sf::Color::White);
-
-	setPosition(DEFAULT_SPAWN_POS_X, DEFAULT_SPAWN_POS_Y);
 
 	//Modification des origines
 	sf::FloatRect characSize = charac.getGlobalBounds();
@@ -72,7 +67,6 @@ void Character::setMousePosition(sf::Vector2i mouse)
 {
 	mousePosition = mouse;
 }
-
 
 void Character::setPosition(int xSpawn, int ySpawn)
 {
@@ -122,8 +116,7 @@ void Character::update(const float& deltaTime)
 		if (_reloadingTime > COOLDOWN_RELOAD_SECOND_BALL)
 		{
 			activateReloading(false);
-			_reloadingTime = 0;
-			_ammos = 2;
+			resetAmmos();
 		}
 	}
 
@@ -266,13 +259,13 @@ void Character::ammoCount(int ammo)
 	_ammos = _ammos + ammo;
 }
 
-sf::Vector2f Character::shootDirection(sf::Vector2i mousePos)
+sf::Vector2f Character::shootDirection(sf::Vector2i mousePos) const
 {
-	float radianDirection = _rotation * PI / 180;
-	return sf::Vector2f(-(float)cos(radianDirection), -(float)sin(radianDirection));
+	const float radianDirection = _rotation * PI / 180;
+	return sf::Vector2f(-std::cos(radianDirection), -std::sin(radianDirection));
 }
 
-sf::Vector2f Character::shootDepart()
+sf::Vector2f Character::shootDepart() const
 {
 	return sf::Vector2f(shootZone.getTransform().transformPoint(0, 0).x, shootZone.getTransform().transformPoint(0, 0).y);
 }
@@ -303,23 +296,23 @@ sf::Color Character::getNormalAmmoColor() const
 	return _ammoColorNormal;
 }
 
-bool Character::isInCooldown()
+bool Character::isInCooldown() const
 {
 	return _cooldownActivated;
 }
 
-bool Character::isReloading()
+bool Character::isReloading() const
 {
 	return _isReloading;
 }
 
 //x = position en x, y = position en y et z = rayon 
-sf::Vector2f Character::getPosition()
+sf::Vector2f Character::getPosition() const
 {
 	return sf::Vector2f(charac.getPosition().x, charac.getPosition().y);
 }
 
-float Character::getRadius()
+float Character::getRadius() const
 {
 	return charac.getGlobalBounds().width / 2;
 }
@@ -327,6 +320,12 @@ float Character::getRadius()
 void Character::setPlayerAlive(bool isAlive)
 {
 	_isAlive = isAlive;
+}
+
+void Character::resetAmmos()
+{
+	_ammos = 2;
+	_reloadingTime = 0;
 }
 
 

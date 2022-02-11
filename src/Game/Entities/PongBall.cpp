@@ -8,12 +8,12 @@
 #include "../../Logger/Logger.hpp"
 #include "../Effects/PhantomBallEffect.hpp"
 
-constexpr int BALL_SIZE = 20;
+constexpr int BALL_SIZE = 25;
 
-constexpr int MAX_NUM_BOUNCES = 3;
+constexpr int MAX_NUM_BOUNCES = 2;
 constexpr float BOOST_DURATION = 2.f;
 
-constexpr float INITIAL_SPEED = 450.f;
+constexpr float INITIAL_SPEED = 650.f;
 
 //--- Constructors - Destructor ---
 PongBall::PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene)
@@ -95,7 +95,8 @@ void PongBall::update(const float& deltaTime)
 
 void PongBall::updateCollision(const float& deltaTime)
 {
-	if(!_ballShape.getGlobalBounds().intersects(sf::Rect<float>(0,0,1200,900)))
+	//TODO : très très moche
+	if(!_ballShape.getGlobalBounds().intersects(sf::Rect<float>(0,0,1920,1080)))
 	{
 		Logger::Log("Out of window !");
 		_ballShape.setPosition(_initialPosition);

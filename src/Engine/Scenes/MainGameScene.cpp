@@ -17,8 +17,8 @@
 #define INACTIVE_AMMO_COLOR_PLAYER2 sf::Color(160, 160, 235)
 #define NORMAL_AMMO_COLOR_PLAYER2 sf::Color(0, 40, 220)
 
-constexpr int NUM_MAX_PONGBALL = 12;
-constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 125;
+constexpr int NUM_MAX_PONGBALL = 15;
+constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 75;
 
 MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -152,7 +152,6 @@ void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 			std::cout << "Player hit !" << std::endl;
 		}
 	}
-
 }
 
 void MainGameScene::update(const float& deltaTime)
@@ -182,8 +181,6 @@ void MainGameScene::render(sf::RenderTarget* target)
 {
 	_gameManager->render(*target);
 	_polygonTerrain->render(*target);
-	
-
 
 	for (const auto pongBall : _pongBalls)
 	{
@@ -208,12 +205,13 @@ void MainGameScene::displayPlayers(bool isDisplayed) const
 	for (const auto player : _players)
 	{
 		player->setPlayerAlive(isDisplayed);
+		player->resetAmmos();
 	}
 }
 
 void MainGameScene::hideAllPongBalls() const
 {
-	for (auto pongBall : _pongBalls)
+	for (const auto pongBall : _pongBalls)
 	{
 		pongBall->setActive(false);
 	}
