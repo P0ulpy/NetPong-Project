@@ -13,9 +13,9 @@ protected:
 	std::unique_ptr<sf::Sprite> _sprite;
 
 	sf::Vector2f _velocity;
-	float _currentSpeed;
-	float _initialSpeed;
-	float _maxSpeed;
+	float _currentSpeed { 200 };
+	float _initialSpeed { 200 };
+	float _maxSpeed { 500 };
 
 public:
 	Entity();

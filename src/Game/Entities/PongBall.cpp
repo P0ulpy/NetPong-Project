@@ -3,51 +3,48 @@
 #include <iostream>
 #include <valarray>
 
-#include "PhantomBall.hpp"
+#include "../../Engine/Scenes/MainGameScene.hpp"
 #include "../../Utils/Utils.hpp"
 #include "../Terrains/PolygonTerrain.hpp"
 #include "../../Logger/Logger.hpp"
+#include "../Effects/PhantomBallEffect.hpp"
 
 constexpr int BALL_SIZE = 20;
 
-constexpr int MAX_NUM_BOUNCES = 2;
+constexpr int MAX_NUM_BOUNCES = 3;
 constexpr float BOOST_DURATION = 2.f;
 
-constexpr int MAX_PHANTOM_BALLS = 20;
-constexpr float DURATION_BETWEEN_PHANTOM_BALLS = .025f;
-
-constexpr float INITIAL_SPEED = 220.f;
+constexpr float INITIAL_SPEED = 350.f;
 
 //--- Constructors - Destructor ---
-PongBall::PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain)
-	: _terrainArea(terrain), _polygonTerrain(&polyTerrain)
+PongBall::PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene)
+	: _mainGameScene(&mainGameScene), _polygonTerrain(mainGameScene.getPolygonTerrain())
 {
 	initVariables();
 	initShapes(window);
 	initBoost();
-	initPhantomEffect();
+
+	_phantomBallEffect = std::make_unique<PhantomBallEffect>(*this);
+
+	startPhantomBallEffect();
+
+	setActive(false);
 }
 
 PongBall::~PongBall()
-{
-
-}
+{ }
 
 //--- Initializers ---
 void PongBall::initVariables()
 {
-	setActive(true);
-
-	_velocity = Utils::normalize(sf::Vector2f(1.f, 1.5f));
+	_velocity = Utils::normalize(sf::Vector2f(1.f,1.5f));
 	_initialSpeed = INITIAL_SPEED;
 	_currentSpeed = _initialSpeed;
 	_maxSpeed = 10000.f;
 
-	_texture = std::make_unique<sf::Texture>();
-	_sprite = std::make_unique<sf::Sprite>();
-
 	_ballSize = BALL_SIZE;
 	_ballColor = sf::Color(65, 90, 255, 255);
+	_ballInactiveColor = sf::Color(200, 200, 200, 255);
 
 	_speedMultiplierBonus = 1.f;
 }
@@ -65,6 +62,7 @@ void PongBall::initShapes(const sf::RenderWindow& window)
 
 	_oldPosition = _ballShape.getPosition();
 
+	//FOR DEBUG PURPOSES
 	_ballDestination = new sf::CircleShape();
 	_ballDestination->setRadius(5.f);
 	_ballDestination->setFillColor(sf::Color::Red);
@@ -78,11 +76,9 @@ void PongBall::initBoost()
 	_currentTimeBoost = 0.f;
 }
 
-void PongBall::initPhantomEffect()
+void PongBall::startPhantomBallEffect()
 {
-	createPhantomBalls();
-
-	startPhantomBallEffect();
+	_phantomBallEffect->begin();
 }
 
 //--- Updating ---
@@ -130,24 +126,7 @@ void PongBall::updateBoost(const float& deltaTime)
 
 void PongBall::updatePhantomEffect(const float& deltaTime)
 {
-	if(_hasPhantomEffect)
-	{
-		_currentTimePhantomBallCooldown += deltaTime;
-
-		if (_currentTimePhantomBallCooldown > DURATION_BETWEEN_PHANTOM_BALLS)
-		{
-			displayPhantomBall();
-			_currentTimePhantomBallCooldown = 0;
-		}
-	}
-
-	for (const auto& phantomBall : _phantomBalls)
-	{
-		if (phantomBall->isDisplayed())
-		{
-			phantomBall->update(deltaTime);
-		}
-	}
+	_phantomBallEffect->update(deltaTime);
 }
 
 //--- Rendering ---
@@ -158,54 +137,62 @@ void PongBall::render(sf::RenderTarget& target) const
 	if(_isActive)
 	{
 		target.draw(_ballShape);
-		target.draw(*_ballDestination);
+		//target.draw(*_ballDestination);
 	}
 }
 
 void PongBall::renderPhantomEffect(sf::RenderTarget& target) const
 {
-	for (const auto& phantomBall : _phantomBalls)
-	{
-		if (phantomBall->isDisplayed())
-		{
-			phantomBall->render(target);
-		}
-	}
+	_phantomBallEffect->render(target);
 }
-
-void PongBall::updateAndRenderPhantomEffect(sf::RenderTarget& target, const float& deltaTime)
+ 
+bool PongBall::hitPlayer(float c2x, float c2y, float c2r, sf::Color color2)
 {
-	for (const auto& phantomBall : _phantomBalls)
+	if (_canKill && _isActive && color2 != _ballColor)
 	{
-		if (phantomBall->isDisplayed())
-		{
-			phantomBall->update(deltaTime);
-			phantomBall->render(target);
-		}
+		return Utils::circleCircleCollision(_ballShape.getPosition().x, _ballShape.getPosition().y, _ballShape.getRadius(), c2x, c2y, c2r);
 	}
+
+	return false;
+	
 }
 
-bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2)
+bool PongBall::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)
 {
 	sf::Vector2f outImpactPoint{ 0,0 };
 
-	bool hit = linePongBallCollision(x1, y1, x2, y2, outImpactPoint);
+	bool hit = linePongBallCollision(x1, y1, x2, y2, outImpactPoint, remainingTime);
 
 	if (hit)
 	{
 		const sf::Vector2f surfaceVector = Utils::normalize(sf::Vector2f(x2 - x1, y2 - y1));
+		const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
+
 		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
 
-		const auto normalSurfaceVector = sf::Vector2f(-surfaceVector.y, surfaceVector.x);
-		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius(),
-			outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius());
+		_ballShape.setPosition(outImpactPoint.x + normalSurfaceVector.x * _ballShape.getRadius() + _velocity.x * (remainingTime),
+								outImpactPoint.y + normalSurfaceVector.y * _ballShape.getRadius() + _velocity.y * (remainingTime));
 
-		addNumBounceAndUpdateVisibility();
+		_ballDestination->setPosition(std::abs(_ballShape.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
+			std::abs(_ballShape.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
 
 		return true;
 	}
 
 	return false;
+
+}
+
+void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity, const sf::Color& colorNormal, const sf::Color& colorInactive)
+{
+	_ballShape.setPosition(position);
+	_velocity = normVelocity;
+	_ballColor = colorNormal;
+	_ballInactiveColor = colorInactive;
+
+	Logger::Log("SHOOT BALL !");
+
+	setActive(true);
 }
 
 void PongBall::resetBallDestAndOldPos(const float& deltaTime)
@@ -226,15 +213,6 @@ void PongBall::setSpeedMultiplierBonus(float pSpeedMultiplierBonus)
 	}
 }
 
-void PongBall::addSpeedMultiplierBonus(float pSpeedMultiplierBonus)
-{
-	if ((_speedMultiplierBonus + pSpeedMultiplierBonus) * _currentSpeed < _maxSpeed)
-	{
-		_speedMultiplierBonus += pSpeedMultiplierBonus;
-		setSpeed(_initialSpeed * _speedMultiplierBonus);
-	}
-}
-
 void PongBall::resetSpeedMultiplierBonus()
 {
 	_speedMultiplierBonus = 1;
@@ -244,17 +222,21 @@ void PongBall::resetSpeedMultiplierBonus()
 
 void PongBall::setActive(bool isActive)
 {
+	if (_isActive == isActive) return;
+
 	_isActive = isActive;
 
 	if(_isActive)
 	{
 		_currentNumBounces = 0;
-		startPhantomBallEffect();
+		setCanKill(false);
+		_phantomBallEffect->begin();
 	}
 	else
 	{
-		stopPhantomBallEffect();
+		_phantomBallEffect->stop();
 		resetSpeedMultiplierBonus();
+		_mainGameScene->pushInactivePongBall(this);
 	}
 }
 
@@ -263,16 +245,44 @@ bool PongBall::isActive() const
 	return _isActive;
 }
 
+void PongBall::setCanKill(bool canKill)
+{
+	_canKill = canKill;
+
+	if(_canKill)
+	{
+		_ballShape.setFillColor(_ballColor);
+
+		_phantomBallEffect->setPhantomBallFillColour(_ballColor);
+	}
+	else
+	{
+		_ballShape.setFillColor(_ballInactiveColor);
+
+		_phantomBallEffect->setPhantomBallFillColour(_ballInactiveColor);
+	}
+}
+
+bool PongBall::canKill() const
+{
+	return _canKill;
+}
+
 void PongBall::addNumBounceAndUpdateVisibility()
 {
 	_currentNumBounces++;
-
+	setCanKill(true);//Once the ball had bounced the ball can kill the player
+	
 	if(_currentNumBounces > MAX_NUM_BOUNCES)
 	{
 		setActive(false);
 	}
 }
 
+void PongBall::stopPhantomBallEffect()
+{
+	_phantomBallEffect->stop();
+}
 
 void PongBall::setSpeed(float pSpeed)
 {
@@ -306,48 +316,8 @@ void PongBall::startBoostBall(float speedBoostBonus)
 	setSpeedMultiplierBonus(_speedMultiplierBonus);
 }
 
-//--- Phantom balls effect ---
-void PongBall::createPhantomBalls()
-{
-	for (int i = 0; i < MAX_PHANTOM_BALLS; i++)
-	{
-		_phantomBalls.push_back(std::make_unique<PhantomBall>(*this));
-	}
-}
-
-void PongBall::displayPhantomBall()
-{
-	bool isPhantomBallDisplayed = false;
-	//Recherche de la premiere PhantomBall qui n'est pas affich�e dans la liste
-	for (const auto& phantomBall : _phantomBalls)
-	{
-		if (!phantomBall->isDisplayed())
-		{
-			phantomBall->show();
-			isPhantomBallDisplayed = true;
-			break;
-		}
-	}
-
-	if(!isPhantomBallDisplayed)
-	{
-		Logger::Log("ERROR PongBall.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
-	}
-}
-
-void PongBall::startPhantomBallEffect()
-{
-	_hasPhantomEffect = true;
-	_currentTimePhantomBallCooldown = 0;
-}
-
-void PongBall::stopPhantomBallEffect()
-{
-	_hasPhantomEffect = false;
-}
-
 // LINE/CIRCLE
-bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const
+bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const
 {
 	sf::Vector2f outIntersectionPoint{};
 
@@ -372,6 +342,7 @@ bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf:
 	{
 		outImpactPoint.x = closestX;
 		outImpactPoint.y = closestY;
+		remainingTime -= remainingTime * distance / _ballShape.getRadius();
 		return true;
 	}
 
@@ -383,16 +354,20 @@ bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf:
 	{
 		Logger::Log("Traverse !! ");
 		outImpactPoint = outIntersectionPoint;
+		remainingTime -= remainingTime * Utils::getDistance(_ballShape.getPosition(), outImpactPoint) /
+										Utils::getDistance(_ballShape.getPosition(), _ballDestination->getPosition());
+		std::cout << remainingTime << std::endl;
+
 		return true;
 	}
 
-	if (Utils::lineLineCollision(x1, y1, x2, y2, _oldPosition.x + ballEdgeCollTestStartX, _oldPosition.y + ballEdgeCollTestStartY,
-		_ballShape.getPosition().x + ballEdgeCollTestStartX, _ballShape.getPosition().y + ballEdgeCollTestStartY, outIntersectionPoint))
-	{
-		Logger::Log("Traverse old position !! ");
-		outImpactPoint = outIntersectionPoint;
-		return true;
-	}
+	//if (Utils::lineLineCollision(x1, y1, x2, y2, _oldPosition.x + ballEdgeCollTestStartX, _oldPosition.y + ballEdgeCollTestStartY,
+	//	_ballShape.getPosition().x + ballEdgeCollTestStartX, _ballShape.getPosition().y + ballEdgeCollTestStartY, outIntersectionPoint))
+	//{
+	//	Logger::Log("Traverse old position !! ");
+	//	outImpactPoint = outIntersectionPoint;
+	//	return true;
+	//}
 
 
 	return false;

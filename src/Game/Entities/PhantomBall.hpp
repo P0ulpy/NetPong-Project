@@ -2,27 +2,29 @@
 
 #include "SFML/Graphics.hpp"
 
+class PhantomBallEffect;
 class PongBall;
 
 class PhantomBall
 {
 public:
 	//Constructors - Destructors
-	PhantomBall(const PongBall& ballParent);
+	PhantomBall(PhantomBallEffect* phantomBallEffectParent);
 	virtual ~PhantomBall();
 
 	//Functions
 	void update(const float& deltaTime);
 	void render(sf::RenderTarget& target) const;
 
-	void show();
-	void hide();
+	void setIsActive(bool isActive);
 
-	bool isDisplayed() const;
+	void setFillColor(const sf::Color& newColor);
+	bool isActive() const;
 
 private:
 	//Attributes
-	const PongBall& _pongBallParent;
+	PhantomBallEffect* _phantomBallEffectParent;
+
 	sf::Color _currentFillColor;
 	sf::Color _currentOutlineColor;
 	sf::CircleShape _phantomBallShape;
@@ -31,12 +33,15 @@ private:
 
 	float _timeAlphaDecreaseCooldown;
 
-	bool _isDisplayed { false };
+	bool _isActive;
 
 	//Initializers
 	void initVariables();
 	void initShapeAndColor();
 	void resetTimer();
+
+	void show();
+	void hide();
 
 	void setAndUpdateShapeAlpha(const sf::Uint8& alpha);
 };

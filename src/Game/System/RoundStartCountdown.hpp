@@ -13,6 +13,7 @@ private:
 	bool _isStartCountdownActive;
 
 	void initValues();
+	void displayNextMessage() const;
 
 public:
 	RoundStartCountdown();

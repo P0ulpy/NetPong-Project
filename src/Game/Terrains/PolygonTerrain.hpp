@@ -2,12 +2,13 @@
 
 #include "SFML/Graphics.hpp"
 
+class Character;
 class PongBall;
 
 class PolygonTerrain
 {
 public:
-	PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBalls);
+	PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBalls, const std::vector<Character*>& players);
 	virtual ~PolygonTerrain();
 
 	//Functions
@@ -15,15 +16,12 @@ public:
 	void updateCollision(const float& deltaTime) const;
 	void render(sf::RenderTarget& target) const;
 
-	sf::ConvexShape getShape() const;
-	sf::Rect<float> getPlayableArea() const;
-
-	sf::Vector2f getPointPosition(int index) const;
-
 	void drawRandomTerrain();
 
-private:
+	//Gets - Sets
+	sf::ConvexShape getShape() const;
 
+private:
 	enum DrawDirection
 	{
 		TOP_LEFT_TO_BOTTOM_RIGHT,
@@ -46,26 +44,34 @@ private:
 	const sf::RenderWindow* _window;
 
 	const std::vector<PongBall*>& _pongBalls;
+	const std::vector<Character*>& _players;
 
+	int _currentTerrain{ 1 };
 	sf::ConvexShape _terrainShape;
-	sf::Rect<float> _playableArea;
-
-	sf::Vector2f _terrainSize{ 600, 600 };
-
+	sf::Vector2f _firstPointPositionOfShape;
 	std::vector<sf::Vector2f> _pointPositions;
 
-	int _tempCurrentTerrain {1};
-
+	//Initializers
 	void initShape();
-	void initPlayableArea();
-	void initEdgesRegistration();
-
-	sf::Vector2f initPoint(const sf::Vector2f& previousPoint, DrawDirection drawDirection, Orientation orientation, int pointDistance);
-	void setPointAndUpdateCurrentPoint( DrawDirection drawDirection, Orientation orientation, int pointDistance, int& currentPointDrawned);
-	void selectAndDrawRandomTerrain();
 	void initTerrainOrigin();
+	void initEdgesRegistration();
+	sf::Vector2f initPoint(const sf::Vector2f& previousPoint, DrawDirection drawDirection, Orientation orientation, int pointDistance);
+
+	//Gets - Sets
+	sf::Vector2f getPointPosition(int index) const;
+	void setPointAndUpdateCurrentPoint( DrawDirection drawDirection, Orientation orientation, int pointDistance, int& currentPointDrawned);
+
+	//Drawing terrain
+	void selectAndDrawRandomTerrain();
+
 	void drawTerrain1();
 	void drawTerrain2();
 	void drawTerrain3();
 	void drawTerrain4();
+	void drawTerrain5();
+	void drawTerrain6();
+	void drawTerrain7();
+	void drawTerrain8();
+	void drawTerrain9();
+	void drawTerrain10();
 };

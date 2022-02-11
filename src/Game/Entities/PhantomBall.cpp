@@ -1,23 +1,25 @@
 ﻿#include "PhantomBall.hpp"
+
 #include "PongBall.hpp"
+#include "../Effects/PhantomBallEffect.hpp"
 
 constexpr int INITIAL_ALPHA = 160;
 constexpr int ALPHA_DECREASE_SPEED = 20;//ALPHA_DECREASE_SPEED doit ętre un INITIAL_ALPHA de initialAlpha
 
 constexpr float DURATION_BETWEEN_ALPHA_DECREASE = 0.05f;
 
-PhantomBall::PhantomBall(const PongBall& ballParent)
-	: _pongBallParent(ballParent)
+PhantomBall::PhantomBall(PhantomBallEffect* phantomBallEffectParent)
+	: _phantomBallEffectParent(phantomBallEffectParent)
 {
 	initVariables();
 	initShapeAndColor();
 	resetTimer();
+
+	setIsActive(false);
 }
 
 PhantomBall::~PhantomBall()
-{
-
-}
+{ }
 
 void PhantomBall::initVariables()
 {
@@ -26,12 +28,10 @@ void PhantomBall::initVariables()
 
 void PhantomBall::initShapeAndColor()
 {
-	_phantomBallShape = _pongBallParent.getShape();
+	_phantomBallShape = _phantomBallEffectParent->getPongBallParent().getShape();
 
 	_currentFillColor = _phantomBallShape.getFillColor();
 	_currentOutlineColor = _phantomBallShape.getOutlineColor();
-
-	hide();
 }
 
 void PhantomBall::update(const float& deltaTime)
@@ -40,7 +40,7 @@ void PhantomBall::update(const float& deltaTime)
 
 	if (_currentAlpha <= 10)
 	{
-		hide();
+		setIsActive(false);
 	}
 	else if (_timeAlphaDecreaseCooldown > DURATION_BETWEEN_ALPHA_DECREASE)
 	{
@@ -55,19 +55,39 @@ void PhantomBall::render(sf::RenderTarget& target) const
 	target.draw(_phantomBallShape);
 }
 
+void PhantomBall::setIsActive(bool isActive)
+{
+	if (isActive == _isActive) return;
+
+	_isActive = isActive;
+
+	if(_isActive)
+	{
+		show();
+	}
+	else
+	{
+		hide();
+	}
+}
+
 void PhantomBall::hide()
 {
 	setAndUpdateShapeAlpha(0);
+	_phantomBallEffectParent->pushInactivePhantomBall(this);
+}
 
-	_isDisplayed = false;
+void PhantomBall::setFillColor(const sf::Color& newColor)
+{
+	_currentFillColor = newColor;
 }
 
 void PhantomBall::show()
 {
 	setAndUpdateShapeAlpha(INITIAL_ALPHA);
 
-	_phantomBallShape.setPosition(_pongBallParent.getShape().getPosition().x, _pongBallParent.getShape().getPosition().y);
-	_isDisplayed = true;
+	_phantomBallShape.setPosition(_phantomBallEffectParent->getPongBallParent().getShape().getPosition().x, 
+									_phantomBallEffectParent->getPongBallParent().getShape().getPosition().y);
 
 	resetTimer();
 }
@@ -90,7 +110,7 @@ void PhantomBall::resetTimer()
 }
 
 
-bool PhantomBall::isDisplayed() const
+bool PhantomBall::isActive() const
 {
-	return _isDisplayed;
+	return _isActive;
 }

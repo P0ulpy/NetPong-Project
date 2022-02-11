@@ -9,6 +9,13 @@ float Utils::getDistance(float x1, float y1, float x2, float y2)
 	return std::sqrt(distX*distX + distY * distY);
 }
 
+float Utils::getDistance(sf::Vector2f v1, sf::Vector2f v2)
+{
+	const float distX = v1.x - v2.x;
+	const float distY = v1.y - v2.y;
+	return std::sqrt(distX * distX + distY * distY);
+}
+
 float Utils::deceleration(const float initial, const float target, const float time)
 {
 	//Linear(Y0,Y1,t) = Y0 + t(Y1 - Y0)
@@ -45,6 +52,11 @@ sf::Vector2f Utils::getVectorReflection(const sf::Vector2f& inDirection, const s
 	const auto finalVector = sf::Vector2f(factor * inNormal.x + inDirection.x,
 		factor * inNormal.y + inDirection.y);
 	return finalVector;
+}
+
+double Utils::degreeToRadian(double degree)
+{
+	return degree * PI / 180;
 }
 
 bool Utils::circleCircleCollision(float c1x, float c1y, float c1r, float c2x, float c2y, float c2r)
@@ -84,13 +96,44 @@ bool Utils::linePointCollision(float x1, float y1, float x2, float y2, float px,
 
 	// since floats are so minutely accurate, add
 	// a little buffer zone that will give collision
-	const float buffer = 0.1f;    // higher # = less accurate
+	const float buffer = 18.f;    // higher # = less accurate
 
 	// if the two distances are equal to the line's 
 	// length, the point is on the line!
 	// note we use the buffer here to give a range, 
 	// rather than one #
 	return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
+}
+
+bool Utils::lineCircleCollision(float x1, float y1, float x2, float y2, float cX, float cY, float cR, sf::Vector2f& outImpactPoint)
+{
+	sf::Vector2f outIntersectionPoint{};
+
+	//// get length of the line
+	const float lengthLine = getDistance(x1, y1, x2, y2);
+
+	// get dot product of the line and circle
+	const float dot = ((cX - x1)*(x2 - x1) + (cY - y1)*(y2 - y1)) / std::pow(lengthLine, 2);
+
+	// find the closest point on the line
+	const float closestX = x1 + (dot * (x2 - x1));
+	const float closestY = y1 + (dot * (y2 - y1));
+
+	// is this point actually on the line segment?
+	// if so keep going, but if not, return false
+	if (!linePointCollision(x1, y1, x2, y2, closestX, closestY)) return false;
+
+	// get distance to closest point
+	const float distance = getDistance(closestX, closestY, cX, cY);
+
+	if (distance <= cR)
+	{
+		outImpactPoint.x = closestX;
+		outImpactPoint.y = closestY;
+		return true;
+	}
+
+	return false;
 }
 
 // POINT/CIRCLE

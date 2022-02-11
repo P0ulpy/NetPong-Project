@@ -5,15 +5,15 @@
 #include "../Entity.hpp"
 
 class PolygonTerrain;
-class PhantomBall;
+class PhantomBallEffect;
 class PolygonCollisionResult;
+class MainGameScene;
 
 class PongBall : public Entity
 {
 public:
 	//Constructors - Destructors
-	PongBall(const sf::RenderWindow& window, const sf::Rect<float>& terrain, PolygonTerrain& polyTerrain);
-
+	PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene);
 	virtual ~PongBall();
 
 	//Functions
@@ -26,35 +26,47 @@ public:
 	void render(sf::RenderTarget& target) const override;
 	void renderPhantomEffect(sf::RenderTarget& target) const;
 
-	void updateAndRenderPhantomEffect(sf::RenderTarget& target, const float& deltaTime);
+	bool hitPlayer(float c2x, float c2y, float c2r, sf::Color color2);
 
-	bool hitWallIfCollision(float x1, float y1, float x2, float y2);
-	void resetBallDestAndOldPos(const float& deltaTime);
+	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
+
+	void shoot(sf::Vector2f position, sf::Vector2f normVelocity, const sf::Color& colorNormal = sf::Color::Green, const sf::Color& colorInactive = sf::Color::White);
 
 	//Getters - Setters
 	sf::CircleShape getShape() const;
 
 	void setSpeed(float speed);
-	void setSpeedMultiplierBonus(float pSpeedMultiplierBonus);
-	void addSpeedMultiplierBonus(float pSpeedMultiplierBonus);
-	void resetSpeedMultiplierBonus();
 
 	void setActive(bool isActive);
 	bool isActive() const;
 
+	void setCanKill(bool canKill);
+	bool canKill() const;
+
+	//Boost and collision
+	void startBoostBall(float speedBoostBonus);
+	void setSpeedMultiplierBonus(float pSpeedMultiplierBonus);
+	void resetSpeedMultiplierBonus();
+
+	bool linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;
+	void resetBallDestAndOldPos(const float& deltaTime);
+
+	void addNumBounceAndUpdateVisibility();
 	void startPhantomBallEffect();
 	void stopPhantomBallEffect();
 
-	void startBoostBall(float speedBoostBonus);
-
-	bool linePongBallCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const;
-
 private:
+	//MainGameScene
+	MainGameScene* _mainGameScene;
+
 	//Ball rendering
 	bool _isActive;
 
 	sf::CircleShape _ballShape;
+
+	
 	sf::Color _ballColor;
+	sf::Color _ballInactiveColor;
 	int _ballSize;
 
 	sf::Vector2f _initialPosition;
@@ -64,9 +76,9 @@ private:
 	//Ball physics
 	float _speedMultiplierBonus;
 	int _currentNumBounces;
+	bool _canKill;
 
 	//Terrain
-	sf::Rect<float> _terrainArea;
 	PolygonTerrain* _polygonTerrain;
 
 	//Boost
@@ -74,9 +86,7 @@ private:
 	bool _isBoosted;
 
 	//Phantom ball effect
-	std::vector<std::unique_ptr<PhantomBall>> _phantomBalls;
-	float _currentTimePhantomBallCooldown;
-	bool _hasPhantomEffect;
+	std::unique_ptr<PhantomBallEffect> _phantomBallEffect;
 
 	//Functions
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime) override;
@@ -85,11 +95,4 @@ private:
 	void initVariables();
 	void initShapes(const sf::RenderWindow& window);
 	void initBoost();
-	void initPhantomEffect();
-
-	//Phantom Ball Effect
-	void displayPhantomBall();
-	void createPhantomBalls();
-
-	void addNumBounceAndUpdateVisibility();
 };
