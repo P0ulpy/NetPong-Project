@@ -226,7 +226,7 @@ void PolygonTerrain::selectAndDrawRandomTerrain()
 
 void PolygonTerrain::drawTerrain1()//OCTOGON
 {
-	int edgeLenght = 12;
+	int edgeLenght = 16;
 
 	_terrainShape.setPointCount(TERRAIN_NUM_EDGES);
 	_terrainShape.setPoint(0, sf::Vector2f(0,0));
@@ -243,7 +243,7 @@ void PolygonTerrain::drawTerrain1()//OCTOGON
 }
 void PolygonTerrain::drawTerrain2()//CARRE ORIENTE
 {
-	int edgeLenght = 35;
+	int edgeLenght = 28;
 
 	_terrainShape.setPointCount(4);
 	_terrainShape.setPoint(0, sf::Vector2f(0,0));
@@ -411,8 +411,8 @@ void PolygonTerrain::drawTerrain9() //CARRE AVEC ANGLES CREUSES ORIENTE
 
 void PolygonTerrain::drawTerrain10() //PLUS
 {
-	int edgeLenght = 8;
-	int edgeLenght2 = 10;
+	int edgeLenght = 6;
+	int edgeLenght2 = 12;
 
 	_terrainShape.setPointCount(16);
 	_terrainShape.setPoint(0, sf::Vector2f(0,0));

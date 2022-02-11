@@ -7,13 +7,13 @@ class AnimatorManager
 private:
 	sf::Image _imageExplosion;
 	sf::Texture _explosionTexture;
-	sf::Sprite _styleSheetExplosion;
-
-	bool _playAnimExplosion = false;
-
+	sf::Sprite _frameExplosion;
+	// 1 = Animation Explosion ; ...
+	std::vector<bool> _playAnim;
+	
 	//Pour le stylsheet de l'explosion
-	int _nbrFrameRow;
-	int _nbrFrameCol;
+	int _nbrFrameRow = 0;
+	int _nbrFrameCol = 0;
 	int _indexBalayageRow = 0;
 	int _indexBalayageCol = 0;
 
@@ -21,10 +21,13 @@ private:
 	int _row = 0;
 
 public:
-
+	//Pour l'animation de mort
 	void DeathAnimation(sf::Vector2f position);
+
 	void render(sf::RenderTarget& target);
-	void BalayageTexture();
+	void BalayageTexture(sf::Image image, sf::Sprite& frame);
+
+
 	AnimatorManager();
 
 };

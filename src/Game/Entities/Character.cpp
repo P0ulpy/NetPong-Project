@@ -89,7 +89,10 @@ bool Character::canCharacterMove() const
 
 void Character::update(const float& deltaTime)
 {
+	if (!_isAlive) return;
+
 	setRotation(mousePosition);
+
 	if (_cooldownActivated)
 	{
 		if (_cooldownShoot >= 0 && _cooldownShoot < DURATION_BETWEEN_SHOOTS) _cooldownShoot = _cooldownShoot + deltaTime;
@@ -99,7 +102,6 @@ void Character::update(const float& deltaTime)
 			activateCooldown(false);
 			_cooldownShoot = 0;
 		}
-
 	}
 
 	if (_isReloading)
@@ -137,20 +139,20 @@ void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime
 
 void Character::render(sf::RenderTarget& target)const
 {
-	if (_isAlive)
+	if (!_isAlive) return;
+	
+	target.draw(canon);
+	target.draw(charac);
+	if (_ammos > 1)
 	{
-		target.draw(canon);
-		target.draw(charac);
-		if (_ammos > 1)
-		{
-			target.draw(firstAmmo);
-			target.draw(secondAmmo);
-		}
-		else if (_ammos > 0)
-		{
-			target.draw(secondAmmo);
-		}
+		target.draw(firstAmmo);
+		target.draw(secondAmmo);
 	}
+	else if (_ammos > 0)
+	{
+		target.draw(secondAmmo);
+	}
+	
 }
 
 void Character::setRotation(sf::Vector2i mousePos)
