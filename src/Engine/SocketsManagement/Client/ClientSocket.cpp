@@ -32,7 +32,7 @@ ClientSocket::~ClientSocket()
 
 const ClientConnectionSettings& ClientSocket::getClientConnectionSettings() const { return _clientConnectionSettings; }
 const EventEmitter& ClientSocket::getEventEmitter() const { return _eventEmitter; }
-bool ClientSocket::isReady() const { return _ready;}
+bool ClientSocket::isReady() const { return _ready; }
 
 void ClientSocket::registerListeners()
 {
@@ -47,6 +47,7 @@ void ClientSocket::registerListeners()
     {
         Logger::Log("New Player connected");
     });
+    _eventEmitter.on(SocketEvents::SceneUpdate, [this](sf::Packet packet) -> void { onSceneUpdate(packet); });
 
 	_listenThread.launch();
 }
@@ -118,4 +119,8 @@ void ClientSocket::onConnected(sf::Packet packet)
     Logger::Log("Client socket connected and ready");
 
     _ready = true;
+}
+
+void ClientSocket::onSceneUpdate(sf::Packet packet) {
+
 }

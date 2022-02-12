@@ -15,6 +15,8 @@ public:
 	static float getDistance(sf::Vector2f v1, sf::Vector2f v2);
 	static sf::Vector2f getVectorReflection(const sf::Vector2f& inDirection, const sf::Vector2f& surfaceVector);
 	static double degreeToRadian(double degree);
+    static float clamp01(float x);
+    static double lerp(float a, float b, float t);
 
 	//----------- COLLISIONS -----------
 	static bool circleCircleCollision(float c1x, float c1y, float c1r, float c2x, float c2y, float c2r);

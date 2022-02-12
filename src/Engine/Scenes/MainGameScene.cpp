@@ -61,7 +61,20 @@ void MainGameScene::updateInputs(const float& deltaTime)
 		for (const auto pongBall : _pongBalls)
 			pongBall->startBoostBall(128.f);
 
-	// Joueur 1
+    {
+        float x = 0;
+        float y = 0;
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) x = 1;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) x = -1;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) y = 1;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))	y = -1;
+
+        _players[0]->moveEntity(sf::Vector2f(x, y), deltaTime);
+    }
+
+    /*
+    // Joueur 1
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))	_players[0]->direction(1, 0, 0, 0, deltaTime);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))_players[0]->direction(0, 1, 0, 0, deltaTime);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))	_players[0]->direction(0, 0, 1, 0, deltaTime);
@@ -74,7 +87,7 @@ void MainGameScene::updateInputs(const float& deltaTime)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))_players[1]->direction(0, 0, 1, 0, deltaTime);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))_players[1]->direction(0, 0, 0, 1, deltaTime);
 	else											_players[1]->direction(0, 0, 0, 0, deltaTime);
-
+    */
 
 	//Shoot
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
@@ -153,9 +166,7 @@ void MainGameScene::update(const float& deltaTime)
 
 		if (pongBall->hitPlayer(_players[1]->getPositionAndRadiusCharac().x, _players[1]->getPositionAndRadiusCharac().y, _players[1]->getPositionAndRadiusCharac().z, _player1color))
 		{
-
 			std::cout << "Player blue hit" << std::endl;
-
 		}
 	}
 
@@ -165,9 +176,9 @@ void MainGameScene::update(const float& deltaTime)
 		player->update(deltaTime);
 	}
 
-	
-	
-	
+
+
+
 
 }
 

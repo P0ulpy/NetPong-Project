@@ -85,7 +85,7 @@ void Character::setPosition(int xSpawn, int ySpawn)
 
 void Character::update(const float& deltaTime)
 {
-	setRotation(mousePosition);
+    setRotation(calcRotFromMousePos(mousePosition));
 	if (_cooldownActivated)
 	{
 		if (_cooldownShoot >= 0 && _cooldownShoot < DURATION_BETWEEN_SHOOTS) _cooldownShoot = _cooldownShoot + deltaTime;
@@ -95,18 +95,17 @@ void Character::update(const float& deltaTime)
 			activateCooldown(false);
 			_cooldownShoot = 0;
 		}
-
 	}
 
 	if (_isReloading)
 	{
 		if (_reloadingTime >= 0 && _reloadingTime < COOLDOWN_RELOAD_FIRST_BALL)
 		{
-			_reloadingTime = _reloadingTime + deltaTime;
+			_reloadingTime += deltaTime;
 		}
 		if (_reloadingTime >= COOLDOWN_RELOAD_FIRST_BALL && _reloadingTime < COOLDOWN_RELOAD_SECOND_BALL)
 		{
-			_reloadingTime = _reloadingTime + deltaTime;
+			_reloadingTime += deltaTime;
 			_ammos = 1;
 		}
 		if (_reloadingTime > COOLDOWN_RELOAD_SECOND_BALL)
@@ -115,7 +114,6 @@ void Character::update(const float& deltaTime)
 			_reloadingTime = 0;
 			_ammos = 2;
 		}
-
 	}
 
 	_characDestination->setPosition(std::abs(charac.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
@@ -146,27 +144,24 @@ void Character::render(sf::RenderTarget& target)const
 	}
 }
 
-void Character::setRotation(sf::Vector2i mousePos)
+float Character::calcRotFromMousePos(sf::Vector2i mousePos)
 {
-	sf::Vector2f curPos = canon.getPosition();
-	float dx = curPos.x - mousePos.x;
-	float dy = curPos.y - mousePos.y;
+    sf::Vector2f curPos = canon.getPosition();
+    float dx = curPos.x - mousePos.x;
+    float dy = curPos.y - mousePos.y;
+    return ((atan2(dy, dx)) * (float)180.0 / PI);
+}
 
-	_rotation = ((atan2(dy, dx)) * 180.0 / PI);
+void Character::setRotation(float rot)
+{
+    _rotation = rot;
 	canon.setRotation(_rotation);
 	shootZone.setRotation(_rotation);
 	firstAmmo.setRotation(_rotation);
 	secondAmmo.setRotation(_rotation);
 }
 
-void Character::direction(int isleft, int isright, int up, int down, float deltaTime)
-{
-	xCharDirection = -isleft + isright;
-	yCharDirection = -up + down;
-
-	_velocity = sf::Vector2f(xCharDirection, yCharDirection);
-	moveEntity(_velocity, deltaTime);
-}
+void Character::setVelocity(const sf::Vector2f& newVelocity) { _velocity = newVelocity; }
 
 bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)
 {

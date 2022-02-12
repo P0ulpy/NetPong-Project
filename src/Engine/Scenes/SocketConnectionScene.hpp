@@ -17,7 +17,8 @@ private:
     bool _hostWindowOpen = false;
     bool _joining = false;
 
-    bool _oui =false;
+    bool _oui = false;
+    bool _oui2LeRetour = false;
 
 	void displayHostWindow();
 	void displayJoinWindow();

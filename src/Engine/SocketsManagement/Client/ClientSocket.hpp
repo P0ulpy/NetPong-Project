@@ -45,5 +45,7 @@ private:
 
     [[noreturn]] void listenEvents();
 
+
 	void onConnected(sf::Packet packet);
+	void onSceneUpdate(sf::Packet packet);
 };

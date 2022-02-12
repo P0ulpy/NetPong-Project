@@ -127,8 +127,9 @@ void SocketConnectionScene::displayJoinWindow()
                 char pseudo[16] = "Xx_pseudo_xX";
                 ImGui::InputTextWithHint("Pseudo", "Player...", pseudo, IM_ARRAYSIZE(pseudo));
 
-                if (ImGui::Button("Join game"))
+                if (ImGui::Button("Join game") || !_oui2LeRetour)
                 {
+                    _oui2LeRetour = true;
                     Logger::Log("Start Joining Game");
 
                     clientSocket->_playerSettings.name = pseudo;
@@ -139,6 +140,5 @@ void SocketConnectionScene::displayJoinWindow()
                 }
             }
         }
-
 	}
 }

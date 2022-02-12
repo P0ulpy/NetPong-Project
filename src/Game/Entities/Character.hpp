@@ -17,8 +17,6 @@ private:
 	sf::RectangleShape firstAmmo;
 	sf::RectangleShape secondAmmo;
 
-
-
 	//PongBall colors
 	sf::Color _ammoColorNormal;
 	sf::Color _ammoColorInactive;
@@ -54,11 +52,11 @@ public:
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime)override;
 
 	// set la rotation des sprites en fonction de la souris
-	void setRotation(sf::Vector2i mousePos);
-	bool isInCooldown();
+    float calcRotFromMousePos(sf::Vector2i mousePos);
+    void setRotation(float rot);
+    void setVelocity(const sf::Vector2f& newVelocity);
+    bool isInCooldown();
 	bool isReloading();
-
-	
 	
 	void activateCooldown(bool activate);
 	void activateReloading(bool activateReload);
@@ -66,9 +64,6 @@ public:
 	void setAmmosColor(sf::Color normalColor, sf::Color inactiveColor);
 	sf::Color getInactiveAmmoColor() const;
 	sf::Color getNormalAmmoColor() const;
-
-	// On d�fini la direction du personnage gr�ce aux inputs
-	void direction(int isleft, int isright, int up, int down, float deltaTime);
 
 	bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
 	bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;

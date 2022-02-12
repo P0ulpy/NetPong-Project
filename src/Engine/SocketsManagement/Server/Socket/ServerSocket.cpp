@@ -124,7 +124,7 @@ const std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients()
 		}
         else
         {
-            Logger::Err("Wait time elapsed ?");
+            //Logger::Err("Wait time elapsed ?");
         }
 	}
 }

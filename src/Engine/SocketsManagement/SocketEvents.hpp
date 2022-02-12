@@ -6,7 +6,7 @@ enum SocketEvents {
     PlayerSendSettings,
     NewPlayerConnected,
     PlayerDisconnected,
-    SyncUpdate,
+    SceneUpdate,
 
 	Count
 };

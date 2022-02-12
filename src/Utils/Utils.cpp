@@ -84,6 +84,16 @@ bool Utils::lineLineCollision(float x1, float y1, float x2, float y2, float x3, 
 	return false;
 }
 
+float Utils::clamp01(float value) {
+    if (value < 0.0)
+        return 0.0f;
+    return value > 1.0 ? 1 : value;
+}
+
+double Utils::lerp(float a, float b, float t) {
+    return a - (b - a) * clamp01(t);
+}
+
 // LINE/POINT
 bool Utils::linePointCollision(float x1, float y1, float x2, float y2, float px, float py)
 {
