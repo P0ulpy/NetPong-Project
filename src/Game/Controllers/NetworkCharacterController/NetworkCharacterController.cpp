@@ -3,11 +3,13 @@
 //
 
 #include "NetworkCharacterController.hpp"
-#include "../../../../Utils/Utils.hpp"
+#include "../../Entities/Character.hpp"
 
-PlayerState::PlayerState(sf::Vector2i position, const sf::Vector2f &velocity) : velocity(velocity), position(position) {}
+PlayerState::PlayerState(const sf::Vector2i& position, const sf::Vector2f &velocity, float angle, float angularVelocity)
+        : velocity(velocity), position(position), angle(angle), angularVelocity(angularVelocity) {}
 
-NetworkCharacterController::NetworkCharacterController(Character &character) : _character(character) {}
+NetworkCharacterController::NetworkCharacterController(Character &character)
+        : _character(character) {}
 
 void NetworkCharacterController::onReceive(const PlayerState &playerState)
 {
@@ -18,7 +20,7 @@ void NetworkCharacterController::onReceive(const PlayerState &playerState)
 void NetworkCharacterController::Update(float dt)
 {
     _netDelta += dt;
-    // Maybe have a very quick Lerp instead of instant rotation
+    // TODO : Maybe have a very quick Lerp instead of instant rotation
     _character.setRotation(_lastPlayerState.angle);
     _character.setVelocity(positionPrediction());
 }
@@ -36,5 +38,20 @@ sf::Vector2f NetworkCharacterController::positionPrediction() const
     };
 }
 
+PlayerState NetworkCharacterController::getCurrentPlayerState() const
+{
+    sf::Vector2f velocity;
+    float angle;
+
+    return {
+        (sf::Vector2i)_character.getShape().getPosition(),
+        _character.getVelocity(),
+        _character.getRotation(),
+        //TEMP
+        0
+    };
+}
+
 const PlayerState &NetworkCharacterController::getLastPlayerState() const { return _lastPlayerState; }
 double NetworkCharacterController::getTimeSinceLastReceive() const { return _netDelta; }
+

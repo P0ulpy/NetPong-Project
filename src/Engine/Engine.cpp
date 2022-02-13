@@ -19,12 +19,10 @@ PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
 	, _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this))
 	, _logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
 {
-	/*
 	if (_instance != nullptr)
-		throw std::exception("Engine is a singleton");
+        Logger::Err("Engine is a Singleton ! : Overriding old Engine intance");
 
-	_instance = this;
-	*/
+    _instance = this;
 }
 
 void PoPossibEngin::start()
@@ -67,7 +65,7 @@ PoPossibEngin::~PoPossibEngin()
 
 // Get
 
-//PoPossibEngin& PoPossibEngin::getInstance() { return *_instance; }
+PoPossibEngin& PoPossibEngin::getInstance() { return *_instance; }
 
 sf::RenderWindow& PoPossibEngin::getRenderWindow() const { return *_renderWindow; }
 const EngineState& PoPossibEngin::getEngineState() const { return _engineState; }

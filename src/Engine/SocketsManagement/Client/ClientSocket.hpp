@@ -21,7 +21,7 @@ public:
     void send(SocketEvents event, const sf::Packet& data);
 
 	[[nodiscard]] const ClientConnectionSettings& getClientConnectionSettings() const;
-	[[nodiscard]] const EventEmitter& getEventEmitter() const;
+	[[nodiscard]] const EventEmitter* getEventEmitter() const;
     [[nodiscard]] bool isReady() const;
 
     // TODO: Proprifier (get / set ect)

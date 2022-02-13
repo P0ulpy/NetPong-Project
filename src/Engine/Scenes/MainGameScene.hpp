@@ -20,7 +20,7 @@ public:
 	void updateInputs(const float& deltaTime);
 	void start() override {};
 	void update(const float& deltaTime) override;
-	void render(sf::RenderTarget* target = nullptr) override;
+	void render(sf::RenderTarget* target) override;
 
 	PolygonTerrain* getPolygonTerrain() const;
 	void hideAllPongBalls() const;

@@ -47,7 +47,11 @@ bool InputsManager::getEvent(sf::Event::EventType eventType, sf::Event& outEvent
 	return false;
 }
 
+void InputsManager::update()
+{
+	setMousePosition();
+}
+
 //Mouse
 void InputsManager::setMousePosition() { _mousePosition = sf::Mouse::getPosition(_engine.getRenderWindow()); }
-sf::Vector2<int> InputsManager::updateMousePosition() { return _mousePosition; }
-sf::Vector2<int> InputsManager::getMousePosition() {return _mousePosition; }
+sf::Vector2i InputsManager::getMousePosition() { return _mousePosition; }

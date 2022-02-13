@@ -67,12 +67,6 @@ Character::Character(sf::Color color)
 Character::~Character()
 { }
 
-void Character::setMousePosition(sf::Vector2i mouse)
-{
-	mousePosition = mouse;
-}
-
-
 void Character::setPosition(int xSpawn, int ySpawn)
 {
 	charac.setPosition(xSpawn, ySpawn);
@@ -86,7 +80,8 @@ void Character::setPosition(int xSpawn, int ySpawn)
 void Character::update(const float& deltaTime)
 {
     setRotation(calcRotFromMousePos(mousePosition));
-	if (_cooldownActivated)
+
+    if (_cooldownActivated)
 	{
 		if (_cooldownShoot >= 0 && _cooldownShoot < DURATION_BETWEEN_SHOOTS) _cooldownShoot = _cooldownShoot + deltaTime;
 
@@ -144,14 +139,6 @@ void Character::render(sf::RenderTarget& target)const
 	}
 }
 
-float Character::calcRotFromMousePos(sf::Vector2i mousePos)
-{
-    sf::Vector2f curPos = canon.getPosition();
-    float dx = curPos.x - mousePos.x;
-    float dy = curPos.y - mousePos.y;
-    return ((atan2(dy, dx)) * (float)180.0 / PI);
-}
-
 void Character::setRotation(float rot)
 {
     _rotation = rot;
@@ -162,6 +149,7 @@ void Character::setRotation(float rot)
 }
 
 void Character::setVelocity(const sf::Vector2f& newVelocity) { _velocity = newVelocity; }
+const sf::Vector2f& Character::getVelocity() { return _velocity; }
 
 bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)
 {
@@ -276,29 +264,14 @@ void Character::setAmmosColor(sf::Color normalColor, sf::Color inactiveColor)
 	_ammoColorInactive = inactiveColor;
 }
 
-sf::Color Character::getInactiveAmmoColor() const
-{
-	return _ammoColorInactive;
-}
+const sf::CircleShape& Character::getShape() const { return charac; }
+const sf::RectangleShape& Character::getCanon() const { return canon; }
+float Character::getRotation() const { return _rotation; }
 
-sf::Color Character::getNormalAmmoColor() const
-{
-	return _ammoColorNormal;
-}
+sf::Color Character::getInactiveAmmoColor() const { return _ammoColorInactive; }
+sf::Color Character::getNormalAmmoColor() const { return _ammoColorNormal; }
 
-bool Character::isInCooldown()
-{
-	return _cooldownActivated;
-}
+bool Character::isInCooldown() const { return _cooldownActivated; }
+bool Character::isReloading() const { return _isReloading; }
 
-bool Character::isReloading()
-{
-	return _isReloading;
-}
-
-//x = position en x, y = position en y et z = rayon 
-sf::Vector3f Character::getPositionAndRadiusCharac() 
-{
-	return sf::Vector3f(charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2);
-}
-
+sf::Vector3f Character::getPositionAndRadiusCharac() { return {charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2}; }

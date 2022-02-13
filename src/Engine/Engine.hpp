@@ -42,9 +42,7 @@ public:
 	void start();
 	void stop();
 
-	// get / set
-
-	//[[nodiscard]] static PoPossibEngin& getInstance();
+	[[nodiscard]] static PoPossibEngin& getInstance();
 	
 	[[nodiscard]] sf::RenderWindow& getRenderWindow() const;
 	[[nodiscard]] const EngineState& getEngineState() const;
@@ -61,7 +59,7 @@ public:
 
 private:
 
-	//static PoPossibEngin* _instance;
+	static PoPossibEngin* _instance;
 
 	EngineState _engineState = STOP;
 	const EngineConfig& _engineConfig;

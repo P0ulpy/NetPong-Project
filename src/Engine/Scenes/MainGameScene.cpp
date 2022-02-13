@@ -6,7 +6,6 @@
 #include "../../Game/Entities/Character.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
-#include "../../Utils/Utils.hpp"
 
 constexpr int NUM_MAX_PONGBALL = 500;
 
@@ -22,13 +21,11 @@ MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	setPlayersToDefaultSpawnPoints();
 }
 
-MainGameScene::~MainGameScene()
-{
-
-}
+MainGameScene::~MainGameScene() {}
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
+#pragma region DEBUG_KEYS
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
 		_gameManager->player1WinsRound();
@@ -61,6 +58,9 @@ void MainGameScene::updateInputs(const float& deltaTime)
 		for (const auto pongBall : _pongBalls)
 			pongBall->startBoostBall(128.f);
 
+#pragma endregion
+
+    // POSITION
     {
         float x = 0;
         float y = 0;
@@ -73,21 +73,17 @@ void MainGameScene::updateInputs(const float& deltaTime)
         _players[0]->moveEntity(sf::Vector2f(x, y), deltaTime);
     }
 
-    /*
-    // Joueur 1
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))	_players[0]->direction(1, 0, 0, 0, deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))_players[0]->direction(0, 1, 0, 0, deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))	_players[0]->direction(0, 0, 1, 0, deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))	_players[0]->direction(0, 0, 0, 1, deltaTime);
-	else												_players[0]->direction(0, 0, 0, 0, deltaTime);
+    {
+        float x = 0;
+        float y = 0;
 
-	// Joueur 2
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))_players[1]->direction(1, 0, 0, 0, deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))_players[1]->direction(0, 1, 0, 0, deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))_players[1]->direction(0, 0, 1, 0, deltaTime);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))_players[1]->direction(0, 0, 0, 1, deltaTime);
-	else											_players[1]->direction(0, 0, 0, 0, deltaTime);
-    */
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) x = 1;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) x = -1;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) y = 1;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))	y = -1;
+
+        _players[1]->moveEntity(sf::Vector2f(x, y), deltaTime);
+    }
 
 	//Shoot
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
@@ -146,40 +142,30 @@ void MainGameScene::makePlayerShoot(int playerIndex)
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs(deltaTime);
-	_poPossibEngin->getInputsManager().setMousePosition();
-	
+	_poPossibEngin->getInputsManager().update();
 	_gameManager->update(deltaTime);
-
 	_polygonTerrain->update(deltaTime);
 
 	for (const auto pongBall : _pongBalls)
 	{
 		pongBall->update(deltaTime);
-		
-		
-		if (pongBall->hitPlayer(_players[0]->getPositionAndRadiusCharac().x, _players[0]->getPositionAndRadiusCharac().y, _players[0]->getPositionAndRadiusCharac().z, _player0color))
+
+        // TODO : REMOVE THIS
+		/*if (pongBall->hitPlayer(_players[0]->getPositionAndRadiusCharac().x, _players[0]->getPositionAndRadiusCharac().y, _players[0]->getPositionAndRadiusCharac().z, _player0color))
 		{
-
 			std::cout << "Player red hit" << std::endl;
-
 		}
 
 		if (pongBall->hitPlayer(_players[1]->getPositionAndRadiusCharac().x, _players[1]->getPositionAndRadiusCharac().y, _players[1]->getPositionAndRadiusCharac().z, _player1color))
 		{
 			std::cout << "Player blue hit" << std::endl;
-		}
+		}*/
 	}
 
 	for (const auto player : _players)
 	{
-		player->setMousePosition(_poPossibEngin->getInputsManager().getMousePosition());
 		player->update(deltaTime);
 	}
-
-
-
-
-
 }
 
 void MainGameScene::render(sf::RenderTarget* target)
@@ -198,11 +184,7 @@ void MainGameScene::render(sf::RenderTarget* target)
 	}
 }
 
-PolygonTerrain* MainGameScene::getPolygonTerrain() const
-{
-	return _polygonTerrain.get();
-}
-
+PolygonTerrain* MainGameScene::getPolygonTerrain() const { return _polygonTerrain.get(); }
 void MainGameScene::hideAllPongBalls() const
 {
 	for (auto pongBall : _pongBalls)
@@ -210,19 +192,14 @@ void MainGameScene::hideAllPongBalls() const
 		pongBall->setActive(false);
 	}
 }
-
-void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush)
-{
-	_inactivePongBalls.push(pongBallToPush);
-}
-
+void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush) { _inactivePongBalls.push(pongBallToPush); }
 void MainGameScene::setPlayersToDefaultSpawnPoints() const
 {
-	_players[0]->setPosition(_poPossibEngin->getRenderWindow().getSize().x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
-		_poPossibEngin->getRenderWindow().getSize().y / 2);
+    sf::Vector2i renderWindowSize = (sf::Vector2i)_poPossibEngin->getRenderWindow().getSize();
 
-	_players[1]->setPosition(_poPossibEngin->getRenderWindow().getSize().x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET, 
-		_poPossibEngin->getRenderWindow().getSize().y / 2);
+    _players[0]->setPosition(renderWindowSize.x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
+                             renderWindowSize.y / 2);
+
+    _players[1]->setPosition(renderWindowSize.x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
+                             renderWindowSize.y / 2);
 }
-
-
