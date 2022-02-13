@@ -7,6 +7,7 @@
 
 #include "SFML/System/Vector2.hpp"
 #include "../../../Engine/SocketsManagement/Client/ClientSocket.hpp"
+#include "../ControllerBase.hpp"
 
 struct PlayerState
 {
@@ -22,22 +23,20 @@ struct PlayerState
 
 class Character;
 
-class NetworkCharacterController
+class NetworkCharacterController : public Engine::ControllerBase
 {
 private:
-    Character& _character;
-
     const float _maxNetDelta = 2.0;
     PlayerState _lastPlayerState;
     float _netDelta = 0;
 
 public:
-    NetworkCharacterController(Character &character);
+    NetworkCharacterController(Character& controlTarget);
 
     [[nodiscard]] PlayerState getCurrentPlayerState() const;
     [[nodiscard]] const PlayerState &getLastPlayerState() const;
     [[nodiscard]] double getTimeSinceLastReceive() const;
-    void Update(float dt);
+    void update(const float& deltaTime) final;
 
 private:
     void onReceive(const PlayerState& playerState);

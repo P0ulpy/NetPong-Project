@@ -31,8 +31,6 @@ PongBall::PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene)
 	setActive(false);
 }
 
-PongBall::~PongBall() = default;
-
 //--- Initializers ---
 void PongBall::initVariables()
 {

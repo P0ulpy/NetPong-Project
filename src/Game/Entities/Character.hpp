@@ -1,9 +1,9 @@
 #include "SFML/Graphics.hpp"
 #include "../Entity.hpp"
+#include "../../Engine/Interfaces/IControllable.hpp"
+#include "../../Engine/Interfaces/IRenderable.hpp"
 
-//class PongBall;
-
-class Character : public Entity
+class Character : public Entity, public Engine::IControllable, public Engine::IRenderable
 {
 private:
 	sf::CircleShape charac;
@@ -46,7 +46,7 @@ public:
     Character(sf::Color color);
 	~Character() = default;
 
-	void update(const float& deltaTime)override;
+	void update(const float& deltaTime) override;
 	void render(sf::RenderTarget& renderTarget) const override;
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime) override;
 
@@ -67,18 +67,17 @@ public:
     // GET
     [[nodiscard]] const sf::CircleShape& getShape() const;
     [[nodiscard]] const sf::RectangleShape& getCanon() const;
-    [[nodiscard]] const sf::Vector2f& getVelocity();
-    [[nodiscard]] float getRotation() const;
+    [[nodiscard]] const sf::Vector2f& getVelocity() final;
+    [[nodiscard]] const sf::Vector2f& getPosition() const final;
+    [[nodiscard]] float getRotation() const final;
     //x = position en x, y = position en y et z = rayon
     [[nodiscard]] sf::Vector3f getPositionAndRadiusCharac();
     [[nodiscard]] sf::Color getInactiveAmmoColor() const;
     [[nodiscard]] sf::Color getNormalAmmoColor() const;
 
     // SET
-    void setPosition(int xSpawn, int ySpawn);
-    void setRotation(float rot);
-    void setVelocity(const sf::Vector2f& newVelocity);
+    void setPosition(int xSpawn, int ySpawn) final;
+    void setRotation(float rot) final;
+    void setVelocity(const sf::Vector2f& newVelocity) final;
     void setAmmosColor(sf::Color normalColor, sf::Color inactiveColor);
-
-
 };

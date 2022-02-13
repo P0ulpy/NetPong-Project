@@ -5,7 +5,7 @@ int main(int argc, char** argv)
     PoPossibEngin engine(
         EngineConfig(
             EngineConfig::WindowConfig(
-                sf::VideoMode(500, 500),
+                sf::VideoMode(1920, 1080),
                 "Netpong"
             )
         )

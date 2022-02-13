@@ -2,7 +2,6 @@
 #include "../Engine.hpp"
 #include "InputsManager.hpp"
 
-
 InputsManager::InputsManager(PoPossibEngin& engine)
     : _engine(engine)
 {

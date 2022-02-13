@@ -1,27 +1,37 @@
 #include "MainGameScene.hpp"
 
-#include <iostream>
-
 #include "../../Game/Entities/PongBall.hpp"
 #include "../../Game/Entities/Character.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
+#include "../../Logger/Logger.hpp"
+
+
+#include "../../Game/Controllers/LocalCharacterController/LocalCharacterController.hpp"
+#include "../../Game/Controllers/NetworkCharacterController/NetworkCharacterController.hpp"
 
 constexpr int NUM_MAX_PONGBALL = 500;
-
 constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 75;
 
+MainGameScene* MainGameScene::_instance = nullptr;
 
 MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
 {
+    MainGameScene::_instance = this;
+
 	initValues();
 	initFonts();
 
 	setPlayersToDefaultSpawnPoints();
 }
 
-MainGameScene::~MainGameScene() = default;
+MainGameScene::~MainGameScene()
+{
+    MainGameScene::_instance = nullptr;
+};
+
+MainGameScene *MainGameScene::getInstance() { return _instance; }
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {
@@ -60,36 +70,13 @@ void MainGameScene::updateInputs(const float& deltaTime)
 
 #pragma endregion
 
-    // POSITION
-    {
-        float x = 0;
-        float y = 0;
-
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) x = 1;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) x = -1;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) y = 1;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))	y = -1;
-
-        _players[0]->moveEntity(sf::Vector2f(x, y), deltaTime);
-    }
-
-    {
-        float x = 0;
-        float y = 0;
-
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) x = 1;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) x = -1;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) y = 1;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))	y = -1;
-
-        _players[1]->moveEntity(sf::Vector2f(x, y), deltaTime);
-    }
-
+    /*
 	//Shoot
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
 		makePlayerShoot(0);
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
 		makePlayerShoot(1);
+     */
 }
 
 void MainGameScene::initValues()
@@ -100,12 +87,22 @@ void MainGameScene::initValues()
 	{
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
 	}
-	
-	_players.emplace_back(new Character(_player0color));
+
+    auto p0 = new Character(_player0color);
+	_players.emplace_back(p0);
 	_players.back()->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
 
-	_players.emplace_back(new Character(_player1color));
+    auto p1 = new Character(_player1color);
+    _players.emplace_back(p1);
 	_players.back()->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
+
+    _controllers.push_back(new LocalCharacterController(*p0, {
+        sf::Keyboard::Up,sf::Keyboard::Down,sf::Keyboard::Left,sf::Keyboard::Right, sf::Mouse::Button::Right
+    }));
+
+    _controllers.push_back(new LocalCharacterController(*p1,{
+            sf::Keyboard::Z,sf::Keyboard::S,sf::Keyboard::Q,sf::Keyboard::D, sf::Mouse::Button::Left
+    }));
 
 	_gameManager = std::make_shared<GameManager>(this);
 }
@@ -114,7 +111,7 @@ void MainGameScene::initFonts()
 {
 	if (!_font.loadFromFile("./Assets/arial.ttf"))
 	{
-		std::cout << "ERROR FONT NOT LOADED - MainGameScene.cpp" << std::endl;
+		Logger::Err("ERROR FONT NOT LOADED - MainGameScene.cpp");
 	}
 }
 
@@ -142,9 +139,13 @@ void MainGameScene::makePlayerShoot(int playerIndex)
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs(deltaTime);
+
 	_poPossibEngin->getInputsManager().update();
 	_gameManager->update(deltaTime);
 	_polygonTerrain->update(deltaTime);
+
+    for(const auto controller : _controllers)
+        controller->update(deltaTime);
 
 	for (const auto pongBall : _pongBalls)
 	{
@@ -203,3 +204,5 @@ void MainGameScene::setPlayersToDefaultSpawnPoints() const
     _players[1]->setPosition(renderWindowSize.x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
                              renderWindowSize.y / 2);
 }
+
+std::stack<PongBall *> &MainGameScene::getInactivePongBalls() { return _inactivePongBalls; }

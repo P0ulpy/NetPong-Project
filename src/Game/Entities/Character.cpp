@@ -268,11 +268,12 @@ void Character::setAmmosColor(sf::Color normalColor, sf::Color inactiveColor)
 const sf::CircleShape& Character::getShape() const { return charac; }
 const sf::RectangleShape& Character::getCanon() const { return canon; }
 float Character::getRotation() const { return _rotation; }
-
+const sf::Vector2f &Character::getPosition() const { return charac.getPosition(); }
 sf::Color Character::getInactiveAmmoColor() const { return _ammoColorInactive; }
-sf::Color Character::getNormalAmmoColor() const { return _ammoColorNormal; }
 
+sf::Color Character::getNormalAmmoColor() const { return _ammoColorNormal; }
 bool Character::isInCooldown() const { return _cooldownActivated; }
+
 bool Character::isReloading() const { return _isReloading; }
 
 sf::Vector3f Character::getPositionAndRadiusCharac() { return {charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2}; }

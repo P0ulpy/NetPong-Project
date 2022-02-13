@@ -3,6 +3,7 @@
 #include <stack>
 #include <memory>
 #include "Scene.hpp"
+#include "../../Game/Controllers/ControllerBase.hpp"
 
 class GameManager;
 class PolygonTerrain;
@@ -17,6 +18,8 @@ public:
 	MainGameScene(PoPossibEngin& poPossibEngin);
 	~MainGameScene();
 
+    static MainGameScene* getInstance();
+
 	void updateInputs(const float& deltaTime);
 	void start() override {};
 	void update(const float& deltaTime) override;
@@ -26,16 +29,22 @@ public:
 	void hideAllPongBalls() const;
 	void pushInactivePongBall(PongBall* pongBallToPush);
 
-	//Red
 	sf::Color _player0color = sf::Color(255, 40, 0);
-	//Blue
 	sf::Color _player1color = sf::Color(0, 40, 255);
 
 	void setPlayersToDefaultSpawnPoints() const;
 
+    // GET / SET
+    std::stack<PongBall*>& getInactivePongBalls();
+
 private:
+    static MainGameScene* _instance;
+
 	std::vector<sf::Texture> _textures;
 	std::shared_ptr<GameManager> _gameManager;
+
+    // Controllers
+    std::vector<Engine::ControllerBase*> _controllers;
 
 	//Game objects
 	std::vector<PongBall*> _pongBalls;

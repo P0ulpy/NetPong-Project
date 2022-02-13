@@ -14,7 +14,6 @@ class PongBall : public Entity
 public:
 	//Constructors - Destructors
 	PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene);
-	virtual ~PongBall() = 0;
 
 	//Functions
 	void update(const float& deltaTime) override;

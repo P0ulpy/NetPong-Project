@@ -5,20 +5,38 @@
 #ifndef NETPONG_PROJECT_LOCALCHARACTERCONTROLLER_HPP
 #define NETPONG_PROJECT_LOCALCHARACTERCONTROLLER_HPP
 
-#include "../../Entities/Character.hpp"
+#include "../ControllerBase.hpp"
+#include "SFML/Window/Keyboard.hpp"
+#include "SFML/Window/Mouse.hpp"
 
 class Character;
 
-class LocalCharacterController
+class LocalCharacterController : public Engine::ControllerBase
 {
-private:
-    Character& _character;
-
 public:
-    explicit LocalCharacterController(Character &character);
-    void Update(float dt);
+    struct KeyMap
+    {
+        KeyMap() = default;
+        KeyMap(sf::Keyboard::Key up, sf::Keyboard::Key down, sf::Keyboard::Key left, sf::Keyboard::Key right, sf::Mouse::Button shoot);
+
+        sf::Keyboard::Key up;
+        sf::Keyboard::Key down;
+        sf::Keyboard::Key left;
+        sf::Keyboard::Key right;
+        sf::Mouse::Button shoot;
+    };
+
+    explicit LocalCharacterController(Character &character, const KeyMap& keymap);
+    void update(const float& deltaTime) final;
 
     float calcRotFromMousePos(sf::Vector2i mousePos);
+
+private:
+    KeyMap _keyMap;
+
+    void rotate();
+    void translate(const float& deltaTime);
+    void shoot();
 };
 
 #endif //NETPONG_PROJECT_LOCALCHARACTERCONTROLLER_HPP
