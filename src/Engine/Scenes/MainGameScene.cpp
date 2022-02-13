@@ -7,6 +7,7 @@
 #include "../../Engine/Animator/AnimatorManager.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
+#include "../../Game/System/AudioPlayer.hpp"
 #include "../SocketsManagement/Client/ClientSocket.hpp"
 
 #define COLOR_PLAYER_1 sf::Color(255, 40, 0)
@@ -26,7 +27,9 @@ MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	initValues();
 	initFonts();
 
+	getPolygonTerrain()->drawRandomTerrain();
 	setPlayersToDefaultSpawnPoints();
+	togglePlayersMovement(false);
 }
 
 MainGameScene::~MainGameScene()
@@ -38,32 +41,6 @@ void MainGameScene::updateInputs(const float& deltaTime)
 		_gameManager->makePlayerWin(1);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
 		_gameManager->makePlayerWin(2);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::U))
-		for (const auto pongBall : _pongBalls)
-			pongBall->startPhantomBallEffect();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::I))
-		for (const auto pongBall : _pongBalls)
-			pongBall->stopPhantomBallEffect();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
-		for (const auto pongBall : _pongBalls)
-			pongBall->setActive(true);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
-		hideAllPongBalls();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad2))
-		for (const auto pongBall : _pongBalls)
-			pongBall->startBoostBall(8.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad3))
-		for (const auto pongBall : _pongBalls)
-			pongBall->startBoostBall(16.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad4))
-		for (const auto pongBall : _pongBalls)
-			pongBall->startBoostBall(32.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad5))
-		for (const auto pongBall : _pongBalls)
-			pongBall->startBoostBall(64.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Numpad6))
-		for (const auto pongBall : _pongBalls)
-			pongBall->startBoostBall(128.f);
 
 	// Joueur 1
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))	_players[0]->direction(1, 0, 0, 0, deltaTime);
@@ -91,6 +68,7 @@ void MainGameScene::initValues()
 {
 	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls, _players);
 	_animator = std::make_unique<AnimatorManager>();
+
 	for (int i = 0 ; i < NUM_MAX_PONGBALL ; i++)
 	{
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
@@ -101,6 +79,8 @@ void MainGameScene::initValues()
 
 	_players.emplace_back(new Character(COLOR_PLAYER_2));
 	_players.back()->setAmmosColor(NORMAL_AMMO_COLOR_PLAYER2, INACTIVE_AMMO_COLOR_PLAYER2);
+
+	_audioPlayer = std::make_unique<AudioPlayer>();
 
 	_gameManager = std::make_shared<GameManager>(this);
 }
@@ -115,15 +95,14 @@ void MainGameScene::initFonts()
 
 void MainGameScene::makePlayerShoot(int playerIndex)
 {
-	if (playerIndex < 0 ||
-		playerIndex > _players.size() - 1 ||
+	if (playerIndex < 0 || playerIndex > _players.size() - 1 ||
 		_inactivePongBalls.empty() ||
 		!_players[playerIndex]->canCharacterMove())
 	{
 		return;
 	}
 
-	if (!_players[playerIndex]->isInCooldown() && !_players[playerIndex]->isReloading())
+	if (_players[playerIndex]->canCharacterShoot())
 	{
 		_inactivePongBalls.top()->shoot(
 			_players[playerIndex]->shootDepart(),
@@ -134,6 +113,7 @@ void MainGameScene::makePlayerShoot(int playerIndex)
 
 		_players[playerIndex]->ammoCount(-1);
 		_players[playerIndex]->activateCooldown(true);
+		getAudioPlayer()->playSound("Shoot");
 
 		_inactivePongBalls.pop();
 	}
@@ -143,13 +123,15 @@ void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 {
 	for (int currPlayerIndex = 0; currPlayerIndex < _players.size(); ++currPlayerIndex)
 	{
-		if (pongBall.hitPlayer(_players[currPlayerIndex]->getPosition().x, _players[currPlayerIndex]->getPosition().y, _players[currPlayerIndex]->getRadius(), _players[currPlayerIndex]->getNormalAmmoColor()))
+		if (pongBall.hitPlayer(_players[currPlayerIndex]->getPosition().x,
+								_players[currPlayerIndex]->getPosition().y,	
+							_players[currPlayerIndex]->getRadius(),
+								_players[currPlayerIndex]->getNormalAmmoColor()))
 		{
 			_players[currPlayerIndex]->setPlayerAlive(false);
+			getAudioPlayer()->playSound("Explosion");
 			_animator->DeathAnimation(_players[currPlayerIndex]->getPosition());
 			_gameManager->makePlayerWin(currPlayerIndex+1);
-
-			std::cout << "Player hit !" << std::endl;
 		}
 	}
 }
@@ -200,13 +182,9 @@ PolygonTerrain* MainGameScene::getPolygonTerrain() const
 	return _polygonTerrain.get();
 }
 
-void MainGameScene::displayPlayers(bool isDisplayed) const
+AudioPlayer* MainGameScene::getAudioPlayer() const
 {
-	for (const auto player : _players)
-	{
-		player->setPlayerAlive(isDisplayed);
-		player->resetAmmos();
-	}
+	return _audioPlayer.get();
 }
 
 void MainGameScene::hideAllPongBalls() const
@@ -228,6 +206,35 @@ void MainGameScene::togglePlayersMovement(bool canTheyMove) const
 void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush)
 {
 	_inactivePongBalls.push(pongBallToPush);
+}
+
+void MainGameScene::startFirstRound() const
+{
+	setPlayersToDefaultSpawnPoints();
+
+	for (const auto player : _players)
+	{
+		player->setPlayerAlive(true);
+		player->resetAmmos();
+	}
+}
+
+void MainGameScene::restartRound() const
+{
+	getPolygonTerrain()->drawRandomTerrain();
+	setPlayersToDefaultSpawnPoints();
+
+	for (const auto player : _players)
+	{
+		player->setPlayerAlive(true);
+		player->resetAmmos();
+	}
+}
+
+void MainGameScene::endRound() const
+{
+	hideAllPongBalls();
+	togglePlayersMovement(false);
 }
 
 void MainGameScene::setPlayersToDefaultSpawnPoints() const

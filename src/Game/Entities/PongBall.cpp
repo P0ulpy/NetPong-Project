@@ -7,6 +7,7 @@
 #include "../Terrains/PolygonTerrain.hpp"
 #include "../../Logger/Logger.hpp"
 #include "../Effects/PhantomBallEffect.hpp"
+#include "../System/AudioPlayer.hpp"
 
 constexpr int BALL_SIZE = 25;
 
@@ -271,6 +272,7 @@ void PongBall::addNumBounceAndUpdateVisibility()
 {
 	_currentNumBounces++;
 	setCanKill(true);//Once the ball had bounced the ball can kill the player
+	_mainGameScene->getAudioPlayer()->playSound("Bounce");
 	
 	if(_currentNumBounces > MAX_NUM_BOUNCES)
 	{

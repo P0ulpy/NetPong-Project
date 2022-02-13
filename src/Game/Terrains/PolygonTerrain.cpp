@@ -89,7 +89,10 @@ void PolygonTerrain::checkPlayerTerrainCollision() const
 
 		for (const auto player : _players)
 		{
-			player->hitWallIfCollision(xA, yA, xB, yB);
+			if(player->canCharacterMove())
+			{
+				player->hitWallIfCollision(xA, yA, xB, yB);
+			}
 		}
 	}
 }

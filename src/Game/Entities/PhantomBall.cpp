@@ -44,7 +44,7 @@ void PhantomBall::update(const float& deltaTime)
 	}
 	else if (_timeAlphaDecreaseCooldown > DURATION_BETWEEN_ALPHA_DECREASE)
 	{
-		setAndUpdateShapeAlpha(_currentAlpha - ALPHA_DECREASE_SPEED);
+		setAndUpdateShapeAlpha(_currentAlpha < ALPHA_DECREASE_SPEED ? 0 : _currentAlpha - ALPHA_DECREASE_SPEED);
 
 		_timeAlphaDecreaseCooldown = 0;
 	}

@@ -87,6 +87,11 @@ bool Character::canCharacterMove() const
 	return _canCharacterMove;
 }
 
+bool Character::canCharacterShoot() const
+{
+	return !isInCooldown() && !isReloading();
+}
+
 void Character::update(const float& deltaTime)
 {
 	if (!_isAlive) return;
@@ -152,7 +157,6 @@ void Character::render(sf::RenderTarget& target)const
 	{
 		target.draw(secondAmmo);
 	}
-	
 }
 
 void Character::setRotation(sf::Vector2i mousePos)
@@ -191,19 +195,7 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2)
 
 		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
 
-		charac.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
-
-		canon.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
-
-		shootZone.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
-
-		firstAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
-
-		secondAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+		setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
 			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
 		return true;
@@ -322,12 +314,18 @@ float Character::getRadius() const
 void Character::setPlayerAlive(bool isAlive)
 {
 	_isAlive = isAlive;
+
+	if(!_isAlive)
+	{
+		resetAmmos();
+	}
 }
 
 void Character::resetAmmos()
 {
 	_ammos = 2;
 	_reloadingTime = 0;
+	_isReloading = false;
 }
 
 
