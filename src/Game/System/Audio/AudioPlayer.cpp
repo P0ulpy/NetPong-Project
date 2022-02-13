@@ -1,10 +1,13 @@
 #include "AudioPlayer.hpp"
 
+#include "./GameSound.hpp"
+
 #include <iostream>
 
 AudioPlayer::AudioPlayer()
 {
 	initGameSounds();
+	changeSoundsVolume();
 }
 
 AudioPlayer::~AudioPlayer()
@@ -32,6 +35,19 @@ void AudioPlayer::initGameSounds()
 	if (!verifyLoadSoundsIntoBuffer())
 	{
 		std::cout << "Error AudioPlayer : some sounds couldn't have been loaded !";
+	}
+}
+
+void AudioPlayer::changeSoundsVolume() const
+{
+	if (sf::Sound* s; (s = getSoundFromSoundName("Ready")) != nullptr)
+	{
+		s->setVolume(s->getVolume()/5);
+	}
+
+	if (sf::Sound* s; (s = getSoundFromSoundName("Go")) != nullptr)
+	{
+		s->setVolume(s->getVolume()/5);
 	}
 }
 

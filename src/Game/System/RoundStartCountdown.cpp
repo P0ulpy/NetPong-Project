@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "AudioPlayer.hpp"
+#include "Audio/AudioPlayer.hpp"
 
 constexpr float DURATION_BETWEEN_START_COUNTDOWN_NUMBERS = 0.6f;
 

@@ -7,7 +7,7 @@
 #include "../../Engine/Animator/AnimatorManager.hpp"
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Game/System/GameManager.hpp"
-#include "../../Game/System/AudioPlayer.hpp"
+#include "../../Game/System/Audio/AudioPlayer.hpp"
 #include "../SocketsManagement/Client/ClientSocket.hpp"
 
 #define COLOR_PLAYER_1 sf::Color(255, 40, 0)
