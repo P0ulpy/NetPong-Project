@@ -40,9 +40,6 @@ sf::Vector2f NetworkCharacterController::positionPrediction() const
 
 PlayerState NetworkCharacterController::getCurrentPlayerState() const
 {
-    sf::Vector2f velocity;
-    float angle;
-
     return {
         (sf::Vector2i)_character.getShape().getPosition(),
         _character.getVelocity(),

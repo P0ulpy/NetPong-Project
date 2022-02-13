@@ -23,10 +23,7 @@
 #include "EventEmitter.hpp"
 
 #include <stdexcept>
-
-EventEmitter::EventEmitter() {}
-
-EventEmitter::~EventEmitter() {}
+#include <utility>
 
 unsigned int EventEmitter::add_listener(unsigned int event_id, std::function<void()> cb)
 {
@@ -45,14 +42,14 @@ unsigned int EventEmitter::add_listener(unsigned int event_id, std::function<voi
 
 unsigned int EventEmitter::on(unsigned int event_id, std::function<void()> cb)
 {
-    return add_listener(event_id, cb);
+    return add_listener(event_id, std::move(cb));
 }
 
 void EventEmitter::remove_listener(unsigned int listener_id)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
-    auto i = std::find_if(listeners.begin(), listeners.end(), [&](std::pair<const unsigned int, std::shared_ptr<ListenerBase>> p) {
+    auto i = std::find_if(listeners.begin(), listeners.end(), [&](const std::pair<const unsigned int, std::shared_ptr<ListenerBase>>& p) {
         return p.second->id == listener_id;
         });
     if (i != listeners.end())

@@ -12,10 +12,7 @@ SocketConnectionScene::SocketConnectionScene(PoPossibEngin& poPossibEngin)
 
 }
 
-SocketConnectionScene::~SocketConnectionScene()
-{
-
-}
+SocketConnectionScene::~SocketConnectionScene() = default;
 
 void SocketConnectionScene::start()
 {

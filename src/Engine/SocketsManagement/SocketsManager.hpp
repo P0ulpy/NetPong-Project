@@ -27,7 +27,7 @@ struct ClientConnectionSettings
     uint16_t port = 25565;
 	int32_t connectionTimeout = 1000;
 
-    explicit ClientConnectionSettings(std::string pIP = "127.0.0.1", uint16_t pPort = 25565, uint32_t connectionTimeout = 1000)
+    explicit ClientConnectionSettings(std::string pIP = "127.0.0.1", uint16_t pPort = 25565, int32_t connectionTimeout = 1000)
             : ip(std::move(pIP))
             , port(pPort)
 			, connectionTimeout(connectionTimeout) {}

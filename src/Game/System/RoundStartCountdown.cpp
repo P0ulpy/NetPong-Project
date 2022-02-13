@@ -9,9 +9,7 @@ RoundStartCountdown::RoundStartCountdown()
 	initValues();
 }
 
-RoundStartCountdown::~RoundStartCountdown()
-{
-}
+RoundStartCountdown::~RoundStartCountdown() = default;
 
 void RoundStartCountdown::initValues()
 {

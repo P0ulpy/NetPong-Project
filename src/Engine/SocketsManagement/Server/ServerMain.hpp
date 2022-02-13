@@ -12,7 +12,7 @@ namespace Server
     class ServerMain
     {
     public:
-        ServerMain(const HostSettings &hostSettings, PoPossibEngin *engine);
+        ServerMain(HostSettings hostSettings, PoPossibEngin *engine);
 
         [[nodiscard]] const HostSettings &getHostSettings() const;
         [[nodiscard]] const sf::Thread &getServerThread() const;

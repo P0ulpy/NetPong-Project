@@ -8,7 +8,7 @@ constexpr int ALPHA_DECREASE_SPEED = 20;//ALPHA_DECREASE_SPEED doit ętre un INI
 
 constexpr float DURATION_BETWEEN_ALPHA_DECREASE = 0.05f;
 
-PhantomBall::PhantomBall(PhantomBallEffect* phantomBallEffectParent)
+PhantomBall::PhantomBall(PhantomBallEffect* phantomBallEffectParent, bool isActive)
 	: _phantomBallEffectParent(phantomBallEffectParent)
 {
 	initVariables();
@@ -18,8 +18,7 @@ PhantomBall::PhantomBall(PhantomBallEffect* phantomBallEffectParent)
 	setIsActive(false);
 }
 
-PhantomBall::~PhantomBall()
-{ }
+PhantomBall::~PhantomBall() = default;
 
 void PhantomBall::initVariables()
 {

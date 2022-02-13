@@ -6,10 +6,7 @@ Scene::Scene(PoPossibEngin& parentEngine, const SceneConfig& sceneInitData)
 
 }
 
-Scene::~Scene()
-{
-
-}
+Scene::~Scene() = default;
 
 PoPossibEngin& Scene::getParentEngine() const
 {

@@ -20,8 +20,8 @@
 // SOFTWARE.
 //
 
-#ifndef _EVENT_EMITTER_H_
-#define _EVENT_EMITTER_H_
+#ifndef _EVENT_EMITTER_HPP_
+#define _EVENT_EMITTER_HPP_
 
 #include <functional>
 #include <map>
@@ -33,8 +33,8 @@
 class EventEmitter
 {
 public:
-    EventEmitter();
-    ~EventEmitter();
+    EventEmitter() = default;
+    ~EventEmitter() = default;
 
     template <typename... Args>
     unsigned int add_listener(unsigned int event_id, std::function<void(Args...)> cb);
@@ -159,4 +159,4 @@ void EventEmitter::emit(unsigned int event_id, Args... args)
     }
 }
 
-#endif
+#endif // _EVENT_EMITTER_HPP_

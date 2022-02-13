@@ -1,11 +1,12 @@
 #include "Client.hpp"
 #include "../../../../Logger/Logger.hpp"
 #include <SFML/Network.hpp>
+#include <utility>
 
 using namespace Server;
 
-Client::Client(const std::string& id, sf::TcpSocket* socket)
-	: _id(id)
+Client::Client(std::string id, sf::TcpSocket* socket)
+	: _id(std::move(id))
 	, _socket(socket)
 {
 	

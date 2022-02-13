@@ -18,8 +18,8 @@ protected:
 	float _maxSpeed { 500 };
 
 public:
-	Entity();
-	virtual ~Entity();
+	Entity() = default;
+	virtual ~Entity() = default;
 
 	virtual void update(const float& deltaTime) = 0;
 	virtual void render(sf::RenderTarget& renderTarget) const = 0;

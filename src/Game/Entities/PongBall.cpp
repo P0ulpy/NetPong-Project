@@ -31,8 +31,7 @@ PongBall::PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene)
 	setActive(false);
 }
 
-PongBall::~PongBall()
-{ }
+PongBall::~PongBall() = default;
 
 //--- Initializers ---
 void PongBall::initVariables()
@@ -335,7 +334,7 @@ bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf:
 	// if so keep going, but if not, return false
 	if (!Utils::linePointCollision(x1, y1, x2, y2, closestX, closestY)) return false;
 
-	// get distance to closest point
+	// get distance to the closest point
 	const float distance = Utils::getDistance(closestX, closestY, _ballShape.getPosition().x, _ballShape.getPosition().y);
 
 	if (distance <= _ballShape.getRadius())

@@ -13,6 +13,8 @@
 
 #include "../Logger/Logger.hpp"
 
+PoPossibEngin* PoPossibEngin::_instance;
+
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
     : _engineConfig(engineConfig)
 	, _socketManager(new SocketManager(*this))
@@ -50,7 +52,8 @@ void PoPossibEngin::stop()
 	_logicThread.terminate();
 
     ImGui::SFML::Shutdown();
-    _renderWindow->close();
+    if(_renderWindow)
+        _renderWindow->close();
 }
 
 PoPossibEngin::~PoPossibEngin()
@@ -131,7 +134,7 @@ void PoPossibEngin::renderThread_InitWindow()
 
 void PoPossibEngin::renderThreadUpdate()
 {
-	if(_renderWindow == nullptr)
+	if(!_renderWindow)
 	{
         Logger::Err("_renderWindow not initialized, stopping");
         return;

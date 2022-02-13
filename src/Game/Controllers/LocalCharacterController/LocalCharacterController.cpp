@@ -10,14 +10,14 @@ LocalCharacterController::LocalCharacterController(Character &character)
 void LocalCharacterController::Update(float dt)
 {
     auto mousePosition = PoPossibEngin::getInstance().getInputsManager().getMousePosition();
-    auto rotation = _character.calcRotFromMousePos(mousePosition);
+    auto rotation = calcRotFromMousePos(mousePosition);
     _character.setRotation(rotation);
 }
 
 float LocalCharacterController::calcRotFromMousePos(sf::Vector2i mousePos)
 {
     sf::Vector2f curPos = _character.getCanon().getPosition();
-    float dx = curPos.x - mousePos.x;
-    float dy = curPos.y - mousePos.y;
-    return ((atan2(dy, dx)) * (float)180.0 / PI);
+    float dx = curPos.x - (float)mousePos.x;
+    float dy = curPos.y - (float)mousePos.y;
+    return ((atan2(dy, dx)) * (float)180.0 / 3.14);
 }

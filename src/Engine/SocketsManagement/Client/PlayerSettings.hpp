@@ -7,11 +7,12 @@
 
 #include <string>
 #include <SFML/Network/Packet.hpp>
+#include <utility>
 //#include "../PacketOverload.hpp"
 
 struct PlayerSettings
 {
-    PlayerSettings(const std::string &name = "Unnamed Player", int color = 0) : name(name), color(color) {}
+    PlayerSettings(std::string name = "Unnamed Player", int color = 0) : name(std::move(name)), color(color) {}
 
     std::string name;
     int color;

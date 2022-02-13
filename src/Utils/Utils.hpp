@@ -10,7 +10,7 @@ public:
 	//----------- MATHS -----------
 	static float dot(const sf::Vector2f& lhs, const sf::Vector2f& rhs);
 	static sf::Vector2f normalize(const sf::Vector2f& originalVector);
-	static float deceleration(float initial, float target, float time);
+	static double deceleration(const float initial, const float target, const float time);
 	static float getDistance(float x1, float y1, float x2, float y2);
 	static float getDistance(sf::Vector2f v1, sf::Vector2f v2);
 	static sf::Vector2f getVectorReflection(const sf::Vector2f& inDirection, const sf::Vector2f& surfaceVector);

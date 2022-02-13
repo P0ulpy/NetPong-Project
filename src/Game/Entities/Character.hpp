@@ -42,14 +42,14 @@ private:
 	int _ammos = 2;
 
 public:
-	Character(sf::Color color);
-	~Character();
+    Character() = default;
+    Character(sf::Color color);
+	~Character() = default;
 
 	void update(const float& deltaTime)override;
 	void render(sf::RenderTarget& renderTarget) const override;
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime) override;
 
-    float calcRotFromMousePos(sf::Vector2i mousePos);
     bool isInCooldown() const;
     bool isReloading() const;
 
@@ -59,7 +59,7 @@ public:
     bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
     bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;
 
-    sf::Vector2f shootDirection(sf::Vector2i mousePos);
+    sf::Vector2f shootDirection(sf::Vector2i mousePos) const;
     sf::Vector2f shootDepart();
 
     void ammoCount(int ammo);

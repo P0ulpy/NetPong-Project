@@ -31,7 +31,7 @@ public:
 	void createPhantomBalls();
 
 	void setPhantomBallFillColour(const sf::Color& newColor) const;
-	const PongBall& getPongBallParent() const;
+	[[nodiscard]] const PongBall& getPongBallParent() const;
 
 	void pushInactivePhantomBall(PhantomBall* phantomBall);
 };

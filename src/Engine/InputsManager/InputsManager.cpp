@@ -21,7 +21,7 @@ void InputsManager::updateEvents(sf::RenderWindow& renderWindow)
 {
 	clearEvents();
 
-	sf::Event event;
+	sf::Event event {};
 	while(renderWindow.pollEvent(event))
 	{
 		// ImGui Events Handling

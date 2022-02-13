@@ -1,5 +1,4 @@
 #include "Utils.hpp"
-#include <math.h>
 
 //----------- MATHS -----------
 float Utils::getDistance(float x1, float y1, float x2, float y2)
@@ -16,7 +15,7 @@ float Utils::getDistance(sf::Vector2f v1, sf::Vector2f v2)
 	return std::sqrt(distX * distX + distY * distY);
 }
 
-float Utils::deceleration(const float initial, const float target, const float time)
+double Utils::deceleration(const float initial, const float target, const float time)
 {
 	//Linear(Y0,Y1,t) = Y0 + t(Y1 - Y0)
 	//Deceleration(Y0,Y1,t) = Linear( Y0, Y1, 1 - pow(1 - t,2) )
@@ -117,23 +116,21 @@ bool Utils::linePointCollision(float x1, float y1, float x2, float y2, float px,
 
 bool Utils::lineCircleCollision(float x1, float y1, float x2, float y2, float cX, float cY, float cR, sf::Vector2f& outImpactPoint)
 {
-	sf::Vector2f outIntersectionPoint{};
-
 	//// get length of the line
 	const float lengthLine = getDistance(x1, y1, x2, y2);
 
 	// get dot product of the line and circle
-	const float dot = ((cX - x1)*(x2 - x1) + (cY - y1)*(y2 - y1)) / std::pow(lengthLine, 2);
+	const double dot = ((cX - x1)*(x2 - x1) + (cY - y1)*(y2 - y1)) / std::pow(lengthLine, 2);
 
 	// find the closest point on the line
-	const float closestX = x1 + (dot * (x2 - x1));
-	const float closestY = y1 + (dot * (y2 - y1));
+	const double closestX = x1 + (dot * (x2 - x1));
+	const double closestY = y1 + (dot * (y2 - y1));
 
 	// is this point actually on the line segment?
 	// if so keep going, but if not, return false
 	if (!linePointCollision(x1, y1, x2, y2, closestX, closestY)) return false;
 
-	// get distance to closest point
+	// get distance to the closest point
 	const float distance = getDistance(closestX, closestY, cX, cY);
 
 	if (distance <= cR)

@@ -1,10 +1,12 @@
 #include "ServerMain.hpp"
+
+#include <utility>
 #include "../../../Logger/Logger.hpp"
 
 using namespace Server;
 
-ServerMain::ServerMain(const HostSettings& hostSettings, PoPossibEngin* engine)
-    : _hostSettings(hostSettings)
+ServerMain::ServerMain(HostSettings hostSettings, PoPossibEngin* engine)
+    : _hostSettings(std::move(hostSettings))
 	, _serverSocket(ServerSocket(this))
 	, _engine(engine)
 	, _serverThread(sf::Thread(&ServerMain::threadEntry, this))

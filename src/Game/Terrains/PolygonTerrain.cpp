@@ -4,7 +4,7 @@
 #include "../../Utils/Utils.hpp"
 #include "../Entities/PongBall.hpp"
 #include "../Entities/Character.hpp"
-#include <math.h>
+#include <cmath>
 
 constexpr int TERRAIN_SIZE_MULTIPLIER = 20;
 constexpr int TERRAIN_NUM_EDGES = 8;
@@ -17,8 +17,7 @@ PolygonTerrain::PolygonTerrain(const sf::RenderWindow& window, const std::vector
 	initShape();
 }
 
-PolygonTerrain::~PolygonTerrain()
-{ }
+PolygonTerrain::~PolygonTerrain() = default;
 
 void PolygonTerrain::update(const float& deltaTime)
 {
@@ -32,7 +31,7 @@ void PolygonTerrain::updateCollision(const float& deltaTime) const
 	bool hasOnceCollisionOccured = false;
 	float remainingTime = 1.f;
 
-	//For every sides of the terrain
+	//For every side of the terrain
 	do
 	{
 		hasCollisionOccured = false;

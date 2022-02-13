@@ -14,9 +14,7 @@ PhantomBallEffect::PhantomBallEffect(const PongBall& ballParent)
 	begin();
 }
 
-PhantomBallEffect::~PhantomBallEffect()
-{
-}
+PhantomBallEffect::~PhantomBallEffect() = default;
 
 void PhantomBallEffect::update(const float& deltaTime)
 {
@@ -70,7 +68,7 @@ void PhantomBallEffect::displayPhantomBall()
 		Logger::Log("ERROR PhantomBallEffect.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
 		return;
 	}
-	//Recherche de la premiere PhantomBall qui n'est pas affichée dans la liste
+	//Recherche de la premiere PhantomBall qui n'est pas affichï¿½e dans la liste
 	_inactivePhantomBalls.top()->setIsActive(true);
 	_inactivePhantomBalls.pop();
 }

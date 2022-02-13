@@ -6,10 +6,7 @@ Terrain::Terrain(const sf::RenderWindow& window)
 	initPlayableArea();
 }
 
-Terrain::~Terrain()
-{
-
-}
+Terrain::~Terrain() = default;
 
 void Terrain::update()
 {

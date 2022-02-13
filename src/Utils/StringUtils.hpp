@@ -48,6 +48,6 @@ namespace StringUtils
         trim(s);
         return s;
     }
-};
+}
 
 #endif //NETPONG_PROJECT_STRINGUTILS_HPP

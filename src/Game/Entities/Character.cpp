@@ -1,9 +1,9 @@
 #include "Character.hpp"
-#include "iostream"
-#include <math.h>
-#include "string"
+
+#include <iostream>
+#include <cmath>
+
 #include "../../Utils/Utils.hpp"
-#include "../Entities/PongBall.hpp"
 
 constexpr float CHARAC_SPEED = 300.f;
 
@@ -64,9 +64,6 @@ Character::Character(sf::Color color)
 	_characDestination->setPosition(charac.getPosition());
 }
 
-Character::~Character()
-{ }
-
 void Character::setPosition(int xSpawn, int ySpawn)
 {
 	charac.setPosition(xSpawn, ySpawn);
@@ -79,8 +76,6 @@ void Character::setPosition(int xSpawn, int ySpawn)
 
 void Character::update(const float& deltaTime)
 {
-    setRotation(calcRotFromMousePos(mousePosition));
-
     if (_cooldownActivated)
 	{
 		if (_cooldownShoot >= 0 && _cooldownShoot < DURATION_BETWEEN_SHOOTS) _cooldownShoot = _cooldownShoot + deltaTime;
@@ -203,7 +198,7 @@ bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::V
 	// if so keep going, but if not, return false
 	if (!Utils::linePointCollision(x1, y1, x2, y2, closestX, closestY)) return false;
 
-	// get distance to closest point
+	// get distance to the closest point
 	const float distance = Utils::getDistance(closestX, closestY, charac.getPosition().x, charac.getPosition().y);
 
 	if (distance <= charac.getRadius())
@@ -237,15 +232,21 @@ void Character::ammoCount(int ammo)
 	_ammos = _ammos + ammo;
 }
 
-sf::Vector2f Character::shootDirection(sf::Vector2i mousePos)
+sf::Vector2f Character::shootDirection(sf::Vector2i mousePos) const
 {
 	float radianDirection = _rotation * PI / 180;
-	return sf::Vector2f(-(float)cos(radianDirection), -(float)sin(radianDirection));
+	return {
+        -(float)cos(radianDirection),
+        -(float)sin(radianDirection)
+    };
 }
 
 sf::Vector2f Character::shootDepart()
 {
-	return sf::Vector2f(shootZone.getTransform().transformPoint(0, 0).x, shootZone.getTransform().transformPoint(0, 0).y);
+	return {
+        shootZone.getTransform().transformPoint(0, 0).x,
+        shootZone.getTransform().transformPoint(0, 0).y
+    };
 }
 
 void Character::activateCooldown(bool activate)

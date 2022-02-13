@@ -169,7 +169,7 @@ void ServerSocket::sendToAll(SocketEvents event, const sf::Packet& data)
 
 void ServerSocket::registerListeners(sf::TcpSocket* clientSocket)
 {
-    on(SocketEvents::PlayerSendSettings, [this](sf::Packet packet) -> void
+    on(SocketEvents::PlayerSendSettings, [](sf::Packet packet) -> void
     {
         std::string playerSettings;
         packet >> playerSettings;

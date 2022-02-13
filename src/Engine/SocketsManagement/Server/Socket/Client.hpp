@@ -13,7 +13,7 @@ namespace Server
 {
     class Client : public EventEmitter {
     public:
-        Client(const std::string &id, sf::TcpSocket *socket);
+        Client(std::string id, sf::TcpSocket *socket);
         Client(const Client &) = delete;
 
         const Client &operator=(const Client &) = delete;

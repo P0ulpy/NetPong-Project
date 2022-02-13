@@ -9,7 +9,7 @@ class PhantomBall
 {
 public:
 	//Constructors - Destructors
-	PhantomBall(PhantomBallEffect* phantomBallEffectParent);
+	PhantomBall(PhantomBallEffect* phantomBallEffectParent, bool isActive = true);
 	virtual ~PhantomBall();
 
 	//Functions
@@ -31,9 +31,9 @@ private:
 
 	sf::Uint8 _currentAlpha;
 
-	float _timeAlphaDecreaseCooldown;
+	float _timeAlphaDecreaseCooldown = 0;
 
-	bool _isActive;
+	bool _isActive ;
 
 	//Initializers
 	void initVariables();

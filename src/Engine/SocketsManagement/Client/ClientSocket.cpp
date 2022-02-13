@@ -121,6 +121,7 @@ void ClientSocket::onConnected(sf::Packet packet)
     _ready = true;
 }
 
-void ClientSocket::onSceneUpdate(sf::Packet packet) {
+void ClientSocket::onSceneUpdate(sf::Packet packet)
+{
 
 }

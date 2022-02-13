@@ -13,13 +13,13 @@ class GameManager
 private	:
 	MainGameScene* _mainGameScene;
 
-	int _scorePlayer1;
-	int _scorePlayer2;
-	bool _isRoundEnded;
+	int _scorePlayer1 = 0;
+	int _scorePlayer2 = 0;
+	bool _isRoundEnded = false;
 
-	int _currentRound;
+	int _currentRound = 0;
 
-	float _currentTimeBeforeStartingNewRound;
+	float _currentTimeBeforeStartingNewRound = 0.0f;
 
 	std::unique_ptr<RoundStartCountdown> _roundStartCountdown;
 	std::unique_ptr<GameUI> _gameUI;

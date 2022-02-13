@@ -21,7 +21,7 @@ MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	setPlayersToDefaultSpawnPoints();
 }
 
-MainGameScene::~MainGameScene() {}
+MainGameScene::~MainGameScene() = default;
 
 void MainGameScene::updateInputs(const float& deltaTime)
 {

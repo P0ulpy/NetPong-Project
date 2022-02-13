@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include <utility>
 
 #include "InputsManager/InputsManager.hpp"
 #include "SocketsManagement/SocketsManager.hpp"
@@ -18,7 +19,7 @@ struct EngineConfig
 		unsigned int framerateLimit = 60; // 0 mean automatic (verticalSyncEnabled = true)
 
 		explicit WindowConfig(sf::VideoMode pVideoMode, std::string pTitle = "Render Window", unsigned int pStyle = sf::Style::Default, unsigned int pFramerateLimit = 60)
-			: videoMode(pVideoMode), title(pTitle), style(pStyle), framerateLimit(pFramerateLimit) {}
+			: videoMode(pVideoMode), title(std::move(pTitle)), style(pStyle), framerateLimit(pFramerateLimit) {}
 	};
 
 	WindowConfig windowConfig;
