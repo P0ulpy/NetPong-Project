@@ -76,7 +76,7 @@ public:
     [[nodiscard]] sf::Color getNormalAmmoColor() const;
 
     // SET
-    void setPosition(int xSpawn, int ySpawn) final;
+    void setPosition(const sf::Vector2i& position) final;
     void setRotation(float rot) final;
     void setVelocity(const sf::Vector2f& newVelocity) final;
     void setAmmosColor(sf::Color normalColor, sf::Color inactiveColor);

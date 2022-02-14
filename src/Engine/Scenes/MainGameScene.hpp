@@ -34,7 +34,7 @@ public:
 
 	void setPlayersToDefaultSpawnPoints() const;
 
-    // GET / SET
+    // GET
     std::stack<PongBall*>& getInactivePongBalls();
 
 private:

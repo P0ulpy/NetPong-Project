@@ -31,7 +31,7 @@ private:
     float _netDelta = 0;
 
 public:
-    NetworkCharacterController(Character& controlTarget);
+    explicit NetworkCharacterController(Character& controlTarget);
 
     [[nodiscard]] PlayerState getCurrentPlayerState() const;
     [[nodiscard]] const PlayerState &getLastPlayerState() const;
@@ -40,7 +40,11 @@ public:
 
 private:
     void onReceive(const PlayerState& playerState);
-    [[nodiscard]] sf::Vector2f positionPrediction() const;
+
+    void rotate();
+    void translate(const float& deltaTime);
+    void shoot();
+    [[nodiscard]] sf::Vector2f velocityPrediction() const;
 
     friend ClientSocket;
 };

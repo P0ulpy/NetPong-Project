@@ -56,6 +56,10 @@ sudo apt install g++ gdb make ninja-build rsync zip libx11-dev libxrandr-dev lib
 cmake --build out/debug --target NetPong-Project
 ```
 
+```bash
+cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - NMake Makefiles" ./NetPong-Project
+```
+
 ```powershell
 (dir -include *.cpp -recurse | select-string "^(\s*)//" -notMatch | select-string "^(\s*)$" -notMatch).Count
 (dir -include *.hpp -recurse | select-string "^(\s*)//" -notMatch | select-string "^(\s*)$" -notMatch).Count

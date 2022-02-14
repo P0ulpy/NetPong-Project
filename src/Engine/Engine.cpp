@@ -15,7 +15,7 @@
 
 PoPossibEngin* PoPossibEngin::_instance;
 
-PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
+PoPossibEngin::PoPossibEngin(EngineConfig engineConfig)
     : _engineConfig(engineConfig)
 	, _socketManager(new SocketManager(*this))
 	, _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this))
@@ -228,3 +228,6 @@ void PoPossibEngin::loadScene(SceneType sceneType)
 
 	_currScene->start();
 }
+
+EngineConfig::EngineConfig(EngineConfig::WindowConfig pWindowConfig)
+		: windowConfig(std::move(pWindowConfig)) {}

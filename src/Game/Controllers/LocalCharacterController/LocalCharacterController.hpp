@@ -9,7 +9,9 @@
 #include "SFML/Window/Keyboard.hpp"
 #include "SFML/Window/Mouse.hpp"
 
+
 class Character;
+class PlayerState;
 
 class LocalCharacterController : public Engine::ControllerBase
 {
@@ -30,6 +32,8 @@ public:
     void update(const float& deltaTime) final;
 
     float calcRotFromMousePos(sf::Vector2i mousePos);
+
+    [[nodiscard]] PlayerState getCurrentPlayerState() const;
 
 private:
     KeyMap _keyMap;

@@ -17,7 +17,7 @@ namespace Engine
         [[nodiscard]] virtual const sf::Vector2f& getPosition() const = 0;
         [[nodiscard]] virtual float getRotation() const = 0;
 
-        virtual void setPosition(int xSpawn, int ySpawn) = 0;
+        virtual void setPosition(const sf::Vector2i& position) = 0;
         virtual void setRotation(float rot) = 0;
         virtual void setVelocity(const sf::Vector2f& newVelocity) = 0;
     };

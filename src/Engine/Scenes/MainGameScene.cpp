@@ -24,6 +24,7 @@ MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 	initFonts();
 
 	setPlayersToDefaultSpawnPoints();
+
 }
 
 MainGameScene::~MainGameScene()
@@ -69,14 +70,6 @@ void MainGameScene::updateInputs(const float& deltaTime)
 			pongBall->startBoostBall(128.f);
 
 #pragma endregion
-
-    /*
-	//Shoot
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
-		makePlayerShoot(0);
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
-		makePlayerShoot(1);
-     */
 }
 
 void MainGameScene::initValues()
@@ -198,11 +191,15 @@ void MainGameScene::setPlayersToDefaultSpawnPoints() const
 {
     sf::Vector2i renderWindowSize = (sf::Vector2i)_poPossibEngin->getRenderWindow().getSize();
 
-    _players[0]->setPosition(renderWindowSize.x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
-                             renderWindowSize.y / 2);
+    _players[0]->setPosition({
+        renderWindowSize.x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
+        renderWindowSize.y / 2
+    });
 
-    _players[1]->setPosition(renderWindowSize.x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
-                             renderWindowSize.y / 2);
+    _players[1]->setPosition({
+        renderWindowSize.x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
+        renderWindowSize.y / 2
+    });
 }
 
 std::stack<PongBall *> &MainGameScene::getInactivePongBalls() { return _inactivePongBalls; }

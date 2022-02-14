@@ -63,6 +63,7 @@ void ClientSocket::registerListeners()
 		if(_socket.receive(packet) != sf::Socket::Done)
 		{
 			Logger::Err("Error during packet reception");
+            continue;
 		}
 
 		int eventID;
@@ -86,7 +87,7 @@ void ClientSocket::registerListeners()
 
 void ClientSocket::send(SocketEvents event, const sf::Packet& data)
 {
-    Logger::Log(&"Firing Net event :" [ (int)event]);
+    Logger::Log(&"Firing Net event :" [(int)event]);
 
     // we asynchronously send data
     sf::Thread sendThread = sf::Thread([this, &event, &data]()

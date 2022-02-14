@@ -18,14 +18,13 @@ struct EngineConfig
 		unsigned int style = sf::Style::Default;
 		unsigned int framerateLimit = 60; // 0 mean automatic (verticalSyncEnabled = true)
 
-		explicit WindowConfig(sf::VideoMode pVideoMode, std::string pTitle = "Render Window", unsigned int pStyle = sf::Style::Default, unsigned int pFramerateLimit = 60)
+		WindowConfig(sf::VideoMode pVideoMode, std::string pTitle = "Render Window", unsigned int pStyle = sf::Style::Default, unsigned int pFramerateLimit = 60)
 			: videoMode(pVideoMode), title(std::move(pTitle)), style(pStyle), framerateLimit(pFramerateLimit) {}
 	};
 
 	WindowConfig windowConfig;
 
-	explicit EngineConfig(WindowConfig pWindowConfig)
-		: windowConfig(std::move(pWindowConfig)) {}
+	EngineConfig(WindowConfig pWindowConfig);
 };
 
 enum EngineState { STOP, INITIALIZING, INITIALIZED, RUNNING, PAUSE };
@@ -36,7 +35,7 @@ enum SceneType { SocketConnection, MainGame };
 class PoPossibEngin
 {
 public:
-	explicit PoPossibEngin(const EngineConfig& engineConfig);
+	PoPossibEngin(EngineConfig engineConfig);
 
     ~PoPossibEngin();
 

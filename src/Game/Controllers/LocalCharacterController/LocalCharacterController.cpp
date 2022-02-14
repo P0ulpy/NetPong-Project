@@ -6,6 +6,7 @@
 #include "../../Entities/Character.hpp"
 #include "../../Entities/PongBall.hpp"
 #include "../../../Engine/Scenes/MainGameScene.hpp"
+#include "../NetworkCharacterController/NetworkCharacterController.hpp"
 
 LocalCharacterController::KeyMap::KeyMap(sf::Keyboard::Key up, sf::Keyboard::Key down, sf::Keyboard::Key left,
                                          sf::Keyboard::Key right, sf::Mouse::Button shoot)
@@ -78,4 +79,15 @@ void LocalCharacterController::shoot()
 
         inactivePongBalls.pop();
     }
+}
+
+PlayerState LocalCharacterController::getCurrentPlayerState() const
+{
+    return {
+            (sf::Vector2i)_controlTarget.getPosition(),
+            _controlTarget.getVelocity(),
+            _controlTarget.getRotation(),
+            //TEMP
+            0
+    };
 }

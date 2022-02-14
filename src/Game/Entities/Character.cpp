@@ -23,27 +23,27 @@ constexpr int DEFAULT_SPAWN_POS_Y = 500;
 
 Character::Character(sf::Color color)
 {
-	//Pr�paration du personnage
+	//Préparation du personnage
 	charac.setRadius(CHARAC_RADIUS);
 	charac.setFillColor(color);
 
-	//Pr�paration du canon
+	//Préparation du canon
 	canon.setSize(sf::Vector2f(CANON_SIZE_X, CANON_SIZE_Y));
 	canon.setFillColor(sf::Color::White);
 
-	//Pr�paration de la zone d'o� la balle part
+	//Préparation de la zone d'où la balle part
 	shootZone.setRadius(SHOOT_ZONE_RADIUS);
 	shootZone.setFillColor(sf::Color::Magenta);
 
-	//Premi�re munition
+	//Première munition
 	firstAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	firstAmmo.setFillColor(sf::Color::White);
 
-	//Deuxi�me munition
+	//Deuxième munition
 	secondAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	secondAmmo.setFillColor(sf::Color::White);
 
-	setPosition(DEFAULT_SPAWN_POS_X, DEFAULT_SPAWN_POS_Y);
+	setPosition({DEFAULT_SPAWN_POS_X, DEFAULT_SPAWN_POS_Y});
 
 	//Modification des origines
 	sf::FloatRect characSize = charac.getGlobalBounds();
@@ -64,13 +64,13 @@ Character::Character(sf::Color color)
 	_characDestination->setPosition(charac.getPosition());
 }
 
-void Character::setPosition(int xSpawn, int ySpawn)
+void Character::setPosition(const sf::Vector2i& position)
 {
-	charac.setPosition(xSpawn, ySpawn);
-	canon.setPosition(xSpawn, ySpawn);
-	shootZone.setPosition(xSpawn, ySpawn);
-	firstAmmo.setPosition(xSpawn, ySpawn);
-	secondAmmo.setPosition(xSpawn, ySpawn);
+	charac.setPosition(position.x, position.y);
+	canon.setPosition(position.x, position.y);
+	shootZone.setPosition(position.x, position.y);
+	firstAmmo.setPosition(position.x, position.y);
+	secondAmmo.setPosition(position.x, position.y);
 }
 
 
@@ -112,17 +112,20 @@ void Character::update(const float& deltaTime)
 
 void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime) 
 {
-	charac.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
-	canon.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
-	shootZone.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
-	firstAmmo.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
-	secondAmmo.move(Utils::normalize(direction) * CHARAC_SPEED * deltaTime);
+	sf::Vector2f dir = Utils::normalize(direction);
+
+	charac.move(dir * CHARAC_SPEED * deltaTime);
+	canon.move(dir * CHARAC_SPEED * deltaTime);
+	shootZone.move(dir * CHARAC_SPEED * deltaTime);
+	firstAmmo.move(dir * CHARAC_SPEED * deltaTime);
+	secondAmmo.move(dir * CHARAC_SPEED * deltaTime);
 }
 
 void Character::render(sf::RenderTarget& target)const
 {
 	target.draw(canon);
 	target.draw(charac);
+
 	if (_ammos > 1)
 	{
 		target.draw(firstAmmo);
@@ -148,7 +151,7 @@ const sf::Vector2f& Character::getVelocity() { return _velocity; }
 
 bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)
 {
-	sf::Vector2f outImpactPoint{ 0,0 };
+	sf::Vector2f outImpactPoint { 0,0 };
 
 	bool hit = characterCollision(x1, y1, x2, y2, outImpactPoint, remainingTime);
 

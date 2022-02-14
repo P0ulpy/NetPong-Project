@@ -17,9 +17,6 @@ namespace Engine
     {
     public:
         virtual void render(sf::RenderTarget& renderTarget) const = 0;
-        virtual void setPosition(int xSpawn, int ySpawn) = 0;
-        virtual void setRotation(float rot) = 0;
-        virtual void setVelocity(const sf::Vector2f& newVelocity) = 0;
     };
 }
 
