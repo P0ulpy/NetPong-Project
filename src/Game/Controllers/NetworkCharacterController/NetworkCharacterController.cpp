@@ -8,8 +8,9 @@
 PlayerState::PlayerState(const sf::Vector2i& position, const sf::Vector2f &velocity, float angle, float angularVelocity)
         : velocity(velocity), position(position), angle(angle), angularVelocity(angularVelocity) {}
 
-NetworkCharacterController::NetworkCharacterController(Character& controlTarget)
-        : ControllerBase(controlTarget) {}
+NetworkCharacterController::NetworkCharacterController(Client::SyncableObjectOptions options, Character& controlTarget)
+        : Client::SyncableObject(options)
+        , ControllerBase(controlTarget) {}
 
 void NetworkCharacterController::onReceive(const PlayerState &playerState)
 {

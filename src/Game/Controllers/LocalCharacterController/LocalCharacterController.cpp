@@ -13,10 +13,13 @@ LocalCharacterController::KeyMap::KeyMap(sf::Keyboard::Key up, sf::Keyboard::Key
         : up(up), down(down), left(left), right(right), shoot(shoot) {}
 
 
-LocalCharacterController::LocalCharacterController(Character &character, const KeyMap& keymap)
-        : ControllerBase(character)
-        , _keyMap(std::move(keymap))
-        {}
+LocalCharacterController::LocalCharacterController(Client::SyncableObjectOptions options, Character &character, const KeyMap &keymap)
+    : SyncableObject(options)
+    , ControllerBase(character)
+    , _keyMap(keymap)
+{
+
+}
 
 void LocalCharacterController::update(const float& deltaTime)
 {

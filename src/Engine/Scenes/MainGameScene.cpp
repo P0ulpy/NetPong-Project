@@ -89,13 +89,13 @@ void MainGameScene::initValues()
     _players.emplace_back(p1);
 	_players.back()->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
 
-    _controllers.push_back(new LocalCharacterController(*p0, {
-        sf::Keyboard::Up,sf::Keyboard::Down,sf::Keyboard::Left,sf::Keyboard::Right, sf::Mouse::Button::Right
+   /* _controllers.push_back(new LocalCharacterController(0, Client::Remote, Client::Character, *p0, {
+            sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Mouse::Button::Right
     }));
 
-    _controllers.push_back(new LocalCharacterController(*p1,{
-            sf::Keyboard::Z,sf::Keyboard::S,sf::Keyboard::Q,sf::Keyboard::D, sf::Mouse::Button::Left
-    }));
+    _controllers.push_back(new LocalCharacterController(0, Client::Remote, Client::Character, *p1, {
+            sf::Keyboard::Z, sf::Keyboard::S, sf::Keyboard::Q, sf::Keyboard::D, sf::Mouse::Button::Left
+    }));*/
 
 	_gameManager = std::make_shared<GameManager>(this);
 }

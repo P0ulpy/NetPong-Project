@@ -8,6 +8,7 @@
 #include "SFML/System/Vector2.hpp"
 #include "../../../Engine/SocketsManagement/Client/ClientSocket.hpp"
 #include "../ControllerBase.hpp"
+#include "../../../Engine/SocketsManagement/Client/SyncableEntityManagement/SyncableObject.hpp"
 
 struct PlayerState
 {
@@ -23,7 +24,7 @@ struct PlayerState
 
 class Character;
 
-class NetworkCharacterController : public Engine::ControllerBase
+class NetworkCharacterController : public Engine::ControllerBase, public Client::SyncableObject
 {
 private:
     const float _maxNetDelta = 2.0;
@@ -31,7 +32,7 @@ private:
     float _netDelta = 0;
 
 public:
-    explicit NetworkCharacterController(Character& controlTarget);
+    explicit NetworkCharacterController(Client::SyncableObjectOptions options, Character& controlTarget);
 
     [[nodiscard]] PlayerState getCurrentPlayerState() const;
     [[nodiscard]] const PlayerState &getLastPlayerState() const;

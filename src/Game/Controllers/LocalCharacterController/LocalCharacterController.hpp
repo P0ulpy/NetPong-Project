@@ -6,14 +6,14 @@
 #define NETPONG_PROJECT_LOCALCHARACTERCONTROLLER_HPP
 
 #include "../ControllerBase.hpp"
+#include "../../../Engine/SocketsManagement/Client/SyncableEntityManagement/SyncableObject.hpp"
 #include "SFML/Window/Keyboard.hpp"
 #include "SFML/Window/Mouse.hpp"
-
+#include "../NetworkCharacterController/NetworkCharacterController.hpp"
 
 class Character;
-class PlayerState;
 
-class LocalCharacterController : public Engine::ControllerBase
+class LocalCharacterController : public Engine::ControllerBase, public Client::SyncableObject
 {
 public:
     struct KeyMap
@@ -28,7 +28,7 @@ public:
         sf::Mouse::Button shoot;
     };
 
-    explicit LocalCharacterController(Character &character, const KeyMap& keymap);
+    explicit LocalCharacterController(Client::SyncableObjectOptions options, Character &character, const KeyMap &keymap);
     void update(const float& deltaTime) final;
 
     float calcRotFromMousePos(sf::Vector2i mousePos);
@@ -41,6 +41,7 @@ private:
     void rotate();
     void translate(const float& deltaTime);
     void shoot();
+
 };
 
 #endif //NETPONG_PROJECT_LOCALCHARACTERCONTROLLER_HPP

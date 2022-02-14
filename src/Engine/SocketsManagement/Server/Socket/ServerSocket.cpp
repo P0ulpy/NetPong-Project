@@ -35,9 +35,13 @@ ServerSocket::~ServerSocket()
 
 const std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients() const { return _clients; }
 
+bool ServerSocket::isReady() const { return false; }
+
 [[noreturn]] void ServerSocket::connectionsListenEntry()
 {
     Logger::SetThreadLabel("ServerSocket-ConnectionListen");
+
+    _ready = true;
 
     while(true)
 	{

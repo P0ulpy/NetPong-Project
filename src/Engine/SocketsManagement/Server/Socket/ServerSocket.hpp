@@ -16,9 +16,11 @@ namespace Server
         ~ServerSocket();
 
         [[nodiscard]] const std::map<std::string, std::unique_ptr<Client>> &getClients() const;
+        [[nodiscard]] bool isReady() const;
 
     private:
         ServerMain* _server = nullptr;
+        bool _ready = false;
 
         sf::TcpListener _listener;
         void registerListeners(sf::TcpSocket *clientSocket);

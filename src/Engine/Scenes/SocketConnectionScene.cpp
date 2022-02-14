@@ -52,7 +52,7 @@ void SocketConnectionScene::render(sf::RenderTarget* renderTarget)
 
 		ImGui::BeginChild("Clients list");
 
-		for(auto& client : server->getServerSocket().getClients())
+		for(auto& client : server->getServerSocket()->getClients())
 		{
 			ImGui::Text("%s", client.first.c_str());
 		}

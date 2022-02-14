@@ -38,16 +38,16 @@ void ClientSocket::registerListeners()
 {
     Logger::Log("registering listeners for client socket");
 
-    _eventEmitter.on(SocketEvents::Connected, [this](sf::Packet packet) -> void { onConnected(packet); });
+    _eventEmitter.on(SocketEvents::Connected, [this](const sf::Packet& packet) -> void { onConnected(packet); });
     _eventEmitter.on(SocketEvents::Disconnected, [this]() -> void
     {
         Logger::Log("Disconnected");
     });
-    _eventEmitter.on(SocketEvents::NewPlayerConnected, [this](sf::Packet packet) -> void
+    _eventEmitter.on(SocketEvents::NewPlayerConnected, [this](const sf::Packet& packet) -> void
     {
         Logger::Log("New Player connected");
     });
-    _eventEmitter.on(SocketEvents::SceneUpdate, [this](sf::Packet packet) -> void { onSceneUpdate(packet); });
+    _eventEmitter.on(SocketEvents::SceneUpdate, [this](const sf::Packet& packet) -> void { onSceneUpdate(packet); });
 
 	_listenThread.launch();
 }
