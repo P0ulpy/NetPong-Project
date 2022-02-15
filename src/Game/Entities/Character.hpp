@@ -6,6 +6,8 @@
 class Character : public Entity, public Engine::IControllable, public Engine::IRenderable
 {
 private:
+	bool _canCharacterMove { true };
+
 	sf::CircleShape charac;
 	sf::RectangleShape canon;
 	sf::CircleShape shootZone;
@@ -41,6 +43,9 @@ private:
 	//Nombre de balles max
 	int _ammos = 2;
 
+	//Joueur mort
+	bool _isAlive = true;
+
 public:
     Character() = default;
     Character(sf::Color color);
@@ -53,17 +58,23 @@ public:
     bool isInCooldown() const;
     bool isReloading() const;
 
-    void activateCooldown(bool activate);
-    void activateReloading(bool activateReload);
+	// set la rotation des sprites en fonction de la souris
+	void setRotation(sf::Vector2i mousePos);
+	bool isInCooldown() const;
+	bool isReloading() const;
 
-    bool hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime);
-    bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const;
+	
+	
+	void activateCooldown(bool activate);
+	void activateReloading(bool activateReload);
 
     sf::Vector2f shootDirection(sf::Vector2i mousePos) const;
     sf::Vector2f shootDepart();
 
     void ammoCount(int ammo);
 
+	bool hitWallIfCollision(float x1, float y1, float x2, float y2);
+	bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const;
     // GET
     [[nodiscard]] const sf::CircleShape& getShape() const;
     [[nodiscard]] const sf::RectangleShape& getCanon() const;
@@ -80,4 +91,12 @@ public:
     void setRotation(float rot) final;
     void setVelocity(const sf::Vector2f& newVelocity) final;
     void setAmmosColor(sf::Color normalColor, sf::Color inactiveColor);
+	sf::Vector2f shootDirection(sf::Vector2i mousePos) const;
+	sf::Vector2f shootDepart() const;
+	float getRadius() const;
+	void ammoCount(int ammo);
+	void toggleCharacterMove(bool canCharacterMove);
+	bool canCharacterMove() const;
+	void setPlayerAlive(bool isAlive);
+	void resetAmmos();
 };

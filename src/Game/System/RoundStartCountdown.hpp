@@ -4,9 +4,13 @@
 
 #include "SFML/Graphics/RenderTarget.hpp"
 
+class MainGameScene;
+
 class RoundStartCountdown
 {
 private:
+	const MainGameScene& _mainGameScene;
+
 	std::vector<std::string> _countDownMessages;
 	int _currentCountdownMessageIndex;
 	float _currentTimeBetweenStartCountdownNumbers;
@@ -16,7 +20,7 @@ private:
 	void displayNextMessage() const;
 
 public:
-	RoundStartCountdown();
+	RoundStartCountdown(const MainGameScene& mainGameScene);
 	~RoundStartCountdown();
 
 	void update(const float& deltaTime);

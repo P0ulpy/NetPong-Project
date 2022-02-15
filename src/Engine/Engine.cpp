@@ -9,6 +9,7 @@
 
 // Scenes
 #include "Scenes/MainGameScene.hpp"
+#include "Scenes/MainMenuScene.hpp"
 #include "Scenes/SocketConnectionScene.hpp"
 
 #include "../Logger/Logger.hpp"
@@ -106,7 +107,7 @@ void PoPossibEngin::renderThreadEntry()
 	Logger::Log("Engine Initilized");
 	_engineState = INITIALIZED;
 
-	loadScene(MainGame);
+	loadScene(MainMenu);
 
 	renderThreadUpdate();
 }
@@ -215,6 +216,9 @@ void PoPossibEngin::loadScene(SceneType sceneType)
 	{
 	case SocketConnection: 
 		newScene = new SocketConnectionScene(*this);
+		break;
+	case MainMenu:
+		newScene = new MainMenuScene(*this);
 		break;
 	case MainGame:
 		newScene = new MainGameScene(*this);

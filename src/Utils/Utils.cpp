@@ -21,7 +21,7 @@ double Utils::deceleration(const float initial, const float target, const float 
 	//Deceleration(Y0,Y1,t) = Linear( Y0, Y1, 1 - pow(1 - t,2) )
 	//t = 1 - pow(1 - t,2), donc :
 	//LinearDec(Y0,Y1,t) = Y0 + ( 1 - pow(1 - t,2) ) * (Y1 - Y0) )
-	return initial + (1 - std::pow(1 - time / 2, 2)) * (target - initial);
+	return static_cast<float>(initial) + (1 - std::pow(1 - time / 2, 2)) * (target - initial);
 }
 
 sf::Vector2f Utils::normalize(const sf::Vector2f& originalVector)
@@ -105,7 +105,7 @@ bool Utils::linePointCollision(float x1, float y1, float x2, float y2, float px,
 
 	// since floats are so minutely accurate, add
 	// a little buffer zone that will give collision
-	const float buffer = 18.f;    // higher # = less accurate
+	const float buffer = 20.f;    // higher # = less accurate
 
 	// if the two distances are equal to the line's 
 	// length, the point is on the line!
@@ -120,7 +120,7 @@ bool Utils::lineCircleCollision(float x1, float y1, float x2, float y2, float cX
 	const float lengthLine = getDistance(x1, y1, x2, y2);
 
 	// get dot product of the line and circle
-	const double dot = ((cX - x1)*(x2 - x1) + (cY - y1)*(y2 - y1)) / std::pow(lengthLine, 2);
+	const float dot = ((cX - x1)*(x2 - x1) + (cY - y1)*(y2 - y1)) / static_cast<float>(std::pow(lengthLine, 2));
 
 	// find the closest point on the line
 	const double closestX = x1 + (dot * (x2 - x1));

@@ -1,10 +1,13 @@
 #include "RoundStartCountdown.hpp"
 
+#include "../../Engine/Scenes/MainGameScene.hpp"
+
 #include <iostream>
 
 constexpr float DURATION_BETWEEN_START_COUNTDOWN_NUMBERS = 0.6f;
 
-RoundStartCountdown::RoundStartCountdown()
+RoundStartCountdown::RoundStartCountdown(const MainGameScene& mainGameScene)
+	: _mainGameScene(mainGameScene)
 {
 	initValues();
 }
@@ -37,6 +40,7 @@ void RoundStartCountdown::update(const float& deltaTime)
 			if (_currentCountdownMessageIndex >= _countDownMessages.size())
 			{
 				stopBeginCountdown();
+				_mainGameScene.togglePlayersMovement(true);
 			}
 			else
 			{

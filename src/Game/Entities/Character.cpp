@@ -5,7 +5,7 @@
 
 #include "../../Utils/Utils.hpp"
 
-constexpr float CHARAC_SPEED = 300.f;
+constexpr float CHARAC_SPEED = 450.f;
 
 constexpr float DURATION_BETWEEN_SHOOTS = 0.3;
 constexpr float COOLDOWN_RELOAD_FIRST_BALL = 0.75f;
@@ -17,9 +17,6 @@ constexpr int AMMO_SIDE_SIZE = 10 * CHARAC_GLOBAL_SIZE;
 constexpr int SHOOT_ZONE_RADIUS = 5 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_X = 25 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_Y = 15 * CHARAC_GLOBAL_SIZE;
-
-constexpr int DEFAULT_SPAWN_POS_X = 500;
-constexpr int DEFAULT_SPAWN_POS_Y = 500;
 
 Character::Character(sf::Color color)
 {
@@ -74,9 +71,23 @@ void Character::setPosition(const sf::Vector2i& position)
 }
 
 
+void Character::toggleCharacterMove(bool canCharacterMove)
+{
+	_canCharacterMove = canCharacterMove;
+}
+
+bool Character::canCharacterMove() const
+{
+	return _canCharacterMove;
+}
+
 void Character::update(const float& deltaTime)
 {
-    if (_cooldownActivated)
+	if (!_isAlive) return;
+
+	setRotation(mousePosition);
+
+	if (_cooldownActivated)
 	{
 		if (_cooldownShoot >= 0 && _cooldownShoot < DURATION_BETWEEN_SHOOTS) _cooldownShoot = _cooldownShoot + deltaTime;
 
@@ -101,13 +112,14 @@ void Character::update(const float& deltaTime)
 		if (_reloadingTime > COOLDOWN_RELOAD_SECOND_BALL)
 		{
 			activateReloading(false);
-			_reloadingTime = 0;
-			_ammos = 2;
+			resetAmmos();
 		}
 	}
 
-	_characDestination->setPosition(std::abs(charac.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
-		std::abs(charac.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime);
+	_characDestination->setPosition(
+		std::abs(charac.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
+		std::abs(charac.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime
+	);
 }
 
 void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime) 
@@ -123,6 +135,10 @@ void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime
 
 void Character::render(sf::RenderTarget& target)const
 {
+
+
+	if (!_isAlive) return;
+	
 	target.draw(canon);
 	target.draw(charac);
 
@@ -135,6 +151,7 @@ void Character::render(sf::RenderTarget& target)const
 	{
 		target.draw(secondAmmo);
 	}
+	
 }
 
 void Character::setRotation(float rot)
@@ -148,12 +165,21 @@ void Character::setRotation(float rot)
 
 void Character::setVelocity(const sf::Vector2f& newVelocity) { _velocity = newVelocity; }
 const sf::Vector2f& Character::getVelocity() { return _velocity; }
+void Character::direction(int isleft, int isright, int up, int down, float deltaTime)
+{
+	if (!canCharacterMove()) return;
+	xCharDirection = -isleft + isright;
+	yCharDirection = -up + down;
 
-bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float& remainingTime, const float& deltaTime)
+	_velocity = sf::Vector2f(xCharDirection, yCharDirection);
+	moveEntity(_velocity, deltaTime);
+}
+
+bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2)
 {
 	sf::Vector2f outImpactPoint { 0,0 };
 
-	bool hit = characterCollision(x1, y1, x2, y2, outImpactPoint, remainingTime);
+	bool hit = characterCollision(x1, y1, x2, y2, outImpactPoint);
 
 	if (hit)
 	{
@@ -162,20 +188,20 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 
 		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
 
-		charac.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		charac.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
-		canon.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		canon.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
-		shootZone.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		shootZone.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
-		firstAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		firstAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
-		secondAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x * (remainingTime),
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y * (remainingTime));
+		secondAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
 		return true;
 	}
@@ -183,7 +209,7 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2, float
 	return false;
 }
 
-bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint, float& remainingTime) const
+bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const
 {
 	sf::Vector2f outIntersectionPoint{};
 
@@ -208,7 +234,6 @@ bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::V
 	{
 		outImpactPoint.x = closestX;
 		outImpactPoint.y = closestY;
-		remainingTime -= remainingTime * distance / charac.getRadius();
 		return true;
 	}
 
@@ -220,9 +245,7 @@ bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::V
 		_characDestination->getPosition().x, _characDestination->getPosition().y, outIntersectionPoint))
 	{
 		outImpactPoint = outIntersectionPoint;
-		remainingTime -= remainingTime * Utils::getDistance(charac.getPosition(), outImpactPoint) /
-			Utils::getDistance(charac.getPosition(), _characDestination->getPosition());
-		std::cout << remainingTime << std::endl;
+		Utils::getDistance(charac.getPosition(), _characDestination->getPosition());
 
 		return true;
 	}
@@ -244,7 +267,7 @@ sf::Vector2f Character::shootDirection(sf::Vector2i mousePos) const
     };
 }
 
-sf::Vector2f Character::shootDepart()
+sf::Vector2f Character::shootDepart() const
 {
 	return {
         shootZone.getTransform().transformPoint(0, 0).x,
@@ -278,5 +301,25 @@ sf::Color Character::getNormalAmmoColor() const { return _ammoColorNormal; }
 bool Character::isInCooldown() const { return _cooldownActivated; }
 
 bool Character::isReloading() const { return _isReloading; }
+bool Character::isInCooldown() const
+{
+	return _cooldownActivated;
+}
 
 sf::Vector3f Character::getPositionAndRadiusCharac() { return {charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2}; }
+
+float Character::getRadius() const
+{
+	return charac.getGlobalBounds().width / 2;
+}
+
+void Character::setPlayerAlive(bool isAlive)
+{
+	_isAlive = isAlive;
+}
+
+void Character::resetAmmos()
+{
+	_ammos = 2;
+	_reloadingTime = 0;
+}

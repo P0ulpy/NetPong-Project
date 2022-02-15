@@ -5,12 +5,15 @@
 #include "Scene.hpp"
 #include "../../Game/Controllers/ControllerBase.hpp"
 
+
 class GameManager;
 class PolygonTerrain;
 class Terrain;
 class PongBall;
 class PoPossibEngin;
 class Character;
+class AnimatorManager;
+
 
 class MainGameScene : public Scene
 {
@@ -26,11 +29,10 @@ public:
 	void render(sf::RenderTarget* target) override;
 
 	PolygonTerrain* getPolygonTerrain() const;
+	void displayPlayers(bool isDisplayed) const;
 	void hideAllPongBalls() const;
+	void togglePlayersMovement(bool canTheyMove) const;
 	void pushInactivePongBall(PongBall* pongBallToPush);
-
-	sf::Color _player0color = sf::Color(255, 40, 0);
-	sf::Color _player1color = sf::Color(0, 40, 255);
 
 	void setPlayersToDefaultSpawnPoints() const;
 
@@ -51,7 +53,9 @@ private:
 	std::stack<PongBall*> _inactivePongBalls;
 	std::vector<Character*> _players;
 	
+	
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
+	std::unique_ptr<AnimatorManager> _animator;
 
 	//Font and texts
 	sf::Font _font;
@@ -59,4 +63,5 @@ private:
 	void initValues();
 	void initFonts();
 	void makePlayerShoot(int playerIndex);
+	void checkPlayerPongBallCollision(const PongBall& pongBall) const;
 };

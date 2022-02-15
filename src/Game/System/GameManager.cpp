@@ -18,14 +18,12 @@ GameManager::GameManager(MainGameScene* pMainGameScene)
 }
 
 GameManager::~GameManager()
-{
-
-}
+{ }
 
 void GameManager::initValues()
 {
 	_gameUI = std::make_unique<GameUI>();
-	_roundStartCountdown = std::make_unique<RoundStartCountdown>();
+	_roundStartCountdown = std::make_unique<RoundStartCountdown>(*_mainGameScene);
 
 	_currentTimeBeforeStartingNewRound = 0;
 
@@ -58,6 +56,13 @@ void GameManager::render(sf::RenderTarget& target) const
 {
 	_roundStartCountdown->render(target);
 	_gameUI->render(target);
+}
+
+void GameManager::makePlayerWin(int numPlayer)
+{
+	numPlayer = std::min(1, std::max(numPlayer, 2));
+
+	numPlayer == 1 ? player1WinsRound() : player2WinsRound();
 }
 
 void GameManager::player1WinsRound()
@@ -118,6 +123,7 @@ void GameManager::startRoundStartCountdown() const
 void GameManager::endRound()
 {
 	_mainGameScene->hideAllPongBalls();
+	_mainGameScene->togglePlayersMovement(false);
 	startRoundEndTimer();
 }
 
@@ -133,6 +139,7 @@ void GameManager::restartRound(const float& deltaTime)
 
 	_mainGameScene->getPolygonTerrain()->drawRandomTerrain();
 	_mainGameScene->setPlayersToDefaultSpawnPoints();
+	_mainGameScene->displayPlayers(true);
 
 	startRoundStartCountdown();
 }

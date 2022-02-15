@@ -2,10 +2,6 @@
 
 int main(int argc, char** argv)
 {
-
-
-    return 0;
-
     PoPossibEngin engine({
     {
         sf::VideoMode(1920, 1080),

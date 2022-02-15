@@ -19,6 +19,7 @@ public:
 	void drawRandomTerrain();
 
 	//Gets - Sets
+	sf::Vector2f getPointPosition(int index) const;
 	sf::ConvexShape getShape() const;
 
 private:
@@ -35,7 +36,7 @@ private:
 		ZERO = 0,
 		FIFTEEN = 15,
 		THIRTY = 30,
-		FOURTY_FIVE = 45,
+		FORTY_FIVE = 45,
 		SIXTY = 60,
 		SEVENTY_FIVE = 75,
 		NINETY = 90
@@ -57,8 +58,11 @@ private:
 	void initEdgesRegistration();
 	sf::Vector2f initPoint(const sf::Vector2f& previousPoint, DrawDirection drawDirection, Orientation orientation, int pointDistance);
 
+	//Collision methods
+	void checkPongBallTerrainCollision(const float& deltaTime) const;
+	void checkPlayerTerrainCollision() const;
+
 	//Gets - Sets
-	sf::Vector2f getPointPosition(int index) const;
 	void setPointAndUpdateCurrentPoint( DrawDirection drawDirection, Orientation orientation, int pointDistance, int& currentPointDrawned);
 
 	//Drawing terrain
