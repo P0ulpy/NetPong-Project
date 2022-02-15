@@ -41,7 +41,6 @@ private:
     void rotate();
     void translate(const float& deltaTime);
     void shoot();
-
 };
 
 #endif //NETPONG_PROJECT_LOCALCHARACTERCONTROLLER_HPP

@@ -7,8 +7,7 @@
     "freetype",
     "sfml",
     "imgui-sfml",
-    "rapidjson",
-    "tgui"
+    "rapidjson"
   ],
   "overrides": [
     {

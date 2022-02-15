@@ -92,11 +92,11 @@ void MainGameScene::initValues()
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
 	}
 
-    auto p0 = new Character(_player0color);
+    auto p0 = new Character(COLOR_PLAYER_1);
 	_players.emplace_back(p0);
 	_players.back()->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
 
-    auto p1 = new Character(_player1color);
+    auto p1 = new Character(COLOR_PLAYER_2);
     _players.emplace_back(p1);
 	_players.back()->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
 
@@ -229,11 +229,6 @@ void MainGameScene::togglePlayersMovement(bool canTheyMove) const
 	{
 		player->toggleCharacterMove(canTheyMove);
 	}
-}
-
-void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush)
-{
-	_inactivePongBalls.push(pongBallToPush);
 }
 
 void MainGameScene::setPlayersToDefaultSpawnPoints() const

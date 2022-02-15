@@ -16,7 +16,7 @@
 
 PoPossibEngin* PoPossibEngin::_instance;
 
-PoPossibEngin::PoPossibEngin(EngineConfig engineConfig)
+PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
     : _engineConfig(engineConfig)
 	, _socketManager(new SocketManager(*this))
 	, _renderThread(sf::Thread(&PoPossibEngin::renderThreadEntry, this))
@@ -147,16 +147,13 @@ void PoPossibEngin::renderThreadUpdate()
 			sf::Time _deltaTime_Time = _deltaClock.restart();
 			_deltaTime = _deltaTime_Time.asSeconds();
 			ImGui::SFML::Update(*_renderWindow, _deltaTime_Time);
+            _inputsManager.update();
 
 			// DEBUG INFOS
 			renderThreadDebugInfo();
 
-			_renderWindow->clear();
-
-			// TEMP
+            _renderWindow->clear();
 			_currScene->update(getDeltaTime());
-			// TEMP
-
 			_currScene->render(_renderWindow);
 			ImGui::SFML::Render(*_renderWindow);
 

@@ -1,8 +1,6 @@
 #include "Character.hpp"
 
-#include <iostream>
 #include <cmath>
-
 #include "../../Utils/Utils.hpp"
 
 constexpr float CHARAC_SPEED = 450.f;
@@ -40,8 +38,6 @@ Character::Character(sf::Color color)
 	secondAmmo.setSize(sf::Vector2f(AMMO_SIDE_SIZE, AMMO_SIDE_SIZE));
 	secondAmmo.setFillColor(sf::Color::White);
 
-	setPosition({DEFAULT_SPAWN_POS_X, DEFAULT_SPAWN_POS_Y});
-
 	//Modification des origines
 	sf::FloatRect characSize = charac.getGlobalBounds();
 	sf::FloatRect canonSize = canon.getGlobalBounds();
@@ -61,31 +57,11 @@ Character::Character(sf::Color color)
 	_characDestination->setPosition(charac.getPosition());
 }
 
-void Character::setPosition(const sf::Vector2i& position)
-{
-	charac.setPosition(position.x, position.y);
-	canon.setPosition(position.x, position.y);
-	shootZone.setPosition(position.x, position.y);
-	firstAmmo.setPosition(position.x, position.y);
-	secondAmmo.setPosition(position.x, position.y);
-}
-
-
-void Character::toggleCharacterMove(bool canCharacterMove)
-{
-	_canCharacterMove = canCharacterMove;
-}
-
-bool Character::canCharacterMove() const
-{
-	return _canCharacterMove;
-}
-
 void Character::update(const float& deltaTime)
 {
 	if (!_isAlive) return;
 
-	setRotation(mousePosition);
+	//setRotation(mousePosition);
 
 	if (_cooldownActivated)
 	{
@@ -122,7 +98,7 @@ void Character::update(const float& deltaTime)
 	);
 }
 
-void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime) 
+void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime)
 {
 	sf::Vector2f dir = Utils::normalize(direction);
 
@@ -135,8 +111,6 @@ void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime
 
 void Character::render(sf::RenderTarget& target)const
 {
-
-
 	if (!_isAlive) return;
 	
 	target.draw(canon);
@@ -154,18 +128,7 @@ void Character::render(sf::RenderTarget& target)const
 	
 }
 
-void Character::setRotation(float rot)
-{
-    _rotation = rot;
-	canon.setRotation(_rotation);
-	shootZone.setRotation(_rotation);
-	firstAmmo.setRotation(_rotation);
-	secondAmmo.setRotation(_rotation);
-}
-
-void Character::setVelocity(const sf::Vector2f& newVelocity) { _velocity = newVelocity; }
-const sf::Vector2f& Character::getVelocity() { return _velocity; }
-void Character::direction(int isleft, int isright, int up, int down, float deltaTime)
+/*void Character::direction(int isleft, int isright, int up, int down, float deltaTime)
 {
 	if (!canCharacterMove()) return;
 	xCharDirection = -isleft + isright;
@@ -173,7 +136,7 @@ void Character::direction(int isleft, int isright, int up, int down, float delta
 
 	_velocity = sf::Vector2f(xCharDirection, yCharDirection);
 	moveEntity(_velocity, deltaTime);
-}
+}*/
 
 bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2)
 {
@@ -253,11 +216,31 @@ bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::V
 	return false;
 }
 
-void Character::ammoCount(int ammo)
+void Character::setVelocity(const sf::Vector2f& newVelocity) { _velocity = newVelocity; }
+const sf::Vector2f& Character::getVelocity() { return _velocity; }
+
+void Character::setPosition(const sf::Vector2i& position)
 {
-	_ammos = _ammos + ammo;
+    charac.setPosition(position.x, position.y);
+    canon.setPosition(position.x, position.y);
+    shootZone.setPosition(position.x, position.y);
+    firstAmmo.setPosition(position.x, position.y);
+    secondAmmo.setPosition(position.x, position.y);
 }
 
+void Character::setRotation(float rot)
+{
+    _rotation = rot;
+    canon.setRotation(_rotation);
+    shootZone.setRotation(_rotation);
+    firstAmmo.setRotation(_rotation);
+    secondAmmo.setRotation(_rotation);
+}
+
+void Character::toggleCharacterMove(bool canCharacterMove) { _canCharacterMove = canCharacterMove; }
+bool Character::canCharacterMove() const { return _canCharacterMove; }
+
+void Character::ammoCount(int ammo) { _ammos = _ammos + ammo; }
 sf::Vector2f Character::shootDirection(sf::Vector2i mousePos) const
 {
 	float radianDirection = _rotation * PI / 180;
@@ -280,46 +263,22 @@ void Character::activateCooldown(bool activate)
 	if (_ammos == 0)activateReloading(true);
 	else _cooldownActivated = activate;
 }
-void Character::activateReloading(bool activateReload)
-{
-	_isReloading = activateReload;
-}
-
+void Character::activateReloading(bool activateReload) { _isReloading = activateReload; }
 void Character::setAmmosColor(sf::Color normalColor, sf::Color inactiveColor)
 {
 	_ammoColorNormal = normalColor;
 	_ammoColorInactive = inactiveColor;
 }
+void Character::resetAmmos() { _ammos = 2; _reloadingTime = 0; }
+void Character::setPlayerAlive(bool isAlive) { _isAlive = isAlive; }
 
 const sf::CircleShape& Character::getShape() const { return charac; }
 const sf::RectangleShape& Character::getCanon() const { return canon; }
 float Character::getRotation() const { return _rotation; }
 const sf::Vector2f &Character::getPosition() const { return charac.getPosition(); }
 sf::Color Character::getInactiveAmmoColor() const { return _ammoColorInactive; }
-
 sf::Color Character::getNormalAmmoColor() const { return _ammoColorNormal; }
 bool Character::isInCooldown() const { return _cooldownActivated; }
-
 bool Character::isReloading() const { return _isReloading; }
-bool Character::isInCooldown() const
-{
-	return _cooldownActivated;
-}
-
 sf::Vector3f Character::getPositionAndRadiusCharac() { return {charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2}; }
-
-float Character::getRadius() const
-{
-	return charac.getGlobalBounds().width / 2;
-}
-
-void Character::setPlayerAlive(bool isAlive)
-{
-	_isAlive = isAlive;
-}
-
-void Character::resetAmmos()
-{
-	_ammos = 2;
-	_reloadingTime = 0;
-}
+float Character::getRadius() const { return charac.getGlobalBounds().width / 2; }

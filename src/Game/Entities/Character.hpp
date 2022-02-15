@@ -58,45 +58,36 @@ public:
     bool isInCooldown() const;
     bool isReloading() const;
 
-	// set la rotation des sprites en fonction de la souris
-	void setRotation(sf::Vector2i mousePos);
-	bool isInCooldown() const;
-	bool isReloading() const;
-
-	
-	
 	void activateCooldown(bool activate);
 	void activateReloading(bool activateReload);
 
+    sf::Vector2f shootDepart() const;
     sf::Vector2f shootDirection(sf::Vector2i mousePos) const;
-    sf::Vector2f shootDepart();
-
-    void ammoCount(int ammo);
 
 	bool hitWallIfCollision(float x1, float y1, float x2, float y2);
 	bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const;
+
     // GET
     [[nodiscard]] const sf::CircleShape& getShape() const;
     [[nodiscard]] const sf::RectangleShape& getCanon() const;
     [[nodiscard]] const sf::Vector2f& getVelocity() final;
     [[nodiscard]] const sf::Vector2f& getPosition() const final;
     [[nodiscard]] float getRotation() const final;
-    //x = position en x, y = position en y et z = rayon
     [[nodiscard]] sf::Vector3f getPositionAndRadiusCharac();
     [[nodiscard]] sf::Color getInactiveAmmoColor() const;
     [[nodiscard]] sf::Color getNormalAmmoColor() const;
+    [[nodiscard]] float getRadius() const;
 
     // SET
     void setPosition(const sf::Vector2i& position) final;
     void setRotation(float rot) final;
     void setVelocity(const sf::Vector2f& newVelocity) final;
     void setAmmosColor(sf::Color normalColor, sf::Color inactiveColor);
-	sf::Vector2f shootDirection(sf::Vector2i mousePos) const;
-	sf::Vector2f shootDepart() const;
-	float getRadius() const;
-	void ammoCount(int ammo);
-	void toggleCharacterMove(bool canCharacterMove);
+    void setPlayerAlive(bool isAlive);
+
+    void ammoCount(int ammo);
+    void toggleCharacterMove(bool canCharacterMove);
 	bool canCharacterMove() const;
-	void setPlayerAlive(bool isAlive);
+
 	void resetAmmos();
 };

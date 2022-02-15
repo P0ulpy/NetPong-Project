@@ -15,7 +15,7 @@ struct HostSettings
     uint16_t port = 25565;
 	float socketConnectionTimeout = 2000.f;
 
-	explicit HostSettings(std::string pName = "New Lobby", uint16_t pPort = 25565, float pSocketConnectionTimeout = 2000.f)
+	HostSettings(std::string pName = "New Lobby", uint16_t pPort = 25565, float pSocketConnectionTimeout = 2000.f)
 		: name(std::move(pName))
         , port(pPort)
         , socketConnectionTimeout(pSocketConnectionTimeout) {}
@@ -27,7 +27,7 @@ struct ClientConnectionSettings
     uint16_t port = 25565;
 	int32_t connectionTimeout = 1000;
 
-    explicit ClientConnectionSettings(std::string pIP = "127.0.0.1", uint16_t pPort = 25565, int32_t connectionTimeout = 1000)
+    ClientConnectionSettings(std::string pIP = "127.0.0.1", uint16_t pPort = 25565, int32_t connectionTimeout = 1000)
             : ip(std::move(pIP))
             , port(pPort)
 			, connectionTimeout(connectionTimeout) {}

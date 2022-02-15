@@ -1,8 +1,7 @@
 #include "MainMenuScene.hpp"
 
 #include "SocketConnectionScene.hpp"
-
-#include "../SocketsManagement/Server/Server.hpp"
+#include "../SocketsManagement/Server/ServerMain.hpp"
 
 MainMenuScene::MainMenuScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -74,7 +73,6 @@ void MainMenuScene::start()
 void MainMenuScene::update(const float& deltaTime)
 {
 	calculTime += deltaTime;
-	getParentEngine().setMousePosition();
 	sf::Event event{};
 	CheckMouse();
 
@@ -151,35 +149,37 @@ void MainMenuScene::render(sf::RenderTarget* renderTarget)
 
 
 void MainMenuScene::CheckMouse() {
-	
+
+    auto mousePos = _poPossibEngin->getInputsManager().getMousePosition();
+
 	if (_menusIndex == 0)
 	{
-		if (ui->InteractionButton("PlayButton", getParentEngine().getMousePosition(), _isClicked)) Play();
-		if (ui->InteractionButton("QuitButton", getParentEngine().getMousePosition(), _isClicked)) Quit();
+		if (ui->InteractionButton("PlayButton", mousePos, _isClicked)) Play();
+		if (ui->InteractionButton("QuitButton", mousePos, _isClicked)) Quit();
 	}
 	if (_menusIndex == 1)
 	{ 
-		if (ui->InteractionButton("JoinButton", getParentEngine().getMousePosition(), _isClicked)) JoinMenu();
-		if (ui->InteractionButton("HostButton", getParentEngine().getMousePosition(), _isClicked)) HostMenu();
-		if (ui->InteractionButton("BackMenuButton", getParentEngine().getMousePosition(), _isClicked)) BackToMenu();
+		if (ui->InteractionButton("JoinButton", mousePos, _isClicked)) JoinMenu();
+		if (ui->InteractionButton("HostButton", mousePos, _isClicked)) HostMenu();
+		if (ui->InteractionButton("BackMenuButton", mousePos, _isClicked)) BackToMenu();
 	}
 	if (_menusIndex == 2)
 	{
-		if (ui->InteractionButton("Join", getParentEngine().getMousePosition(), _isClicked)) Join();
-		if (ui->InteractionButton("BackMenuButton", getParentEngine().getMousePosition(), _isClicked)) BackToMenu();
-		if (ui->InteractionTextBox("IP", getParentEngine().getMousePosition(), _isClicked))_indexTextBox = 1;
-		if (ui->InteractionTextBox("TextPort", getParentEngine().getMousePosition(), _isClicked))_indexTextBox = 2;
+		if (ui->InteractionButton("Join", mousePos, _isClicked)) Join();
+		if (ui->InteractionButton("BackMenuButton", mousePos, _isClicked)) BackToMenu();
+		if (ui->InteractionTextBox("IP", mousePos, _isClicked))_indexTextBox = 1;
+		if (ui->InteractionTextBox("TextPort", mousePos, _isClicked))_indexTextBox = 2;
 	}
 	if (_menusIndex == 3)
 	{
-		if (ui->InteractionButton("Host", getParentEngine().getMousePosition(), _isClicked)) Host();
-		if (ui->InteractionButton("BackMenuButton", getParentEngine().getMousePosition(), _isClicked)) BackToMenu();
-		if (ui->InteractionTextBox("LobbyName", getParentEngine().getMousePosition(), _isClicked))_indexTextBox = 1;
-		if (ui->InteractionTextBox("HostTextPort", getParentEngine().getMousePosition(), _isClicked))_indexTextBox = 2;
+		if (ui->InteractionButton("Host", mousePos, _isClicked)) Host();
+		if (ui->InteractionButton("BackMenuButton", mousePos, _isClicked)) BackToMenu();
+		if (ui->InteractionTextBox("LobbyName", mousePos, _isClicked))_indexTextBox = 1;
+		if (ui->InteractionTextBox("HostTextPort", mousePos, _isClicked))_indexTextBox = 2;
 	}
 	if (_menusIndex == 4)
 	{
-		if (ui->InteractionButton("BackMenuButton", getParentEngine().getMousePosition(), _isClicked)) BackToMenu();
+		if (ui->InteractionButton("BackMenuButton", mousePos, _isClicked)) BackToMenu();
 	}
 	
 }
@@ -240,18 +240,20 @@ void MainMenuScene::Host()
 	std::string tostring2 = ui->TextBox("LobbyName").getString();
 	ui->Text("Port").setString(tostring);
 	hostport = std::stoi(tostring);
+	
+	getParentEngine().getSocketManager()->startServer({
+		ui->TextBox("LobbyName").getString(), (uint16_t)hostport
+    });
+	
+	while (!getParentEngine().getSocketManager()->getServerInstance()->isReady())
+    {
+        // Connecting
+    }
 
-	std::cout << "Host name = " << tostring2 << std::endl;
-	std::cout << "Host port = " << tostring << std::endl;
-	
-	getParentEngine().getSocketManager().startServer({
-		ui->TextBox("LobbyName").getString(), hostport
-		});
-	
-	//while (!getParentEngine().getSocketManager().getServerInstance().isReady()) {}
-	getParentEngine().getSocketManager().connectClient({
-		"127.0.0.1",hostport
-		});
+	getParentEngine().getSocketManager()->connectClient({
+		"127.0.0.1",
+        (uint16_t)hostport
+    });
 		
 	_menusIndex = 4;
 }
@@ -262,9 +264,10 @@ void MainMenuScene::Join()
 	std::string tostringIP = ui->TextBox("IP").getString();
 	std::string tostringPORT = ui->TextBox("TextPort").getString();
 
-	getParentEngine().getSocketManager().connectClient({
-		tostringIP, std::stoi(tostringPORT)
-		});
+	getParentEngine().getSocketManager()->connectClient({
+		tostringIP,
+        (uint16_t)std::stoi(tostringPORT)
+    });
 }
 
 void MainMenuScene::PlayerFound()
