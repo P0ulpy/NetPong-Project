@@ -3,6 +3,7 @@
 #include <stack>
 #include "Scene.hpp"
 
+
 class GameManager;
 class PolygonCollisionResult;
 class PolygonTerrain;

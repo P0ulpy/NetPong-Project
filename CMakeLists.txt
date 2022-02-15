@@ -34,7 +34,7 @@ file(GLOB_RECURSE src_files
         "src/*.hpp"
         "src/*.cpp"
         )
-add_executable (NetPong-Project ${src_files} "src/Engine/Animator/AnimatorManager.cpp" "src/Engine/Animator/AnimatorManager.hpp" "src/Engine/Scenes/MainMenuScene.cpp" "src/Engine/Scenes/MainMenuScene.hpp")
+add_executable (NetPong-Project ${src_files} "src/Engine/Animator/AnimatorManager.cpp" "src/Engine/Animator/AnimatorManager.hpp" "src/Engine/Scenes/MainMenuScene.cpp" "src/Engine/Scenes/MainMenuScene.hpp" "src/Utils/UI.hpp" "src/Utils/UI.cpp")
 
 target_link_libraries(NetPong-Project
         sfml-system sfml-window sfml-graphics sfml-audio sfml-network

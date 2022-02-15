@@ -5,13 +5,16 @@
 class AnimatorManager
 {
 private:
+	//Explosion
 	sf::Image _imageExplosion;
 	sf::Texture _explosionTexture;
 	sf::Sprite _frameExplosion;
-	// 1 = Animation Explosion ; ...
+
+
+	// 0 = Animation Explosion 
 	std::vector<bool> _playAnim;
 	
-	//Pour le stylsheet de l'explosion
+	//Pour le stylsheet
 	int _nbrFrameRow = 0;
 	int _nbrFrameCol = 0;
 	int _indexBalayageRow = 0;
@@ -26,6 +29,7 @@ public:
 
 	void render(sf::RenderTarget& target);
 	void BalayageTexture(sf::Image image, sf::Sprite& frame);
+	
 
 
 	AnimatorManager();

@@ -6,8 +6,10 @@ AnimatorManager::AnimatorManager()
 	//Animation d'explosion
 	if (!_imageExplosion.loadFromFile("./Assets/Animations/Explosion.png"))std::cout << "No Explosion asset" << std::endl;
 	_explosionTexture.loadFromImage(_imageExplosion);
-	//Anime 1 = Explosion
+
+	//Anime 0 = Explosion
 	_playAnim.push_back(false);
+
 }
 
 void AnimatorManager::DeathAnimation(sf::Vector2f position)
@@ -31,6 +33,8 @@ void AnimatorManager::render(sf::RenderTarget& target)
 		BalayageTexture(_imageExplosion, _frameExplosion);
 		target.draw(_frameExplosion);
 	}
+
+
 }
 
 void AnimatorManager::BalayageTexture(sf::Image image, sf::Sprite& frame)

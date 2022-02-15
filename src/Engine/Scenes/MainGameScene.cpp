@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+
 #include "../../Game/Entities/PongBall.hpp"
 #include "../../Game/Entities/Character.hpp"
 #include "../../Engine/Animator/AnimatorManager.hpp"
@@ -158,6 +159,8 @@ void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 
 void MainGameScene::update(const float& deltaTime)
 {
+	
+	
 	updateInputs(deltaTime);
 	_poPossibEngin->setMousePosition();
 	
@@ -183,7 +186,7 @@ void MainGameScene::render(sf::RenderTarget* target)
 {
 	_gameManager->render(*target);
 	_polygonTerrain->render(*target);
-
+	
 
 	for (const auto pongBall : _pongBalls)
 	{

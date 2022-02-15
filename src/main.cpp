@@ -7,7 +7,8 @@ int main(int argc, char** argv)
         EngineConfig(
             EngineConfig::WindowConfig(
                 sf::VideoMode(1920, 1080),
-                "Netpong"
+                "Netpong",
+                sf::Style::Fullscreen
             )
         )
     );
