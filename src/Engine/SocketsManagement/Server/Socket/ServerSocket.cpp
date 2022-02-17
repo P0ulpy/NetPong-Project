@@ -29,13 +29,25 @@ ServerSocket::ServerSocket(ServerMain* server)
 
 ServerSocket::~ServerSocket()
 {
+    _clientsSocketSelector.clear();
 	_connectionsListenThread.terminate();
 	_listenEventsThread.terminate();
 }
 
-const std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients() const { return _clients; }
+std::map<std::string, std::unique_ptr<Client>>& ServerSocket::getClients() { return _clients; }
+bool ServerSocket::isReady() const { return _ready; }
 
-bool ServerSocket::isReady() const { return false; }
+void ServerSocket::registerListeners(sf::TcpSocket* clientSocket)
+{
+    on(SocketEvents::PlayerSendSettings, [](sf::Packet packet) -> void
+    {
+        std::string playerSettings;
+        packet >> playerSettings;
+        // TODO : Set Player default position / values / color
+
+        Logger::Log("New PlayerConnected : " + playerSettings);
+    });
+}
 
 [[noreturn]] void ServerSocket::connectionsListenEntry()
 {
@@ -50,6 +62,7 @@ bool ServerSocket::isReady() const { return false; }
 		if (_listener.accept(*newClientSocket) != sf::Socket::Done)
 		{
 			Logger::Log("Erreur lors de l'acceptation du client");
+            delete newClientSocket;
 			continue;
 		}
 
@@ -128,38 +141,33 @@ bool ServerSocket::isReady() const { return false; }
 		}
         else
         {
-            //Logger::Err("Wait time elapsed ?");
+
         }
 	}
 }
 
 void ServerSocket::send(sf::TcpSocket& socket, SocketEvents event, const sf::Packet& data)
 {
-    sf::Thread sendThread = sf::Thread([this, &socket, &event, &data]()
+    sf::Packet packet;
+    packet << (int) event;
+    packet.append(data.getData(), data.getDataSize());
+
+    Logger::Log("ServerSocket : Emitting " + std::to_string(packet.getDataSize()) + "o of data for event " +
+                std::to_string(event));
+
+    std::lock_guard lockGuard(_mutex);
+
+    if (socket.send(packet/*, _clientConnectionSettings.ip, _clientConnectionSettings.port*/) !=
+        sf::Socket::Done)
     {
-        sf::Packet packet;
-        packet << (int) event;
-        packet.append(data.getData(), data.getDataSize());
-
-        Logger::Log("ClientSocket : Emitting " + std::to_string(packet.getDataSize()) + "o of data for event " +
-                    std::to_string(event));
-
-        std::lock_guard lockGuard(_mutex);
-
-        if (socket.send(packet/*, _clientConnectionSettings.ip, _clientConnectionSettings.port*/) !=
-            sf::Socket::Done)
-        {
-            Logger::Err("Error while sending data | dataSize : " + std::to_string(packet.getDataSize()) + 'o');
-            return;
-        }
-    });
-
-    sendThread.launch();
+        Logger::Err("Error while sending data | dataSize : " + std::to_string(packet.getDataSize()) + 'o');
+        return;
+    }
 }
 
 void ServerSocket::sendToAll(SocketEvents event, const sf::Packet& data)
 {
-    // we asynchronously send data
+    // asynchronously send data
     sf::Thread sendThread = sf::Thread([this, &event, &data]()
     {
         for(const auto& socketClientPair : _clients)
@@ -171,22 +179,7 @@ void ServerSocket::sendToAll(SocketEvents event, const sf::Packet& data)
     sendThread.launch();
 }
 
-void ServerSocket::registerListeners(sf::TcpSocket* clientSocket)
-{
-    on(SocketEvents::PlayerSendSettings, [](sf::Packet packet) -> void
-    {
-        std::string playerSettings;
-        packet >> playerSettings;
-        // TODO : Set Player default position / values / color
-
-        Logger::Log("New PlayerConnected : " + playerSettings);
-
-        // surely unused in future
-        // emitToAll(SocketEvents::NewPlayerConnected, initSocketConfig);
-    });
-}
-
-void ServerSocket::onClientConnection(const Client& client)
+void ServerSocket::onClientConnection(Client& client)
 {
     Logger::Log(
             std::string("New Client Connected | ip : ")
@@ -198,9 +191,10 @@ void ServerSocket::onClientConnection(const Client& client)
     initSocketConfig << client.getId();
 
     send(*client.getSocket(), SocketEvents::Connected, initSocketConfig);
+    _server->createCharacter(client);
 }
 
-void ServerSocket::onClientDisconnect(const Client &client)
+void ServerSocket::onClientDisconnect(Client &client)
 {
     Logger::Log("Client disconnected | id : " + client.getId());
 

@@ -1,7 +1,7 @@
 #include "MainMenuScene.hpp"
 
-#include "SocketConnectionScene.hpp"
 #include "../SocketsManagement/Server/ServerMain.hpp"
+#include "../SocketsManagement/Client/ClientSocket.hpp"
 
 MainMenuScene::MainMenuScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())
@@ -33,9 +33,9 @@ void MainMenuScene::InitializePlayMenu()
 void MainMenuScene::InitializeHostMenu()
 {
 	ui->CreateText("Host", sf::Color::White, "HOST", 100, sf::Vector2f(1720, 900), font);
-	ui->CreateTextBox("LobbyName", font, 15, sf::Vector2f(960, 400));
+	ui->CreateTextBox("LobbyName", font, 15, sf::Vector2f(960, 400), host_hostNameTextDefault);
 	ui->CreateText("LobbyTitle", sf::Color::White, "Lobby Name", 100, sf::Vector2f(ui->Zone("LobbyName").getPosition().x, ui->Zone("LobbyName").getPosition().y - 150), font);
-	ui->CreateTextBox("HostTextPort", font, 5, sf::Vector2f(960, 700));
+	ui->CreateTextBox("HostTextPort", font, 5, sf::Vector2f(960, 700), host_hostPortTextDefault);
 	ui->CreateText("HostTitlePort", sf::Color::White, "Port", 100, sf::Vector2f(ui->Zone("HostTextPort").getPosition().x, ui->Zone("HostTextPort").getPosition().y - 150), font);
 	
 }
@@ -43,9 +43,9 @@ void MainMenuScene::InitializeHostMenu()
 void MainMenuScene::InitializeJoinMenu()
 {
 	ui->CreateText("Join", sf::Color::White, "JOIN", 100, sf::Vector2f(1720, 900), font);
-	ui->CreateTextBox("IP", font, 15, sf::Vector2f(960, 400));
+	ui->CreateTextBox("IP", font, 15, sf::Vector2f(960, 400), join_hostIpTextDefault);
 	ui->CreateText("TitleIP", sf::Color::White, "IP", 100, sf::Vector2f(ui->Zone("IP").getPosition().x, ui->Zone("IP").getPosition().y - 150), font);
-	ui->CreateTextBox("TextPort", font, 5, sf::Vector2f(960, 700));
+	ui->CreateTextBox("TextPort", font, 5, sf::Vector2f(960, 700), join_hostPortTextDefault);
 	ui->CreateText("TitlePort", sf::Color::White, "Port", 100, sf::Vector2f(ui->Zone("TextPort").getPosition().x, ui->Zone("TextPort").getPosition().y - 150), font);
 	
 }
@@ -53,8 +53,8 @@ void MainMenuScene::InitializeJoinMenu()
 void MainMenuScene::InitializeWaitingScreen()
 {
 	ui->CreateText("Waiting", sf::Color::White, "Waiting for player to join !", 150, sf::Vector2f(960, 400), font);
-	ui->CreateText("IPAdress", sf::Color::White, hostip, 100, sf::Vector2f(960, 100), font);
-	ui->CreateText("Port", sf::Color::White, std::to_string(hostport), 100, sf::Vector2f(960, 250), font);
+	ui->CreateText("IPAddress", sf::Color::White, wait_hostIpTextDefault, 100, sf::Vector2f(960, 100), font);
+	ui->CreateText("Port", sf::Color::White, wait_hostPortTextDefault, 100, sf::Vector2f(960, 250), font);
 	ui->CreateText("WaitingAnimation", sf::Color::White, "...", 100, sf::Vector2f(960, 500), font);
 
 
@@ -133,18 +133,15 @@ void MainMenuScene::render(sf::RenderTarget* renderTarget)
 	{
 		renderTarget->draw(ui->Text("Waiting"));
 		renderTarget->draw(ui->Text("BackMenuButton"));
-		renderTarget->draw(ui->Text("IPAdress"));
+		renderTarget->draw(ui->Text("IPAddress"));
 		renderTarget->draw(ui->Text("Port"));
 		renderTarget->draw(ui->Text("WaitingAnimation"));
+
 		if (!_playerFound)
 		{
 			WaitingScreen();
 		}
-		
-
 	}
-
-
 }
 
 
@@ -181,42 +178,46 @@ void MainMenuScene::CheckMouse() {
 	{
 		if (ui->InteractionButton("BackMenuButton", mousePos, _isClicked)) BackToMenu();
 	}
-	
 }
 
 
-void MainMenuScene::Write(std::string name,int size)
+void MainMenuScene::Write(const std::string& name, int size)
 {
-	sf::Event event{};
+	sf::Event event {};
 	if (getParentEngine().getInputsManager().getEvent(sf::Event::TextEntered, event))
 	{
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Backspace))
-			{
-				if (ui->TextBox(name).getString().getSize() > 0)
-				{
-					std::string stringDelete = ui->TextBox(name).getString();
-					stringDelete.pop_back();
-					ui->TextBox(name).setString(stringDelete);
-				}
-			}
-			else
-			{
-				if (ui->TextBox(name).getString().getSize() < size)
-				{
-					std::string stringAdd = ui->TextBox(name).getString();
-					stringAdd += event.text.unicode;
-					ui->TextBox(name).setString(stringAdd);
-				}
-			}
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Backspace))
+        {
+            if (ui->TextBox(name).getString().getSize() > 0)
+            {
+                std::string stringDelete = ui->TextBox(name).getString();
+                stringDelete.pop_back();
+                ui->TextBox(name).setString(stringDelete);
+            }
+        }
+        else
+        {
+            if (ui->TextBox(name).getString().getSize() < size)
+            {
+                std::string stringAdd = ui->TextBox(name).getString();
+                stringAdd += std::to_string(event.text.unicode);
+                ui->TextBox(name).setString(stringAdd);
+            }
+        }
 	}
 	
 }
 
-void MainMenuScene::Quit(){getParentEngine().stop();}
-void MainMenuScene::BackToMenu(){_menusIndex = 0;}
-void MainMenuScene::Play(){_menusIndex = 1;}
-void MainMenuScene::HostMenu(){_menusIndex = 3;}
-void MainMenuScene::JoinMenu(){_menusIndex = 2;}
+void MainMenuScene::Quit(){ getParentEngine().stop(); }
+void MainMenuScene::BackToMenu()
+{
+    _poPossibEngin->getSocketManager()->disconnectAll();
+    _menusIndex = 0;
+}
+
+void MainMenuScene::Play() { _menusIndex = 1; }
+void MainMenuScene::HostMenu() { _menusIndex = 3; }
+void MainMenuScene::JoinMenu() { _menusIndex = 2; }
 
 void MainMenuScene::WaitingScreen()
 {
@@ -236,26 +237,38 @@ void MainMenuScene::WaitingScreen()
 }
 void MainMenuScene::Host()
 {
-	std::string tostring = ui->TextBox("HostTextPort").getString();
-	std::string tostring2 = ui->TextBox("LobbyName").getString();
-	ui->Text("Port").setString(tostring);
-	hostport = std::stoi(tostring);
+	std::string portStr = ui->TextBox("HostTextPort").getString();
+    std::string lobbyName = ui->TextBox("LobbyName").getString();
+    std::string pseudo = ui->TextBox("LobbyName").getString();
+
+	ui->Text("Port").setString(portStr);
+	auto hostport = (uint16_t)std::stoi(portStr);
 	
 	getParentEngine().getSocketManager()->startServer({
-		ui->TextBox("LobbyName").getString(), (uint16_t)hostport
+		ui->TextBox("LobbyName").getString(), hostport
     });
 	
 	while (!getParentEngine().getSocketManager()->getServerInstance()->isReady())
     {
-        // Connecting
+        Logger::Log("creating internal server...");
     }
 
-	getParentEngine().getSocketManager()->connectClient({
+    ui->Text("IPAddress").setString("127.0.0.1");
+    ui->Text("Port").setString(portStr);
+
+	auto clientSocket = getParentEngine().getSocketManager()->connectClient({
 		"127.0.0.1",
         (uint16_t)hostport
     });
-		
-	_menusIndex = 4;
+
+    while(!clientSocket->isReady())
+    {
+        Logger::Log("connecting to internal server...");
+    }
+
+    // FIXME : ne pas charger directement la scene
+    _poPossibEngin->loadScene(SceneType::MainGame);
+	//_menusIndex = 4;
 }
 
 void MainMenuScene::Join()

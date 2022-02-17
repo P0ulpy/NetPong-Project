@@ -8,7 +8,7 @@
 #include "SFML/System/Vector2.hpp"
 #include "../../../Engine/SocketsManagement/Client/ClientSocket.hpp"
 #include "../ControllerBase.hpp"
-#include "../../../Engine/SocketsManagement/Client/SyncableEntityManagement/SyncableObject.hpp"
+#include "../../../Engine/SocketsManagement/Client/SyncableObjectManagement/SyncableObject.hpp"
 
 struct PlayerState
 {

@@ -140,7 +140,9 @@ void EventEmitter::emit(unsigned int event_id, Args... args)
 
         auto range = listeners.equal_range(event_id);
         handlers.resize(std::distance(range.first, range.second));
-        std::transform(range.first, range.second, handlers.begin(), [](std::pair<const unsigned int, std::shared_ptr<ListenerBase>> p) {
+
+        std::transform(range.first, range.second, handlers.begin(), [] (std::pair<const unsigned int, std::shared_ptr<ListenerBase>> p)
+        {
             auto l = std::dynamic_pointer_cast<Listener<Args...>>(p.second);
             if (l)
             {

@@ -84,6 +84,40 @@ void LocalCharacterController::shoot()
     }
 }
 
+sf::Packet LocalCharacterController::sync(std::stringstream &debugStream)
+{
+    sf::Packet packet;
+    PlayerState state = getCurrentPlayerState();
+
+    packet << state.position.x << state.position.y << state.velocity.x << state.velocity.y << state.angle << state.angularVelocity;
+    debugStream << "pos: {x:" << state.position.x << ", y:" << state.position.y << "}, vel: {x:" << state.velocity.x << ", y:" << state.velocity.y << "}, angle: " << state.angle << ", angleVel: " << state.angularVelocity;
+
+    return packet;
+}
+
+void LocalCharacterController::applySync(sf::Packet &recievedPacketChunk, std::stringstream &debugStream)
+{
+    int px, py;
+    float vx, vy;
+    float angle, angleVel;
+
+    recievedPacketChunk >> px;
+    recievedPacketChunk >> py;
+    recievedPacketChunk >> vx;
+    recievedPacketChunk >> vy;
+    recievedPacketChunk >> angle;
+    recievedPacketChunk >> angleVel;
+
+    PlayerState state {
+            {px, py},
+            {vx, vy},
+            angle,
+            angleVel
+    };
+
+    debugStream << "pos: {x:" << state.position.x << ", y:" << state.position.y << "}, vel: {x:" << state.velocity.x << ", y:" << state.velocity.y << "}, angle: " << state.angle << ", angleVel: " << state.angularVelocity;
+}
+
 PlayerState LocalCharacterController::getCurrentPlayerState() const
 {
     return {

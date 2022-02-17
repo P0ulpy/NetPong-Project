@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <utility>
+#include <mutex>
 
 #include "InputsManager/InputsManager.hpp"
 #include "SocketsManagement/SocketsManager.hpp"
@@ -31,7 +32,7 @@ struct EngineConfig
 enum EngineState { STOP, INITIALIZING, INITIALIZED, RUNNING, PAUSE };
 
 // TEMP
-enum SceneType { SocketConnection, MainMenu, MainGame };
+enum SceneType { SocketConnection, MainMenu, MainGame, None };
 
 class PoPossibEngin
 {
@@ -42,7 +43,9 @@ public:
 	void start();
 	void stop();
 
-	[[nodiscard]] static PoPossibEngin& getInstance();
+    void loadScene(SceneType sceneType);
+
+    [[nodiscard]] static PoPossibEngin& getInstance();
 	
 	[[nodiscard]] sf::RenderWindow& getRenderWindow() const;
 	[[nodiscard]] const EngineState& getEngineState() const;
@@ -56,27 +59,30 @@ public:
 	[[nodiscard]] InputsManager& getInputsManager();
 	[[nodiscard]] SocketManager* getSocketManager();
 
-
 private:
 
 	static PoPossibEngin* _instance;
+    const EngineConfig& _engineConfig;
 
 	EngineState _engineState = STOP;
-	const EngineConfig& _engineConfig;
-
 	sf::RenderWindow* _renderWindow = nullptr;
 
 	Scene* _currScene = nullptr;
-
 	sf::Clock _deltaClock;
 
 	float _deltaTime = 0;
+
+    // Scenes Management
+    void loadScene_internal(SceneType sceneType);
+    SceneType _sceneToLoad = SceneType::MainMenu;
 
 	// InputManager
 	InputsManager _inputsManager { InputsManager(*this) };
     void pollEvents();
 
     // Threads
+
+    std::mutex _mutex;
 
 	sf::Thread _renderThread;
 	void renderThreadEntry();
@@ -86,8 +92,6 @@ private:
 	sf::Thread _logicThread;
 	void logicThreadEntry();
 	void logicThreadUpdate();
-
-	void loadScene(SceneType sceneType);
 
 	// Net
 	SocketManager* _socketManager;

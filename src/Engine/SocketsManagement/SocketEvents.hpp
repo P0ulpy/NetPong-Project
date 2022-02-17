@@ -1,6 +1,7 @@
 #pragma once
 
-enum SocketEvents {
+enum SocketEvents
+{
 	Disconnected,
 	Connected,
     PlayerSendSettings,

@@ -5,6 +5,7 @@
 
 #include "../SocketsManager.hpp"
 #include "../../../Utils/EventEmitter.hpp"
+#include "./SyncableObjectManagement/SyncableObjectManager.hpp"
 #include "../SocketEvents.hpp"
 #include "PlayerSettings.hpp"
 
@@ -14,15 +15,18 @@ class PoPossibEngin;
 class ClientSocket
 {
 public:
-	ClientSocket(const ClientConnectionSettings& clientConnectionSettings, PoPossibEngin* engine);
+	ClientSocket(ClientConnectionSettings  clientConnectionSettings, PoPossibEngin* engine);
 	~ClientSocket();
 
     // asynchronously send packet to socket server
     void send(SocketEvents event, const sf::Packet& data);
 
 	[[nodiscard]] const ClientConnectionSettings& getClientConnectionSettings() const;
-	[[nodiscard]] const EventEmitter* getEventEmitter() const;
+    [[nodiscard]] const EventEmitter* getEventEmitter() const;
+    [[nodiscard]] Client::SyncableObjectManager& getSyncableObjectManager();
     [[nodiscard]] bool isReady() const;
+
+    void waitReady() const;
 
     // TODO: Proprifier (get / set ect)
     PlayerSettings _playerSettings;
@@ -37,7 +41,9 @@ private:
     sf::TcpSocket _socket;
 	//sf::UdpSocket _socket;
 
-	EventEmitter _eventEmitter;
+    Client::SyncableObjectManager _syncableObjectManager;
+
+    EventEmitter _eventEmitter;
 	void registerListeners();
 
     std::mutex _mutex;
@@ -45,7 +51,7 @@ private:
 
     [[noreturn]] void listenEvents();
 
+    void sendPlayerSettings();
 
 	void onConnected(sf::Packet packet);
-	void onSceneUpdate(sf::Packet packet);
 };

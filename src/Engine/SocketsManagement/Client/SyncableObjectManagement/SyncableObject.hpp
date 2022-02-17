@@ -8,13 +8,10 @@
 #include "../ClientSocket.hpp"
 #include "./SyncableObjectManager.hpp"
 
+
 namespace Client
 {
     enum SyncableObjectControl { Local, Remote };
-
-    enum SyncableObjectType {
-        Character
-    };
 
     struct SyncableObjectOptions
     {
@@ -39,8 +36,8 @@ namespace Client
         SyncableObjectControl _control;
         SyncableObjectType _type;
 
-        virtual void sync(sf::Packet& sendPacketChunck) = 0;
-        virtual void applySync(sf::Packet& recievedPacketChunk) = 0;
+        virtual sf::Packet sync(std::stringstream& debugStream) = 0;
+        virtual void applySync(sf::Packet& recievedPacketChunk, std::stringstream& debugStream) = 0;
 
         friend SyncableObjectManager;
     };

@@ -1,9 +1,9 @@
 #include "SocketConnectionScene.hpp"
 
 #include "imgui.h"
-#include "../SocketsManagement/Server/ServerMain.hpp"
-#include "../SocketsManagement/Client/ClientSocket.hpp"
-#include "../../Logger/Logger.hpp"
+#include "../../SocketsManagement/Server/ServerMain.hpp"
+#include "../../SocketsManagement/Client/ClientSocket.hpp"
+#include "../../../Logger/Logger.hpp"
 //#include "../SocketsManagement/PacketOverload.hpp"
 
 SocketConnectionScene::SocketConnectionScene(PoPossibEngin& poPossibEngin)
@@ -108,7 +108,7 @@ void SocketConnectionScene::displayJoinWindow()
                 Logger::Log("start connecting Client");
                 socketManager->connectClient(ClientConnectionSettings(
                         ip,
-                        port, 0));
+                        port, std::string(), 0));
             }
         }
         else

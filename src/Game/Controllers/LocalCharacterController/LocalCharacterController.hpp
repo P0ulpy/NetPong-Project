@@ -6,10 +6,10 @@
 #define NETPONG_PROJECT_LOCALCHARACTERCONTROLLER_HPP
 
 #include "../ControllerBase.hpp"
-#include "../../../Engine/SocketsManagement/Client/SyncableEntityManagement/SyncableObject.hpp"
 #include "SFML/Window/Keyboard.hpp"
 #include "SFML/Window/Mouse.hpp"
 #include "../NetworkCharacterController/NetworkCharacterController.hpp"
+#include "../../../Engine/SocketsManagement/Client/SyncableObjectManagement/SyncableObject.hpp"
 
 class Character;
 
@@ -34,6 +34,9 @@ public:
     float calcRotFromMousePos(sf::Vector2i mousePos);
 
     [[nodiscard]] PlayerState getCurrentPlayerState() const;
+
+    sf::Packet sync(std::stringstream& debugStream) final;
+    void applySync(sf::Packet& recievedPacketChunk, std::stringstream& debugStream) final;
 
 private:
     KeyMap _keyMap;
