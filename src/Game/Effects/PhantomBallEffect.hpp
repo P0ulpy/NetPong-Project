@@ -13,9 +13,8 @@ class PhantomBallEffect
 private:
 	const PongBall& _ballParent;
 	std::vector<PhantomBall*> _phantomBalls;
-	std::stack<PhantomBall*> _inactivePhantomBalls;
-	float _currentTimePhantomBallCooldown{};
-	bool _hasPhantomEffect = false;
+	float _currentTimePhantomBallCooldown;
+	bool _hasPhantomEffect;
 
 public:
 	PhantomBallEffect(const PongBall& ballParent);
@@ -27,11 +26,9 @@ public:
 	void begin();
 	void stop();
 
-	void displayPhantomBall();
+	void displayPhantomBall() const;
 	void createPhantomBalls();
 
 	void setPhantomBallFillColour(const sf::Color& newColor) const;
 	[[nodiscard]] const PongBall& getPongBallParent() const;
-
-	void pushInactivePhantomBall(PhantomBall* phantomBall);
 };

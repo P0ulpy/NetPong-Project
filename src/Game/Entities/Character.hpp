@@ -88,6 +88,7 @@ public:
     void ammoCount(int ammo);
     void toggleCharacterMove(bool canCharacterMove);
 	bool canCharacterMove() const;
-
+	bool canCharacterShoot() const;
+	void setPlayerAlive(bool isAlive);
 	void resetAmmos();
 };

@@ -5,9 +5,9 @@
 
 #include "../../Engine/Scenes/MainGameScene.hpp"
 #include "../../Utils/Utils.hpp"
-#include "../Terrains/PolygonTerrain.hpp"
 #include "../../Logger/Logger.hpp"
 #include "../Effects/PhantomBallEffect.hpp"
+#include "../System/Audio/AudioPlayer.hpp"
 
 constexpr int BALL_SIZE = 25;
 
@@ -250,13 +250,13 @@ void PongBall::setCanKill(bool canKill)
 	{
 		_ballShape.setFillColor(_ballColor);
 
-		_phantomBallEffect->setPhantomBallFillColour(_ballColor);
+		_phantomBallEffect->setPhantomBallFillColor(_ballColor);
 	}
 	else
 	{
 		_ballShape.setFillColor(_ballInactiveColor);
 
-		_phantomBallEffect->setPhantomBallFillColour(_ballInactiveColor);
+		_phantomBallEffect->setPhantomBallFillColor(_ballInactiveColor);
 	}
 }
 
@@ -269,6 +269,7 @@ void PongBall::addNumBounceAndUpdateVisibility()
 {
 	_currentNumBounces++;
 	setCanKill(true);//Once the ball had bounced the ball can kill the player
+	_mainGameScene->getAudioPlayer()->playSound("Bounce");
 	
 	if(_currentNumBounces > MAX_NUM_BOUNCES)
 	{

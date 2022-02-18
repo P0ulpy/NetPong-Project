@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include "Audio/AudioPlayer.hpp"
+
 constexpr float DURATION_BETWEEN_START_COUNTDOWN_NUMBERS = 0.6f;
 
 RoundStartCountdown::RoundStartCountdown(const MainGameScene& mainGameScene)
@@ -37,14 +39,19 @@ void RoundStartCountdown::update(const float& deltaTime)
 			_currentTimeBetweenStartCountdownNumbers = 0;
 			_currentCountdownMessageIndex++;
 
-			if (_currentCountdownMessageIndex >= _countDownMessages.size())
+			if (_currentCountdownMessageIndex >= _countDownMessages.size()-1)
 			{
-				stopBeginCountdown();
+				displayNextMessage();
+				_mainGameScene.getAudioPlayer()->playSound("Go");
+
 				_mainGameScene.togglePlayersMovement(true);
+
+				stopBeginCountdown();
 			}
 			else
 			{
 				displayNextMessage();
+				_mainGameScene.getAudioPlayer()->playSound("Ready");
 			}
 		}
 	}
@@ -60,8 +67,9 @@ void RoundStartCountdown::render(sf::RenderTarget& target) const
 
 void RoundStartCountdown::startBeginCountdown()
 {
+	displayNextMessage();
+	_mainGameScene.getAudioPlayer()->playSound("Ready");
 	_isStartCountdownActive = true;
-	std::cout << _countDownMessages.at(_currentCountdownMessageIndex).data() << std::endl;
 }
 
 void RoundStartCountdown::stopBeginCountdown()

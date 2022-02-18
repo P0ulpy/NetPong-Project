@@ -43,10 +43,7 @@ void PhantomBallEffect::render(sf::RenderTarget& target) const
 {
 	for (const auto& phantomBall : _phantomBalls)
 	{
-		if (phantomBall->isActive())
-		{
-			phantomBall->render(target);
-		}
+		phantomBall->render(target);
 	}
 }
 
@@ -61,16 +58,24 @@ void PhantomBallEffect::stop()
 	_hasPhantomEffect = false;
 }
 
-void PhantomBallEffect::displayPhantomBall()
+void PhantomBallEffect::displayPhantomBall() const
 {
-	if(_inactivePhantomBalls.empty())
+	bool inactiveBallFound = false;
+
+	for (const auto phantomBall : _phantomBalls)
 	{
-		Logger::Err("PhantomBallEffect.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
-		return;
+		if(!phantomBall->isActive())
+		{
+			phantomBall->setIsActive(true);
+			inactiveBallFound = true;
+			break;
+		}
 	}
-	//Recherche de la premiere PhantomBall qui n'est pas affich�e dans la liste
-	_inactivePhantomBalls.top()->setIsActive(true);
-	_inactivePhantomBalls.pop();
+
+	if(!inactiveBallFound)
+	{
+		Logger::Log("ERROR PhantomBallEffect.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
+	}
 }
 
 void PhantomBallEffect::createPhantomBalls()
@@ -81,7 +86,7 @@ void PhantomBallEffect::createPhantomBalls()
 	}
 }
 
-void PhantomBallEffect::setPhantomBallFillColour(const sf::Color& newColor) const
+void PhantomBallEffect::setPhantomBallFillColor(const sf::Color& newColor) const
 {
 	for (const auto& phantomBall : _phantomBalls)
 	{
@@ -92,9 +97,4 @@ void PhantomBallEffect::setPhantomBallFillColour(const sf::Color& newColor) cons
 const PongBall& PhantomBallEffect::getPongBallParent() const
 {
 	return _ballParent;
-}
-
-void PhantomBallEffect::pushInactivePhantomBall(PhantomBall* phantomBall)
-{
-	_inactivePhantomBalls.push(phantomBall);
 }

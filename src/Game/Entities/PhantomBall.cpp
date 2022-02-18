@@ -43,7 +43,7 @@ void PhantomBall::update(const float& deltaTime)
 	}
 	else if (_timeAlphaDecreaseCooldown > DURATION_BETWEEN_ALPHA_DECREASE)
 	{
-		setAndUpdateShapeAlpha(_currentAlpha - ALPHA_DECREASE_SPEED);
+		setAndUpdateShapeAlpha(_currentAlpha < ALPHA_DECREASE_SPEED ? 0 : _currentAlpha - ALPHA_DECREASE_SPEED);
 
 		_timeAlphaDecreaseCooldown = 0;
 	}
@@ -56,8 +56,6 @@ void PhantomBall::render(sf::RenderTarget& target) const
 
 void PhantomBall::setIsActive(bool isActive)
 {
-	if (isActive == _isActive) return;
-
 	_isActive = isActive;
 
 	if(_isActive)
@@ -73,7 +71,6 @@ void PhantomBall::setIsActive(bool isActive)
 void PhantomBall::hide()
 {
 	setAndUpdateShapeAlpha(0);
-	_phantomBallEffectParent->pushInactivePhantomBall(this);
 }
 
 void PhantomBall::setFillColor(const sf::Color& newColor)

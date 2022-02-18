@@ -57,6 +57,22 @@ Character::Character(sf::Color color)
 	_characDestination->setPosition(charac.getPosition());
 }
 
+
+void Character::toggleCharacterMove(bool canCharacterMove)
+{
+	_canCharacterMove = canCharacterMove;
+}
+
+bool Character::canCharacterMove() const
+{
+	return _canCharacterMove;
+}
+
+bool Character::canCharacterShoot() const
+{
+	return !isInCooldown() && !isReloading();
+}
+
 void Character::update(const float& deltaTime)
 {
 	if (!_isAlive) return;
@@ -123,7 +139,6 @@ void Character::render(sf::RenderTarget& target)const
 	{
 		target.draw(secondAmmo);
 	}
-	
 }
 
 /*void Character::direction(int isleft, int isright, int up, int down, float deltaTime)
@@ -149,19 +164,7 @@ bool Character::hitWallIfCollision(float x1, float y1, float x2, float y2)
 
 		_velocity = Utils::getVectorReflection(_velocity, surfaceVector);
 
-		charac.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
-
-		canon.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
-
-		shootZone.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
-
-		firstAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
-			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
-
-		secondAmmo.setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
+		setPosition(outImpactPoint.x + normalSurfaceVector.x * charac.getRadius() + _velocity.x,
 			outImpactPoint.y + normalSurfaceVector.y * charac.getRadius() + _velocity.y);
 
 		return true;
@@ -280,3 +283,53 @@ bool Character::isInCooldown() const { return _cooldownActivated; }
 bool Character::isReloading() const { return _isReloading; }
 sf::Vector3f Character::getPositionAndRadiusCharac() { return {charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2}; }
 float Character::getRadius() const { return charac.getGlobalBounds().width / 2; }
+sf::Color Character::getInactiveAmmoColor() const
+{
+	return _ammoColorInactive;
+}
+
+sf::Color Character::getNormalAmmoColor() const
+{
+	return _ammoColorNormal;
+}
+
+bool Character::isInCooldown() const
+{
+	return _cooldownActivated;
+}
+
+bool Character::isReloading() const
+{
+	return _isReloading;
+}
+
+//x = position en x, y = position en y et z = rayon 
+sf::Vector2f Character::getPosition() const
+{
+	return sf::Vector2f(charac.getPosition().x, charac.getPosition().y);
+}
+
+float Character::getRadius() const
+{
+	return charac.getGlobalBounds().width / 2;
+}
+
+void Character::setPlayerAlive(bool isAlive)
+{
+	_isAlive = isAlive;
+
+	if(!_isAlive)
+	{
+		resetAmmos();
+	}
+}
+
+void Character::resetAmmos()
+{
+	_ammos = 2;
+	_reloadingTime = 0;
+	_isReloading = false;
+}
+
+
+

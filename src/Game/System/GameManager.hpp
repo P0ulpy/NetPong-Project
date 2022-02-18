@@ -18,6 +18,7 @@ private	:
 	bool _isRoundEnded = false;
 
 	int _currentRound = 0;
+	bool _isFirstRound { true };
 
 	float _currentTimeBeforeStartingNewRound = 0.0f;
 
@@ -47,6 +48,8 @@ public:
 	void startRoundStartCountdown() const;
 	void endRound();
 	void startRoundEndTimer();
-	void restartRound(const float& deltaTime);
+
+	void startFirstRound();
+	void restartRound();
 	void resetGame();
 };

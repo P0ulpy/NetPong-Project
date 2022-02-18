@@ -7,7 +7,7 @@
 #include "../../Engine/Scenes/MainGameScene.hpp"
 #include "../Terrains/PolygonTerrain.hpp"
 
-constexpr int NUM_ROUNDS_TO_WIN = 2;
+constexpr int NUM_ROUNDS_TO_WIN = 5;
 constexpr float DURATION_BEFORE_STARTING_NEW_ROUND = 2.5f;
 
 GameManager::GameManager(MainGameScene* pMainGameScene)
@@ -27,7 +27,8 @@ void GameManager::initValues()
 
 	_currentTimeBeforeStartingNewRound = 0;
 
-	_isRoundEnded = false;
+	_hasRoundEnded = false;
+	_isFirstRound = true;
 }
 
 void GameManager::update(const float& deltaTime)
@@ -40,14 +41,14 @@ void GameManager::update(const float& deltaTime)
 
 void GameManager::updateRoundEndTimer(const float& deltaTime)
 {
-	if (_isRoundEnded)
+	if (_hasRoundEnded)
 	{
 		_currentTimeBeforeStartingNewRound += deltaTime;
 
 		if (_currentTimeBeforeStartingNewRound >= DURATION_BEFORE_STARTING_NEW_ROUND)
 		{
 			_currentTimeBeforeStartingNewRound = 0;
-			restartRound(deltaTime);
+			restartRound();
 		}
 	}
 }
@@ -122,31 +123,44 @@ void GameManager::startRoundStartCountdown() const
 
 void GameManager::endRound()
 {
-	_mainGameScene->hideAllPongBalls();
-	_mainGameScene->togglePlayersMovement(false);
+	_mainGameScene->endRound();
 	startRoundEndTimer();
 }
 
 void GameManager::startRoundEndTimer()
 {
-	_isRoundEnded = true;
+	_hasRoundEnded = true;
 }
 
-void GameManager::restartRound(const float& deltaTime)
+void GameManager::startFirstRound()
 {
-	_isRoundEnded = false;
-	_currentTimeBeforeStartingNewRound = 0;
+	//We re-use roundEndTimer to wait a bit before the first countdown plays.
+	startRoundEndTimer();
+}
 
-	_mainGameScene->getPolygonTerrain()->drawRandomTerrain();
-	_mainGameScene->setPlayersToDefaultSpawnPoints();
-	_mainGameScene->displayPlayers(true);
+void GameManager::restartRound()
+{
+	_hasRoundEnded = false;
+	_currentTimeBeforeStartingNewRound = 0;
+	_currentRound++;
+
+	if(!_isFirstRound)
+	{
+		_mainGameScene->restartRound();
+	}
+	else
+	{
+		_isFirstRound = false;
+		_mainGameScene->startFirstRound();
+	}
 
 	startRoundStartCountdown();
 }
 
 void GameManager::resetGame()
 {
-	_currentRound = 0;
+	_currentRound = 1;
 	_scorePlayer1 = _scorePlayer2 = 0;
+	startFirstRound();
 }
 
