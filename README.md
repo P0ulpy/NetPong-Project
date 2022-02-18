@@ -23,7 +23,7 @@ Une partie décrivant briévement le système verra le jour très prochainement 
 
 ### Préparation du projet
 
-La première étape est d'installer le sous-module vcpkg
+La première étape est d'installer le sous-module vcpkg.
 
 ```bash
 git submodule update --init --recursive
@@ -33,11 +33,11 @@ Il est aussi nécéssaire d'installer un compilateur et plusieurs autres outils.
 
 *Windows*
 
-Sous windows, le plus simple reste d'installer [Visual studio](https://visualstudio.microsoft.com/fr/downloads/) avec les addons développement multiplateforme en C++
+Sous windows, le plus simple reste d'installer [Visual studio](https://visualstudio.microsoft.com/fr/downloads/) avec les addons développement multiplateforme en C++.
 
 *Linux*
 
-Cmake est requis pour construire le projet. Il est téléchargable [ici](https://cmake.org/download/)
+Cmake est requis pour construire le projet. Il est téléchargable [ici](https://cmake.org/download/).
 
 ```bash
 sudo apt update
