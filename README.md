@@ -1,6 +1,6 @@
 # Neon PongBall Stadium 90°
 
-  Neon PongBall Stadium 90° est un projet de création de jeu en réseau, réalisé dans le cadre du cours de Programmation Moteur à Ynov Campus. Nous avons été dirigé par Fabrice Granger, à ce jour directeur technique à Big Bad Wolf Studio et professeur dans notre école. Ce jeu a été développé dans le langage C++ avec la librairie SFML, le but premier étant de produire un code structuré et optimisé. À l'origine, nous devions reproduire un jeu de type "Pong", en réseau; au vu du rythme d'avancement de notre projet, nous avons décidé de rajouter quelques règles...
+  Neon PongBall Stadium 90° est un projet de création de jeu en réseau, réalisé dans le cadre du cours de Programmation Moteur à Ynov Campus. Nous avons été dirigé par Fabrice Granger, à ce jour directeur technique à Big Bad Wolf Studio et professeur dans notre école. Ce jeu a été développé dans le langage C++ avec la librairie SFML, le but premier étant de produire un code structuré et optimisé. À l'origine, nous devions reproduire un jeu de type "Pong", en réseau ; au vu du rythme d'avancement de notre projet, nous avons décidé de rajouter quelques règles...
 
   L'équipe !
   - Florian Aurousseau, 11ème Dan en réseau et en crunch C++ #JeRendraiFierLeMaitre
