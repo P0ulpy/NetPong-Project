@@ -15,7 +15,7 @@ private	:
 
 	int _scorePlayer1 = 0;
 	int _scorePlayer2 = 0;
-	bool _isRoundEnded = false;
+	bool _hasRoundEnded = false;
 
 	int _currentRound = 0;
 	bool _isFirstRound { true };

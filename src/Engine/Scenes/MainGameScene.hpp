@@ -38,13 +38,12 @@ public:
 
 	//gets - Sets
 	PolygonTerrain* getPolygonTerrain() const;
+    void displayPlayers(bool isDisplayed) const;
 	AudioPlayer* getAudioPlayer() const;
-	void setPlayersToDefaultSpawnPoints() const;
 
     Client::SyncableObject* createPlayer(SyncableObjectOptions options);
 
     // GET
-    std::stack<PongBall*>& getInactivePongBalls();
 
 private:
     static MainGameScene* _instance;
@@ -68,6 +67,8 @@ private:
 
 	void initValues();
 	void initFonts();
-	void makePlayerShoot(int playerIndex);
+	//void makePlayerShoot(int playerIndex);
 	void checkPlayerPongBallCollision(const PongBall& pongBall) const;
+
+    void setPlayersToDefaultSpawnPoints(Character *p1 = nullptr, Character *p2 = nullptr) const;
 };

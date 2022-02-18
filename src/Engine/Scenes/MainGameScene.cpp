@@ -11,13 +11,13 @@
 #include "../../Game/System/Audio/AudioPlayer.hpp"
 
 #define COLOR_PLAYER_1 sf::Color(255, 40, 0)
-
-#include "../../Game/Controllers/LocalCharacterController/LocalCharacterController.hpp"
-#include "../../Game/Controllers/NetworkCharacterController/NetworkCharacterController.hpp"
 #define COLOR_PLAYER_2 sf::Color(0, 40, 255)
 
 constexpr int NUM_MAX_PONGBALL = 15;
 constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 75;
+
+#include "../../Game/Controllers/LocalCharacterController/LocalCharacterController.hpp"
+#include "../../Game/Controllers/NetworkCharacterController/NetworkCharacterController.hpp"
 
 MainGameScene* MainGameScene::_instance = nullptr;
 
@@ -75,7 +75,7 @@ void MainGameScene::initFonts()
 	}
 }
 
-void MainGameScene::makePlayerShoot(int playerIndex)
+/*void MainGameScene::makePlayerShoot(int playerIndex)
 {
 	if (playerIndex < 0 || playerIndex > _players.size() - 1 ||
 		_inactivePongBalls.empty() ||
@@ -99,7 +99,7 @@ void MainGameScene::makePlayerShoot(int playerIndex)
 
 		_inactivePongBalls.pop();
 	}
-}
+}*/
 
 void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 {
@@ -132,7 +132,8 @@ void MainGameScene::update(const float& deltaTime)
 	{
 		pongBall->update(deltaTime);
 
-		checkPlayerPongBallCollision(*pongBall);
+        // TODO : Server side
+		//checkPlayerPongBallCollision(*pongBall);
 	}
 
 	for (const auto player : _players)
@@ -160,7 +161,16 @@ void MainGameScene::render(sf::RenderTarget* target)
 }
 
 PolygonTerrain* MainGameScene::getPolygonTerrain() const { return _polygonTerrain.get(); }
+
 void MainGameScene::displayPlayers(bool isDisplayed) const
+{
+    for (const auto player : _players)
+    {
+        player->setPlayerAlive(isDisplayed);
+        player->resetAmmos();
+    }
+}
+
 AudioPlayer* MainGameScene::getAudioPlayer() const
 {
 	return _audioPlayer.get();
@@ -181,22 +191,6 @@ void MainGameScene::togglePlayersMovement(bool canTheyMove) const
 		player->toggleCharacterMove(canTheyMove);
 	}
 }
-
-void MainGameScene::setPlayersToDefaultSpawnPoints() const
-{
-    sf::Vector2i renderWindowSize = (sf::Vector2i)_poPossibEngin->getRenderWindow().getSize();
-
-   /*_players[0]->setPosition({
-        renderWindowSize.x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
-        renderWindowSize.y / 2
-    });
-
-    _players[1]->setPosition({
-        renderWindowSize.x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
-        renderWindowSize.y / 2
-    });*/
-}
-
 
 void MainGameScene::startFirstRound() const
 {
@@ -238,6 +232,7 @@ Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions option
     Character* newPlayer = nullptr;
 
     // FIXME : TEMP
+    // P1
     if(options.id == 0)
     {
         Logger::Log("Creating player 1");
@@ -245,12 +240,9 @@ Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions option
         newPlayer = new Character(COLOR_PLAYER_1);
         newPlayer->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
 
-        // FIXME : APPLY JULEN FIX
-        newPlayer->setPosition({
-               renderWindowSize.x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
-               renderWindowSize.y / 2
-        });
+        setPlayersToDefaultSpawnPoints(newPlayer, nullptr);
     }
+    // P2
     else if(options.id >= 1)
     {
         Logger::Log("Creating player 2");
@@ -259,10 +251,8 @@ Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions option
         newPlayer->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
 
         // FIXME : APPLY JULEN FIX
-        newPlayer->setPosition({
-               renderWindowSize.x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
-               renderWindowSize.y / 2
-       });
+
+        setPlayersToDefaultSpawnPoints(nullptr, newPlayer);
     }
 
     _players.emplace_back(newPlayer);
@@ -293,3 +283,26 @@ Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions option
 
      return newPlayerController;
  }
+
+void MainGameScene::setPlayersToDefaultSpawnPoints(Character* p1, Character* p2) const
+{
+    if (p1)
+    {
+        sf::Vector2i spawnPosition(
+                _poPossibEngin->getRenderWindow().getSize().x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
+               _poPossibEngin->getRenderWindow().getSize().y / 2
+        );
+
+        p1->setPosition(spawnPosition);
+    }
+
+    if (p2)
+    {
+        sf::Vector2i spawnPosition(
+            _poPossibEngin->getRenderWindow().getSize().x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
+            _poPossibEngin->getRenderWindow().getSize().y / 2
+        );
+
+        p2->setPosition(spawnPosition);
+    }
+}

@@ -83,12 +83,11 @@ public:
     void setRotation(float rot) final;
     void setVelocity(const sf::Vector2f& newVelocity) final;
     void setAmmosColor(sf::Color normalColor, sf::Color inactiveColor);
-    void setPlayerAlive(bool isAlive);
 
+    void setPlayerAlive(bool isAlive);
     void ammoCount(int ammo);
     void toggleCharacterMove(bool canCharacterMove);
 	bool canCharacterMove() const;
 	bool canCharacterShoot() const;
-	void setPlayerAlive(bool isAlive);
 	void resetAmmos();
 };

@@ -3,5 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/Engine/SocketsManagement/Server/Socket/ServerSocket.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/Game/Effects/PhantomBallEffect.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/Game/Entities/PongBall.cpp" charset="windows-1252" />
   </component>
 </project>
