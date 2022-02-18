@@ -35,7 +35,7 @@ public:
 	void startFirstRound() const;
 	void restartRound() const;
 	void endRound() const;
-
+	
 	//gets - Sets
 	PolygonTerrain* getPolygonTerrain() const;
     void displayPlayers(bool isDisplayed) const;
@@ -64,7 +64,7 @@ private:
 
 	//Font, texts and textures..
 	sf::Font _font;
-
+	
 	void initValues();
 	void initFonts();
 	//void makePlayerShoot(int playerIndex);

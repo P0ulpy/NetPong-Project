@@ -53,6 +53,7 @@ void MainGameScene::updateInputs(const float& deltaTime)
 #pragma endregion
 }
 
+
 void MainGameScene::initValues()
 {
 	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls, _players);
@@ -144,7 +145,7 @@ void MainGameScene::update(const float& deltaTime)
 
 void MainGameScene::render(sf::RenderTarget* target)
 {
-	_gameManager->render(*target);
+	
 	_polygonTerrain->render(*target);
 
 	for (const auto pongBall : _pongBalls)
@@ -158,6 +159,7 @@ void MainGameScene::render(sf::RenderTarget* target)
 	}
 
 	_animator->render(*target);
+	_gameManager->render(*target);
 }
 
 PolygonTerrain* MainGameScene::getPolygonTerrain() const { return _polygonTerrain.get(); }
