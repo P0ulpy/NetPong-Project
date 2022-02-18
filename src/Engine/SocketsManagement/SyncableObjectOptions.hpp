@@ -12,10 +12,11 @@ enum SyncableObjectControl { Local, Remote };
 
 struct SyncableObjectOptions
 {
-    SyncableObjectOptions(int id, SyncableObjectType entityType, SyncableObjectControl control);
+    SyncableObjectOptions(int id, SyncableObjectType entityType, SyncableObjectControl control, std::string controllerID);
     int id;
     SyncableObjectType entityType;
     SyncableObjectControl control;
+    std::string controllerID;
 };
 
 #endif //NETPONG_PROJECT_SYNCABLEOBJECTOPTIONS_HPP

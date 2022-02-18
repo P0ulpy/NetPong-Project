@@ -183,6 +183,7 @@ void MainGameScene::hideAllPongBalls() const
 	}
 }
 void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush) { _inactivePongBalls.push(pongBallToPush); }
+std::stack<PongBall *> &MainGameScene::getInactivePongBalls() { return _inactivePongBalls; }
 
 void MainGameScene::togglePlayersMovement(bool canTheyMove) const
 {
@@ -250,8 +251,6 @@ Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions option
         newPlayer = new Character(COLOR_PLAYER_2);
         newPlayer->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
 
-        // FIXME : APPLY JULEN FIX
-
         setPlayersToDefaultSpawnPoints(nullptr, newPlayer);
     }
 
@@ -265,11 +264,11 @@ Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions option
             Logger::Log("Creating LocalCharacterController for id: " + std::to_string(options.id));
 
             newPlayerController = new LocalCharacterController(options, *newPlayer, {
-                    sf::Keyboard::Up,
-                    sf::Keyboard::Down,
-                    sf::Keyboard::Left,
-                    sf::Keyboard::Right,
-                    sf::Mouse::Button::Right
+                    sf::Keyboard::Z,
+                    sf::Keyboard::S,
+                    sf::Keyboard::Q,
+                    sf::Keyboard::D,
+                    sf::Mouse::Button::Left
             });
             break;
         case Remote:

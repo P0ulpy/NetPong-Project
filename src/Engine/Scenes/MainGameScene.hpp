@@ -31,7 +31,8 @@ public:
 
 	void hideAllPongBalls() const;
 	void togglePlayersMovement(bool canTheyMove) const;
-	void pushInactivePongBall(PongBall* pongBallToPush);
+    std::stack<PongBall*>& getInactivePongBalls();
+    void pushInactivePongBall(PongBall* pongBallToPush);
 	void startFirstRound() const;
 	void restartRound() const;
 	void endRound() const;

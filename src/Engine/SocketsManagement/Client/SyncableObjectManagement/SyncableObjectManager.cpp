@@ -83,7 +83,7 @@ void SyncableObjectManager::onSceneUpdate(sf::Packet &packet)
 
         if(id < 0)
         {
-            Logger::Err("Invalid syncable Object id : " + std::to_string(id));
+            //Logger::Err("Invalid syncable Object id : " + std::to_string(id));
             return;
         }
 
@@ -94,7 +94,7 @@ void SyncableObjectManager::onSceneUpdate(sf::Packet &packet)
 
         if(!_syncableObjects.contains(id) || !_syncableObjects[id])
         {
-            createEntity(SyncableObjectOptions(id, type, control));
+            createEntity({id, type, control, controllerID});
         }
 
         if(_syncableObjects[id])
@@ -103,7 +103,7 @@ void SyncableObjectManager::onSceneUpdate(sf::Packet &packet)
         }
         else
         {
-            Logger::Err("Can't applySync : not in pool id:" + std::to_string(id));
+            //Logger::Err("Can't applySync : value in pool is nullptr id:" + std::to_string(id));
         }
 
         debugStream << "} }";

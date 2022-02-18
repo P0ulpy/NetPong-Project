@@ -21,10 +21,16 @@ LocalCharacterController::LocalCharacterController(SyncableObjectOptions options
 
 void LocalCharacterController::update(const float& deltaTime)
 {
-    rotate();
-    translate(deltaTime);
+    auto& character = static_cast<Character &>(_controlTarget);
 
-    if (sf::Mouse::isButtonPressed(_keyMap.shoot))
+    if(character.canCharacterMove())
+    {
+        translate(deltaTime);
+    }
+
+    rotate();
+
+    if (character.canCharacterShoot() && sf::Mouse::isButtonPressed(_keyMap.shoot))
         shoot();
 }
 
@@ -60,7 +66,7 @@ void LocalCharacterController::shoot()
 {
     if(!MainGameScene::getInstance()) return;
 
-    /*auto& character = static_cast<Character &>(_controlTarget);
+    auto& character = static_cast<Character &>(_controlTarget);
     auto& engine = PoPossibEngin::getInstance();
     auto inactivePongBalls = MainGameScene::getInstance()->getInactivePongBalls();
 
@@ -80,7 +86,7 @@ void LocalCharacterController::shoot()
         character.activateCooldown(true);
 
         inactivePongBalls.pop();
-    }*/
+    }
 }
 
 sf::Packet LocalCharacterController::sync(std::stringstream &debugStream)

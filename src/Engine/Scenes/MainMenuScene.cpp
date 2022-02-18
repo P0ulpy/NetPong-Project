@@ -47,7 +47,6 @@ void MainMenuScene::InitializeJoinMenu()
 	ui->CreateText("TitleIP", sf::Color::White, "IP", 100, sf::Vector2f(ui->Zone("IP").getPosition().x, ui->Zone("IP").getPosition().y - 150), font);
 	ui->CreateTextBox("TextPort", font, 5, sf::Vector2f(960, 700), join_hostPortTextDefault);
 	ui->CreateText("TitlePort", sf::Color::White, "Port", 100, sf::Vector2f(ui->Zone("TextPort").getPosition().x, ui->Zone("TextPort").getPosition().y - 150), font);
-	
 }
 
 void MainMenuScene::InitializeWaitingScreen()
@@ -56,8 +55,6 @@ void MainMenuScene::InitializeWaitingScreen()
 	ui->CreateText("IPAddress", sf::Color::White, wait_hostIpTextDefault, 100, sf::Vector2f(960, 100), font);
 	ui->CreateText("Port", sf::Color::White, wait_hostPortTextDefault, 100, sf::Vector2f(960, 250), font);
 	ui->CreateText("WaitingAnimation", sf::Color::White, "...", 100, sf::Vector2f(960, 500), font);
-
-
 }
 
 MainMenuScene::~MainMenuScene()
@@ -91,10 +88,18 @@ void MainMenuScene::update(const float& deltaTime)
 	{
 		if (getParentEngine().getInputsManager().getEvent(sf::Event::TextEntered, event))
 		{
-			if (_indexTextBox == 1)Write("LobbyName", 15);
-			if (_indexTextBox == 2)Write("HostTextPort", 5);
+			if (_indexTextBox == 1) Write("LobbyName", 15);
+			if (_indexTextBox == 2) Write("HostTextPort", 5);
 		}
 	}
+    if (_menusIndex == 4)
+    {
+        if(_playerFound)
+        {
+            _poPossibEngin->loadScene(SceneType::MainGame);
+            _playerFound = false;
+        }
+    }
 }
 
 void MainMenuScene::render(sf::RenderTarget* renderTarget)
@@ -266,9 +271,7 @@ void MainMenuScene::Host()
         Logger::Log("connecting to internal server...");
     }
 
-    // FIXME : ne pas charger directement la scene
-    _poPossibEngin->loadScene(SceneType::MainGame);
-	//_menusIndex = 4;
+	_menusIndex = 4;
 }
 
 void MainMenuScene::Join()
@@ -287,8 +290,7 @@ void MainMenuScene::Join()
 
     clientSocket->waitReady();
 
-    // FIXME : ne pas charger directement la scene
-    _poPossibEngin->loadScene(SceneType::MainGame);
+    _menusIndex = 4;
 }
 
 void MainMenuScene::PlayerFound()

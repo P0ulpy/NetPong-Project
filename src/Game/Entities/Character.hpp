@@ -51,6 +51,8 @@ public:
     Character(sf::Color color);
 	~Character() = default;
 
+    static unsigned int instancesCount = 0;
+
 	void update(const float& deltaTime) override;
 	void render(sf::RenderTarget& renderTarget) const override;
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime) override;
