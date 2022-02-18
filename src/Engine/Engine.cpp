@@ -10,11 +10,11 @@
 // Scenes
 #include "Scenes/MainGameScene.hpp"
 #include "Scenes/MainMenuScene.hpp"
-#include "Scenes/SocketConnectionScene.hpp"
+#include "Scenes/_old/SocketConnectionScene.hpp"
 
 #include "../Logger/Logger.hpp"
 
-PoPossibEngin* PoPossibEngin::_instance;
+PoPossibEngin* PoPossibEngin::_instance = nullptr;
 
 PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
     : _engineConfig(engineConfig)
@@ -23,7 +23,7 @@ PoPossibEngin::PoPossibEngin(const EngineConfig& engineConfig)
 	, _logicThread(sf::Thread(&PoPossibEngin::logicThreadEntry, this))
 {
 	if (_instance != nullptr)
-        Logger::Err("Engine is a Singleton ! : Overriding old Engine intance");
+        Logger::Err("Engine is a Singleton ! : Overriding old Engine instance");
 
     _instance = this;
 }
@@ -62,7 +62,6 @@ PoPossibEngin::~PoPossibEngin()
 	delete _renderWindow;
 	delete _currScene;
 	delete _socketManager;
-
 }
 
 #pragma region GET/SET
@@ -105,11 +104,10 @@ void PoPossibEngin::renderThreadEntry()
 	renderThread_InitWindow();
 
 	Logger::Log("Engine Initilized");
-	_engineState = INITIALIZED;
+	//_engineState = INITIALIZED;
 
-	loadScene(MainMenu);
-
-	renderThreadUpdate();
+    _engineState = RUNNING;
+    renderThreadUpdate();
 }
 
 void PoPossibEngin::renderThread_InitWindow()
@@ -153,13 +151,20 @@ void PoPossibEngin::renderThreadUpdate()
 			renderThreadDebugInfo();
 
             _renderWindow->clear();
-			_currScene->update(getDeltaTime());
-			_currScene->render(_renderWindow);
-			ImGui::SFML::Render(*_renderWindow);
 
-			_renderWindow->display();
+            if(_currScene)
+            {
+                _currScene->update(getDeltaTime());
+                _currScene->render(_renderWindow);
+            }
+
+            ImGui::SFML::Render(*_renderWindow);
+            _renderWindow->display();
 
 			pollEvents();
+
+            if(_sceneToLoad != SceneType::None)
+                loadScene_internal(_sceneToLoad);
 		}
 	}
 }
@@ -203,11 +208,14 @@ void PoPossibEngin::logicThreadUpdate()
 
 #pragma endregion LogicThread
 
-void PoPossibEngin::loadScene(SceneType sceneType)
+void PoPossibEngin::loadScene(SceneType sceneType) { _sceneToLoad = sceneType; }
+
+void PoPossibEngin::loadScene_internal(SceneType sceneType)
 {
 	_engineState = PAUSE;
 
-	Scene* newScene;
+    delete _currScene;
+    Scene* newScene;
 
 	switch (sceneType)
 	{
@@ -222,8 +230,8 @@ void PoPossibEngin::loadScene(SceneType sceneType)
 		break;
 	}
 
-	delete _currScene;
 	_currScene = newScene;
+    _sceneToLoad = SceneType::None;
 
 	_engineState = RUNNING;
 

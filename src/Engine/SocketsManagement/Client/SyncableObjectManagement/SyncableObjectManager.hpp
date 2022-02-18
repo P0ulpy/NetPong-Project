@@ -6,16 +6,17 @@
 #define NETPONG_PROJECT_SYNCABLEOBJECTMANAGER_HPP
 
 #include <SFML/System/Thread.hpp>
-#include <mutex>
 #include "SFML/Network/Packet.hpp"
+#include "../../SyncableObjectType.hpp"
+#include "../../SyncableObjectOptions.hpp"
+#include <mutex>
+#include <map>
 
 class ClientSocket;
 
 namespace Client
 {
     class SyncableObject;
-    enum SyncableObjectControl;
-    enum SyncableObjectType;
 
     class SyncableObjectManager
     {
@@ -31,10 +32,10 @@ namespace Client
 
         [[noreturn]] void syncThreadEntry();
 
-        std::vector<SyncableObject*> _syncableObjects;
+        std::map<int, SyncableObject*> _syncableObjects;
 
         void onSceneUpdate(sf::Packet& packet);
-        SyncableObject* createEntity(unsigned int id, SyncableObjectControl control, SyncableObjectType entityType);
+        SyncableObject* createEntity(SyncableObjectOptions options);
         void deleteEntity(unsigned int id);
 
         friend ClientSocket;

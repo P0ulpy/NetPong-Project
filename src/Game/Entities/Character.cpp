@@ -61,8 +61,6 @@ void Character::update(const float& deltaTime)
 {
 	if (!_isAlive) return;
 
-	//setRotation(mousePosition);
-
 	if (_cooldownActivated)
 	{
 		if (_cooldownShoot >= 0 && _cooldownShoot < DURATION_BETWEEN_SHOOTS) _cooldownShoot = _cooldownShoot + deltaTime;

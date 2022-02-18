@@ -14,8 +14,8 @@ private:
 	const PongBall& _ballParent;
 	std::vector<PhantomBall*> _phantomBalls;
 	std::stack<PhantomBall*> _inactivePhantomBalls;
-	float _currentTimePhantomBallCooldown;
-	bool _hasPhantomEffect;
+	float _currentTimePhantomBallCooldown{};
+	bool _hasPhantomEffect = false;
 
 public:
 	PhantomBallEffect(const PongBall& ballParent);

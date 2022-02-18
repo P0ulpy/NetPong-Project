@@ -1,53 +1,69 @@
 #include "ClientSocket.hpp"
 #include "../../../Logger/Logger.hpp"
 #include "PlayerSettings.hpp"
+#include "../SyncableObjectType.hpp"
 
-#include <iostream>
-
-ClientSocket::ClientSocket(const ClientConnectionSettings& clientConnectionSettings, PoPossibEngin* engine)
-	: _clientConnectionSettings(clientConnectionSettings)
+ClientSocket::ClientSocket(ClientConnectionSettings clientConnectionSettings, PoPossibEngin* engine)
+	: _clientConnectionSettings(std::move(clientConnectionSettings))
 	, _engine(engine)
 	, _listenThread(sf::Thread(&ClientSocket::listenEvents, this))
+    , _syncableObjectManager(this)
 {
-	if(_socket.connect(
-		clientConnectionSettings.ip, 
-		clientConnectionSettings.port,
-        sf::milliseconds(clientConnectionSettings.connectionTimeout)
-	) != sf::Socket::Status::Done)
-	{
-        Logger::Err("can't connect to remote");
-        return;
-    }
+    sf::Thread connectThread([this]() -> void
+    {
+        if(_socket.connect(
+                _clientConnectionSettings.ip,
+                _clientConnectionSettings.port,
+                sf::milliseconds(_clientConnectionSettings.connectionTimeout)
+        ) != sf::Socket::Status::Done)
+        {
+            Logger::Err("can't connect to remote");
+            return;
+        }
 
-	Logger::Log("Connected to remote " + clientConnectionSettings.ip + ":" + std::to_string(clientConnectionSettings.port));
+        Logger::Log("Connected to remote " + _clientConnectionSettings.ip + ":" + std::to_string(_clientConnectionSettings.port));
 
-	registerListeners();
+        registerListeners();
+    });
+
+    connectThread.launch();
 }
 
 ClientSocket::~ClientSocket()
 {
-    _eventEmitter.emit(Disconnected);
-	_listenThread.terminate();
+    // FIXME : BIG LEAK terminate crash app because mutex is loacked make some test anc cnage lock scope to fix this
+    //_listenThread.terminate();
 }
 
 const ClientConnectionSettings& ClientSocket::getClientConnectionSettings() const { return _clientConnectionSettings; }
+Client::SyncableObjectManager &ClientSocket::getSyncableObjectManager() { return _syncableObjectManager; }
 const EventEmitter* ClientSocket::getEventEmitter() const { return &_eventEmitter; }
+std::string &ClientSocket::getId() { return _id; }
+
 bool ClientSocket::isReady() const { return _ready; }
 
 void ClientSocket::registerListeners()
 {
     Logger::Log("registering listeners for client socket");
 
-    _eventEmitter.on(SocketEvents::Connected, [this](const sf::Packet& packet) -> void { onConnected(packet); });
+    _eventEmitter.on(SocketEvents::Connected, [this](sf::Packet packet) -> void
+    {
+        onConnected(packet);
+    });
+
     _eventEmitter.on(SocketEvents::Disconnected, [this]() -> void
     {
         Logger::Log("Disconnected");
     });
-    _eventEmitter.on(SocketEvents::NewPlayerConnected, [this](const sf::Packet& packet) -> void
+    _eventEmitter.on(SocketEvents::NewPlayerConnected, [this](sf::Packet packet) -> void
     {
         Logger::Log("New Player connected");
     });
-    _eventEmitter.on(SocketEvents::SceneUpdate, [this](const sf::Packet& packet) -> void { onSceneUpdate(packet); });
+    _eventEmitter.on(SocketEvents::SceneUpdate, [this](sf::Packet packet) -> void
+    {
+        if(!_ready) return;
+        _syncableObjectManager.onSceneUpdate(packet);
+    });
 
 	_listenThread.launch();
 }
@@ -59,24 +75,32 @@ void ClientSocket::registerListeners()
 
     while(true)
 	{
-		sf::Packet packet;
+        //Logger::Log("Waiting for reception");
+
+        sf::Packet packet;
 		if(_socket.receive(packet) != sf::Socket::Done)
 		{
 			Logger::Err("Error during packet reception");
             continue;
 		}
 
-		int eventID;
-		if(packet >> eventID)
+        //Logger::Log("Receiving");
+
+        int eventIDInt;
+        SocketEvents eventID;
+		if(packet >> eventIDInt)
 		{
+            eventID = (SocketEvents)eventIDInt;
+
+            Logger::Log("Firring Event : " + std::to_string(eventID));
+
 			if (eventID >= SocketEvents::Count || eventID < 0)
 			{
 				Logger::Err("Can't emit event \"" + std::to_string(eventID) + "\" eventID is invalid");
 			}
 
-            std::lock_guard lockGuard(_mutex);
-
 			_eventEmitter.emit(eventID, packet);
+
 		}
 		else
 		{
@@ -87,16 +111,14 @@ void ClientSocket::registerListeners()
 
 void ClientSocket::send(SocketEvents event, const sf::Packet& data)
 {
-    Logger::Log(&"Firing Net event :" [(int)event]);
-
-    // we asynchronously send data
+    // asynchronously send data
     sf::Thread sendThread = sf::Thread([this, &event, &data]()
     {
         sf::Packet packet;
         packet << (int)event;
         packet.append(data.getData(), data.getDataSize());
 
-        Logger::Log("ClientSocket : Sending " + std::to_string(packet.getDataSize()) + "o of data for event" + std::to_string(event));
+        //Logger::Log("ClientSocket : Sending " + std::to_string(packet.getDataSize()) + "o of data for event : " + std::to_string(event));
 
         std::lock_guard lockGuard(_mutex);
 
@@ -117,12 +139,24 @@ void ClientSocket::onConnected(sf::Packet packet)
 		return;
 	}
 
-    Logger::Log("Client socket connected and ready");
-
+    Logger::Log("Client socket connected and ready : " + _id);
     _ready = true;
+
+    sendPlayerSettings();
 }
 
-void ClientSocket::onSceneUpdate(sf::Packet packet)
+void ClientSocket::sendPlayerSettings()
 {
+    _playerSettings.name = _clientConnectionSettings.pseudo;
 
+    sf::Packet settings;
+    settings << _playerSettings.name;
+    send(SocketEvents::PlayerSendSettings, settings);
+
+    Logger::Log("PlayerSettings sent");
+}
+
+void ClientSocket::waitReady() const
+{
+    while (true) if(_ready) return;
 }

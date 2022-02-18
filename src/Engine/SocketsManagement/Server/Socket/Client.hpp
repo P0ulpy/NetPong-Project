@@ -15,13 +15,12 @@ namespace Server
     public:
         Client(std::string id, sf::TcpSocket *socket);
         Client(const Client &) = delete;
+        ~Client();
 
         const Client &operator=(const Client &) = delete;
 
-        ~Client();
-
         [[nodiscard]] sf::TcpSocket *getSocket() const;
-        [[nodiscard]] const std::string &getId() const;
+        [[nodiscard]] std::string &getId();
         [[nodiscard]] const PlayerSettings &getSettings() const;
         void setSettings(const PlayerSettings &settings);
 

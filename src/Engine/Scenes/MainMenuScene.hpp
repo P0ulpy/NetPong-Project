@@ -12,9 +12,9 @@ public:
 	MainMenuScene(PoPossibEngin& poPossibEngin);
 	~MainMenuScene();
 
-	void start();
-	void update(const float& deltaTime);
-	void render(sf::RenderTarget* renderTarget = nullptr);
+	void start() final;
+	void update(const float& deltaTime) final;
+	void render(sf::RenderTarget* renderTarget) final;
 
 	void Play();
 	void Quit();
@@ -34,7 +34,7 @@ public:
 
 	void PlayerFound();
 	void CheckMouse();
-	void Write(std::string name, int size);
+	void Write(const std::string& name, int size);
 
 private:
 
@@ -47,7 +47,12 @@ private:
 	int _menusIndex = 0;
 	int _indexTextBox = 0;
 
-	std::string hostip = "255.255.255.255";
-	int hostport = 25565;
-	int joinPort = 25565;
+    const std::string host_hostNameTextDefault = "New Lobby";
+    const std::string host_hostPortTextDefault = "25565";
+
+    const std::string join_hostIpTextDefault = "109.215.43.120";
+    const std::string join_hostPortTextDefault = "25565";
+
+	const std::string wait_hostIpTextDefault = "127.0.0.1";
+	const std::string wait_hostPortTextDefault = "25565";
 };

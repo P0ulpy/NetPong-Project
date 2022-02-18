@@ -7,23 +7,10 @@
 
 #include "../ClientSocket.hpp"
 #include "./SyncableObjectManager.hpp"
+#include "../../SyncableObjectOptions.hpp"
 
 namespace Client
 {
-    enum SyncableObjectControl { Local, Remote };
-
-    enum SyncableObjectType {
-        Character
-    };
-
-    struct SyncableObjectOptions
-    {
-        SyncableObjectOptions(unsigned int id, SyncableObjectControl control, SyncableObjectType entityType);
-        unsigned int id;
-        SyncableObjectControl control;
-        SyncableObjectType entityType;
-    };
-
     class SyncableObject
     {
     public:
@@ -39,8 +26,10 @@ namespace Client
         SyncableObjectControl _control;
         SyncableObjectType _type;
 
-        virtual void sync(sf::Packet& sendPacketChunck) = 0;
-        virtual void applySync(sf::Packet& recievedPacketChunk) = 0;
+        std::mutex _mutex;
+
+        virtual sf::Packet sync(std::stringstream& debugStream) = 0;
+        virtual void applySync(sf::Packet& recievedPacketChunk, std::stringstream& debugStream) = 0;
 
         friend SyncableObjectManager;
     };

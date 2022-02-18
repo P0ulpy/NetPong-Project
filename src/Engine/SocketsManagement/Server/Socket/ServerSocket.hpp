@@ -15,15 +15,18 @@ namespace Server
         explicit ServerSocket(ServerMain *server);
         ~ServerSocket();
 
-        [[nodiscard]] const std::map<std::string, std::unique_ptr<Client>> &getClients() const;
+        [[nodiscard]] std::map<std::string, std::unique_ptr<Client>>& getClients();
         [[nodiscard]] bool isReady() const;
+
+        void send(sf::TcpSocket &socket, SocketEvents event, const sf::Packet &data);
+        void sendToAll(SocketEvents event, const sf::Packet &data);
 
     private:
         ServerMain* _server = nullptr;
         bool _ready = false;
 
         sf::TcpListener _listener;
-        void registerListeners(sf::TcpSocket *clientSocket);
+        void registerListeners(Client& client);
 
         std::mutex _mutex;
         sf::Thread _connectionsListenThread;
@@ -32,13 +35,12 @@ namespace Server
         sf::Thread _listenEventsThread;
         [[noreturn]] void listenEvents();
 
-        void send(sf::TcpSocket &socket, SocketEvents event, const sf::Packet &data);
-        void sendToAll(SocketEvents event, const sf::Packet &data);
-
         std::map<std::string, std::unique_ptr<Client>> _clients;
         sf::SocketSelector _clientsSocketSelector;
 
-        void onClientConnection(const Client &client);
-        void onClientDisconnect(const Client &client);
+        void onClientConnection(Client &client);
+        void onClientDisconnect(Client &client);
+
+        friend ServerMain;
     };
 }

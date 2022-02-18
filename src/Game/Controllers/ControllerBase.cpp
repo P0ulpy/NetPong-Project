@@ -4,4 +4,7 @@
 
 #include "ControllerBase.hpp"
 
-Engine::ControllerBase::ControllerBase(Engine::IControllable &controlTarget) : _controlTarget(controlTarget) {}
+Engine::ControllerBase::ControllerBase(SyncableObjectOptions options, Engine::IControllable &controlTarget)
+    : Client::SyncableObject(options)
+    , Engine::IUpdatable()
+    , _controlTarget(controlTarget) {}

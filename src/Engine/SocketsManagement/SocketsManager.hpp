@@ -11,9 +11,9 @@ namespace Server {
 
 struct HostSettings
 {
-	std::string name = "New Lobby";
-    uint16_t port = 25565;
-	float socketConnectionTimeout = 2000.f;
+	std::string name;
+    uint16_t port;
+	float socketConnectionTimeout;
 
 	HostSettings(std::string pName = "New Lobby", uint16_t pPort = 25565, float pSocketConnectionTimeout = 2000.f)
 		: name(std::move(pName))
@@ -23,14 +23,16 @@ struct HostSettings
 
 struct ClientConnectionSettings
 {
-    std::string ip = "127.0.0.1";
-    uint16_t port = 25565;
-	int32_t connectionTimeout = 1000;
+    std::string ip;
+    uint16_t port;
+    std::string pseudo;
+	int32_t connectionTimeout;
 
-    ClientConnectionSettings(std::string pIP = "127.0.0.1", uint16_t pPort = 25565, int32_t connectionTimeout = 1000)
+    ClientConnectionSettings(std::string pIP = "127.0.0.1", uint16_t pPort = 25565, std::string pseudo = "UnnamedPlayer", int32_t connectionTimeout = 1000)
             : ip(std::move(pIP))
             , port(pPort)
-			, connectionTimeout(connectionTimeout) {}
+			, connectionTimeout(connectionTimeout)
+            , pseudo(std::move(pseudo)) {}
 };
 
 class SocketManager
@@ -40,7 +42,7 @@ public:
 	~SocketManager();
 
 	void startServer(const HostSettings& hostSettings);
-	void connectClient(const ClientConnectionSettings& clientConnectionSettings);
+	ClientSocket* connectClient(const ClientConnectionSettings& clientConnectionSettings);
 
 	[[nodiscard]] PoPossibEngin& getEngine() const;
 
@@ -48,6 +50,8 @@ public:
 	[[nodiscard]] Server::ServerMain* getServerInstance() const;
 	[[nodiscard]] bool isHost() const;
 	[[nodiscard]] bool isClient() const;
+
+    void disconnectAll();
 
 private:
 	PoPossibEngin& _engine;

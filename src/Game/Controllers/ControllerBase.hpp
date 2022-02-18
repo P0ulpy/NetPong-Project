@@ -7,16 +7,21 @@
 
 #include "../../Engine/Interfaces/IControllable.hpp"
 #include "../../Engine/Interfaces/IUpdatable.hpp"
+#include "../../Engine/SocketsManagement/Client/SyncableObjectManagement/SyncableObject.hpp"
+
+namespace Client
+{
+    class SyncableObject;
+}
 
 namespace Engine
 {
-    class ControllerBase : public Engine::IUpdatable
+    class ControllerBase : public Client::SyncableObject, public Engine::IUpdatable
     {
+    public:
+        ControllerBase(SyncableObjectOptions options, Engine::IControllable& controlTarget);
     protected:
         Engine::IControllable& _controlTarget;
-
-    public:
-        ControllerBase(Engine::IControllable& controlTarget);
     };
 }
 

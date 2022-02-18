@@ -65,7 +65,7 @@ void PhantomBallEffect::displayPhantomBall()
 {
 	if(_inactivePhantomBalls.empty())
 	{
-		Logger::Log("ERROR PhantomBallEffect.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
+		Logger::Err("PhantomBallEffect.cpp | displayPhantomBall() : pas assez de _phantomBallsMax ! ");
 		return;
 	}
 	//Recherche de la premiere PhantomBall qui n'est pas affich�e dans la liste

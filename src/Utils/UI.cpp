@@ -15,12 +15,14 @@ void UI::CreateText(std::string name, sf::Color colorText, std::string text, int
 	buttonModel.setPosition(position);
 
 	button.push_back(buttonModel);
-	nameButton.push_back(name);
+	nameButton.emplace_back(name);
 }
 
-sf::Text& UI::Text(std::string name)
+sf::Text& UI::Text(const std::string& name)
 {
-	for (int i = 0; i < nameButton.size(); i++)
+    std::lock_guard guard(_mutex);
+
+    for (int i = 0; i < nameButton.size(); i++)
 	{
 		if (nameButton[i] == name)
 		{
@@ -29,7 +31,7 @@ sf::Text& UI::Text(std::string name)
 	}
 }
 
-sf::Text& UI::TextBox(std::string name)
+sf::Text& UI::TextBox(const std::string& name)
 {
 	for (int i = 0; i < nameTextBox.size(); i++)
 	{
@@ -38,12 +40,13 @@ sf::Text& UI::TextBox(std::string name)
 			return text.at(i);
 		}
 	}
-	
+
+    //return sf::Text("UNDEFINED", );
 }
 
 
 
-sf::RectangleShape& UI::Zone(std::string name)
+sf::RectangleShape& UI::Zone(const std::string& name)
 {
 	for (int i = 0; i < nameTextBox.size(); i++)
 	{
@@ -54,16 +57,16 @@ sf::RectangleShape& UI::Zone(std::string name)
 	}
 }
 
-void UI::CreateTextBox(std::string name, sf::Font& font, int maxCharac, sf::Vector2f position)
+void UI::CreateTextBox(const std::string& name, sf::Font& font, int maxCharac, sf::Vector2f position, const std::string& textContent)
 {
 	zoneTextModel.setFillColor(sf::Color(100, 100, 100));
-	zoneTextModel.setSize(sf::Vector2f(((maxCharac+1)*30), 100));
+	zoneTextModel.setSize(sf::Vector2f(((maxCharac + 1) * 30), 100));
 	zoneTextModel.setOrigin(zoneTextModel.getGlobalBounds().width / 2, zoneTextModel.getGlobalBounds().height / 2);
 	zoneTextModel.setPosition(position);
 
 	textModel.setFont(font);
 	textModel.setFillColor(sf::Color::Black);
-	textModel.setString("");
+	textModel.setString(textContent);
 	textModel.setCharacterSize(76);
 	textModel.setOrigin(zoneTextModel.getGlobalBounds().width / 2, zoneTextModel.getGlobalBounds().height / 2);
 	textModel.setPosition(zoneTextModel.getPosition().x, zoneTextModel.getPosition().y);

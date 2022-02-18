@@ -3,7 +3,7 @@
 #include "SocketConnectionScene.hpp"
 
 #include "imgui.h"
-#include "../SocketsManagement/Server/ServerMain.hpp"
+#include "../../SocketsManagement/Server/ServerMain.hpp"
 
 LobbyScene::LobbyScene(PoPossibEngin& poPossibEngin)
 	: Scene(poPossibEngin, SceneConfig())

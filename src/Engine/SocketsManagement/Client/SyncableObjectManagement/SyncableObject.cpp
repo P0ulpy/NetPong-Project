@@ -6,12 +6,6 @@
 
 using namespace Client;
 
-SyncableObjectOptions::SyncableObjectOptions(unsigned int id, SyncableObjectControl control, SyncableObjectType entityType)
-        : id(id)
-        , control(control)
-        , entityType(entityType)
-        {}
-
 SyncableObject::SyncableObject(const SyncableObjectOptions& options)
     : _id(options.id)
     , _control(options.control)

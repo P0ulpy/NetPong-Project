@@ -4,7 +4,7 @@
 #include <memory>
 #include "Scene.hpp"
 #include "../../Game/Controllers/ControllerBase.hpp"
-
+#include "../SocketsManagement/Client/SyncableObjectManagement/SyncableObject.hpp"
 
 class GameManager;
 class PolygonTerrain;
@@ -36,6 +36,8 @@ public:
 
 	void setPlayersToDefaultSpawnPoints() const;
 
+    Client::SyncableObject* createPlayer(SyncableObjectOptions options);
+
     // GET
     std::stack<PongBall*>& getInactivePongBalls();
 
@@ -52,7 +54,6 @@ private:
 	std::vector<PongBall*> _pongBalls;
 	std::stack<PongBall*> _inactivePongBalls;
 	std::vector<Character*> _players;
-	
 	
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
 	std::unique_ptr<AnimatorManager> _animator;

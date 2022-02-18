@@ -8,17 +8,12 @@
 #include "../../Game/Terrains/PolygonTerrain.hpp"
 #include "../../Engine/Scenes/MainMenuScene.hpp"
 #include "../../Game/System/GameManager.hpp"
-#include "../../Logger/Logger.hpp"
 
 #define COLOR_PLAYER_1 sf::Color(255, 40, 0)
-#define INACTIVE_AMMO_COLOR_PLAYER1 sf::Color(255, 160, 160)
-#define NORMAL_AMMO_COLOR_PLAYER1 sf::Color(220, 40, 0)
 
 #include "../../Game/Controllers/LocalCharacterController/LocalCharacterController.hpp"
 #include "../../Game/Controllers/NetworkCharacterController/NetworkCharacterController.hpp"
 #define COLOR_PLAYER_2 sf::Color(0, 40, 255)
-#define INACTIVE_AMMO_COLOR_PLAYER2 sf::Color(160, 160, 235)
-#define NORMAL_AMMO_COLOR_PLAYER2 sf::Color(0, 40, 220)
 
 constexpr int NUM_MAX_PONGBALL = 15;
 constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 75;
@@ -92,22 +87,6 @@ void MainGameScene::initValues()
 		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
 	}
 
-    auto p0 = new Character(COLOR_PLAYER_1);
-	_players.emplace_back(p0);
-	_players.back()->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
-
-    auto p1 = new Character(COLOR_PLAYER_2);
-    _players.emplace_back(p1);
-	_players.back()->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
-
-   /* _controllers.push_back(new LocalCharacterController(0, Client::Remote, Client::Character, *p0, {
-            sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Mouse::Button::Right
-    }));
-
-    _controllers.push_back(new LocalCharacterController(0, Client::Remote, Client::Character, *p1, {
-            sf::Keyboard::Z, sf::Keyboard::S, sf::Keyboard::Q, sf::Keyboard::D, sf::Mouse::Button::Left
-    }));*/
-
 	_gameManager = std::make_shared<GameManager>(this);
 }
 
@@ -154,19 +133,14 @@ void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 			_players[currPlayerIndex]->setPlayerAlive(false);
 			_animator->DeathAnimation(_players[currPlayerIndex]->getPosition());
 			_gameManager->makePlayerWin(currPlayerIndex+1);
-
-			std::cout << "Player hit !" << std::endl;
 		}
 	}
 }
 
 void MainGameScene::update(const float& deltaTime)
 {
-	
-	
 	updateInputs(deltaTime);
 
-	_poPossibEngin->getInputsManager().update();
 	_gameManager->update(deltaTime);
 	_polygonTerrain->update(deltaTime);
 
@@ -190,7 +164,6 @@ void MainGameScene::render(sf::RenderTarget* target)
 {
 	_gameManager->render(*target);
 	_polygonTerrain->render(*target);
-	
 
 	for (const auto pongBall : _pongBalls)
 	{
@@ -235,7 +208,7 @@ void MainGameScene::setPlayersToDefaultSpawnPoints() const
 {
     sf::Vector2i renderWindowSize = (sf::Vector2i)_poPossibEngin->getRenderWindow().getSize();
 
-    _players[0]->setPosition({
+   /*_players[0]->setPosition({
         renderWindowSize.x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
         renderWindowSize.y / 2
     });
@@ -243,7 +216,74 @@ void MainGameScene::setPlayersToDefaultSpawnPoints() const
     _players[1]->setPosition({
         renderWindowSize.x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
         renderWindowSize.y / 2
-    });
+    });*/
 }
 
 std::stack<PongBall *> &MainGameScene::getInactivePongBalls() { return _inactivePongBalls; }
+
+Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions options)
+{
+    // TODO : differentiation P1 / P2
+
+    Logger::Log("Creating new player id: " + std::to_string(options.id));
+
+    sf::Vector2i renderWindowSize = (sf::Vector2i)_poPossibEngin->getRenderWindow().getSize();
+
+    Character* newPlayer = nullptr;
+
+    // FIXME : TEMP
+    if(options.id == 0)
+    {
+        Logger::Log("Creating player 1");
+
+        newPlayer = new Character(COLOR_PLAYER_1);
+        newPlayer->setAmmosColor(sf::Color(255, 40, 0), sf::Color(255, 160, 160));
+
+        // FIXME : APPLY JULEN FIX
+        newPlayer->setPosition({
+               renderWindowSize.x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
+               renderWindowSize.y / 2
+        });
+    }
+    else if(options.id >= 1)
+    {
+        Logger::Log("Creating player 2");
+
+        newPlayer = new Character(COLOR_PLAYER_2);
+        newPlayer->setAmmosColor(sf::Color(0, 40, 255), sf::Color(160, 160, 235));
+
+        // FIXME : APPLY JULEN FIX
+        newPlayer->setPosition({
+               renderWindowSize.x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
+               renderWindowSize.y / 2
+       });
+    }
+
+    _players.emplace_back(newPlayer);
+
+    Engine::ControllerBase* newPlayerController = nullptr;
+
+    switch (options.control)
+    {
+        case Local:
+            Logger::Log("Creating LocalCharacterController for id: " + std::to_string(options.id));
+
+            newPlayerController = new LocalCharacterController(options, *newPlayer, {
+                    sf::Keyboard::Up,
+                    sf::Keyboard::Down,
+                    sf::Keyboard::Left,
+                    sf::Keyboard::Right,
+                    sf::Mouse::Button::Right
+            });
+            break;
+        case Remote:
+            Logger::Log("Creating NetworkCharacterController for id: " + std::to_string(options.id));
+
+            newPlayerController = new NetworkCharacterController(options, *newPlayer);
+            break;
+    }
+
+     _controllers.push_back(newPlayerController);
+
+     return newPlayerController;
+ }

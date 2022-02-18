@@ -19,6 +19,6 @@ Client::~Client()
 }
 
 sf::TcpSocket *Client::getSocket() const { return _socket; }
-const std::string &Client::getId() const { return _id; }
+std::string &Client::getId() { return _id; }
 const PlayerSettings &Client::getSettings() const { return settings; }
 void Client::setSettings(const PlayerSettings &settings) { Client::settings = settings; }

@@ -5,21 +5,8 @@
 #include "NetworkCharacterController.hpp"
 #include "../../Entities/Character.hpp"
 
-PlayerState::PlayerState(const sf::Vector2i& position, const sf::Vector2f &velocity, float angle, float angularVelocity)
-        : velocity(velocity), position(position), angle(angle), angularVelocity(angularVelocity) {}
-
-NetworkCharacterController::NetworkCharacterController(Client::SyncableObjectOptions options, Character& controlTarget)
-        : Client::SyncableObject(options)
-        , ControllerBase(controlTarget) {}
-
-void NetworkCharacterController::onReceive(const PlayerState &playerState)
-{
-    _lastPlayerState = playerState;
-    _netDelta = 0;
-    rotate();
-    // TODO : correcting trajectory instead of TP
-    _controlTarget.setPosition(playerState.position);
-}
+NetworkCharacterController::NetworkCharacterController(SyncableObjectOptions options, Character& controlTarget)
+        : ControllerBase(options, controlTarget) {}
 
 void NetworkCharacterController::update(const float& deltaTime)
 {
@@ -71,4 +58,44 @@ PlayerState NetworkCharacterController::getCurrentPlayerState() const
 
 const PlayerState &NetworkCharacterController::getLastPlayerState() const { return _lastPlayerState; }
 double NetworkCharacterController::getTimeSinceLastReceive() const { return _netDelta; }
+
+void NetworkCharacterController::applySync(sf::Packet &recievedPacketChunk, std::stringstream &debugStream)
+{
+    std::lock_guard guard(_mutex);
+
+    int px, py;
+    float vx, vy;
+    float angle, angleVel;
+
+    recievedPacketChunk >> px;
+    recievedPacketChunk >> py;
+    recievedPacketChunk >> vx;
+    recievedPacketChunk >> vy;
+    recievedPacketChunk >> angle;
+    recievedPacketChunk >> angleVel;
+
+    _lastPlayerState = {
+            {px, py},
+            {vx, vy},
+            angle,
+            angleVel
+    };
+
+    _netDelta = 0;
+    rotate();
+    // TODO : correcting trajectory instead of TP
+    _controlTarget.setPosition(_lastPlayerState.position);
+
+    debugStream << "pos: {x:" << _lastPlayerState.position.x << ", y:" << _lastPlayerState.position.y << "}, vel: {x:" << _lastPlayerState.velocity.x << ", y:" << _lastPlayerState.velocity.y << "}, angle: " << _lastPlayerState.angle << ", angleVel: " << _lastPlayerState.angularVelocity;
+}
+
+sf::Packet NetworkCharacterController::sync(std::stringstream &debugStream)
+{
+    std::lock_guard guard(_mutex);
+
+    sf::Packet packet;
+    PlayerState state;
+    packet.append(&state, sizeof(PlayerState));
+    return packet;
+}
 
