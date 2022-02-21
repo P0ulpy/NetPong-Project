@@ -38,9 +38,12 @@ public:
 	void endRound() const;
 
 	// Get / Set
-    PolygonTerrain *const getPolygonTerrain() const;
+    PolygonTerrain *getPolygonTerrain() const;
     void displayPlayers(bool isDisplayed) const;
-	AudioPlayer* getAudioPlayer() const;
+    AudioPlayer* getAudioPlayer() const;
+    AnimatorManager *getAnimatorManager() const;
+    std::vector<Character*>& getPlayers();
+    GameManager *getGameManager() const;
 
     Client::SyncableObject* createPlayer(const SyncableObjectOptions& options, const PlayerState& playerState);
     Client::SyncableObject* createPongBall(const SyncableObjectOptions& options, const PongBallState& pongBallState);
@@ -62,14 +65,12 @@ private:
 
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
 
-private:
 	//Font, texts and textures..
 	sf::Font _font;
 
 	void initValues();
 	void initFonts();
     void hideAllPongBalls() const;
-	void checkPlayerPongBallCollision(const PongBall& pongBall) const;
 
     void setPlayersToDefaultSpawnPoints(Character *p1 = nullptr, Character *p2 = nullptr) const;
 };

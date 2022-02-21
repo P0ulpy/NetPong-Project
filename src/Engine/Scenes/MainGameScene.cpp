@@ -76,23 +76,6 @@ void MainGameScene::initFonts()
 	}
 }
 
-void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
-{
-	for (int currPlayerIndex = 0; currPlayerIndex < _players.size(); ++currPlayerIndex)
-	{
-		if (pongBall.hitPlayer(_players[currPlayerIndex]->getPosition().x,
-								_players[currPlayerIndex]->getPosition().y,	
-							_players[currPlayerIndex]->getRadius(),
-								_players[currPlayerIndex]->getNormalAmmoColor()))
-		{
-			_players[currPlayerIndex]->setPlayerAlive(false);
-			getAudioPlayer()->playSound("Explosion");
-			_animator->DeathAnimation((sf::Vector2f)_players[currPlayerIndex]->getPosition());
-			_gameManager->makePlayerWin(currPlayerIndex+1);
-		}
-	}
-}
-
 void MainGameScene::update(const float& deltaTime)
 {
 	updateInputs(deltaTime);
@@ -124,7 +107,11 @@ void MainGameScene::render(sf::RenderTarget* target)
 	_animator->render(*target);
 }
 
-PolygonTerrain *const MainGameScene::getPolygonTerrain() const { return _polygonTerrain.get(); }
+PolygonTerrain* MainGameScene::getPolygonTerrain() const    { return _polygonTerrain.get(); }
+std::vector<Character *>& MainGameScene::getPlayers()       { return _players; }
+AudioPlayer* MainGameScene::getAudioPlayer() const          { return _audioPlayer.get(); }
+AnimatorManager* MainGameScene::getAnimatorManager() const  { return _animator.get(); }
+GameManager* MainGameScene::getGameManager() const          { return _gameManager.get(); }
 
 void MainGameScene::displayPlayers(bool isDisplayed) const
 {
@@ -133,11 +120,6 @@ void MainGameScene::displayPlayers(bool isDisplayed) const
         player->setPlayerAlive(isDisplayed);
         player->resetAmmos();
     }
-}
-
-AudioPlayer* MainGameScene::getAudioPlayer() const
-{
-	return _audioPlayer.get();
 }
 
 void MainGameScene::togglePlayersMovement(bool canTheyMove) const
@@ -250,8 +232,8 @@ void MainGameScene::setPlayersToDefaultSpawnPoints(Character* p1, Character* p2)
     if (p1)
     {
         sf::Vector2i spawnPosition(
-                _poPossibEngin->getRenderWindow().getSize().x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
-               _poPossibEngin->getRenderWindow().getSize().y / 2
+            (int)_poPossibEngin->getRenderWindow().getSize().x / 2 - PLAYERS_SPAWN_POINT_X_OFFSET,
+            (int)_poPossibEngin->getRenderWindow().getSize().y / 2
         );
 
         p1->setPosition(spawnPosition);
@@ -260,8 +242,8 @@ void MainGameScene::setPlayersToDefaultSpawnPoints(Character* p1, Character* p2)
     if (p2)
     {
         sf::Vector2i spawnPosition(
-            _poPossibEngin->getRenderWindow().getSize().x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
-            _poPossibEngin->getRenderWindow().getSize().y / 2
+            (int)_poPossibEngin->getRenderWindow().getSize().x / 2 + PLAYERS_SPAWN_POINT_X_OFFSET,
+            (int)_poPossibEngin->getRenderWindow().getSize().y / 2
         );
 
         p2->setPosition(spawnPosition);

@@ -196,20 +196,13 @@ void PolygonTerrain::drawRandomTerrain()
 	initTerrainOrigin();
 }
 
+constexpr int terrainCount = 10;
+
 void PolygonTerrain::selectAndDrawRandomTerrain()
 {
-	//Pick random index between 1 and NUM_TERRAINS, that is different from the previous one
-	srand(static_cast<unsigned>(time(nullptr)));
-	int randomTerrainIndex;
-	do
-	{
-		randomTerrainIndex = rand() % NUM_TERRAINS + 1;
-	} while (randomTerrainIndex == _currentTerrain);
+	_currentTerrain = (++_currentTerrain <= terrainCount) ? _currentTerrain : 1;
 
-	_currentTerrain = randomTerrainIndex;
-
-	//Draw random terrain
-	switch (randomTerrainIndex)
+	switch (_currentTerrain)
 	{
 		case 1: drawTerrain1(); break;
 		case 2: drawTerrain2(); break;
@@ -221,13 +214,13 @@ void PolygonTerrain::selectAndDrawRandomTerrain()
 		case 8: drawTerrain8(); break;
 		case 9: drawTerrain9(); break;
 		case 10:drawTerrain10();break;
-		default:drawTerrain1(); break;
+		default: drawTerrain1(); break;
 	}
 }
 
 //=========================== DRAWING TERRAINS ===========================
 
-void PolygonTerrain::drawTerrain1()//OCTOGON
+void PolygonTerrain::drawTerrain1() //OCTOGON
 {
 	int edgeLenght = 16;
 

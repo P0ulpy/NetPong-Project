@@ -50,7 +50,7 @@ private:
     const std::string host_hostNameTextDefault = "New Lobby";
     const std::string host_hostPortTextDefault = "25565";
 
-    const std::string join_hostIpTextDefault = "109.215.43.120";
+    const std::string join_hostIpTextDefault = "127.0.0.1";
     const std::string join_hostPortTextDefault = "25565";
 
 	const std::string wait_hostIpTextDefault = "127.0.0.1";
