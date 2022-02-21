@@ -2,17 +2,24 @@
 #include "../Entity.hpp"
 #include "../../Engine/Interfaces/IControllable.hpp"
 #include "../../Engine/Interfaces/IRenderable.hpp"
+#include <mutex>
+
+class PongBall;
 
 class Character : public Entity, public Engine::IControllable, public Engine::IRenderable
 {
 private:
-	bool _canCharacterMove { true };
+
+    std::mutex _mutex;
+    bool _canCharacterMove { true };
 
 	sf::CircleShape charac;
 	sf::RectangleShape canon;
 	sf::CircleShape shootZone;
 
-	//For collision testing purposes
+    std::vector<PongBall*> _pongBalls;
+
+    //For collision testing purposes
 	sf::CircleShape* _characDestination;
 
 	//Ammos
@@ -49,11 +56,9 @@ private:
 public:
     Character() = default;
     Character(sf::Color color);
-	~Character() = default;
+	~Character() override = default;
 
-    static unsigned int instancesCount = 0;
-
-	void update(const float& deltaTime) override;
+    void update(const float& deltaTime) override;
 	void render(sf::RenderTarget& renderTarget) const override;
 	void moveEntity(const sf::Vector2f& velocity, const float& deltaTime) override;
 
@@ -70,10 +75,11 @@ public:
 	bool characterCollision(float x1, float y1, float x2, float y2, sf::Vector2f& outImpactPoint) const;
 
     // GET
+    [[nodiscard]] std::vector<PongBall*> getPongBalls();
     [[nodiscard]] const sf::CircleShape& getShape() const;
     [[nodiscard]] const sf::RectangleShape& getCanon() const;
-    [[nodiscard]] const sf::Vector2f& getVelocity() final;
-    [[nodiscard]] const sf::Vector2f& getPosition() const final;
+    [[nodiscard]] sf::Vector2f getVelocity() final;
+    [[nodiscard]] sf::Vector2i getPosition() const final;
     [[nodiscard]] float getRotation() const final;
     [[nodiscard]] sf::Vector3f getPositionAndRadiusCharac();
     [[nodiscard]] sf::Color getInactiveAmmoColor() const;
@@ -92,4 +98,7 @@ public:
 	bool canCharacterMove() const;
 	bool canCharacterShoot() const;
 	void resetAmmos();
+
+    void addPongBall(PongBall* pongBall = nullptr);
+    PongBall* getOneInactivePongball() const;
 };

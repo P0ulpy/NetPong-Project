@@ -8,3 +8,11 @@ Engine::ControllerBase::ControllerBase(SyncableObjectOptions options, Engine::IC
     : Client::SyncableObject(options)
     , Engine::IUpdatable()
     , _controlTarget(controlTarget) {}
+
+Engine::ControllerBase::~ControllerBase() {
+
+}
+
+Engine::IControllable &Engine::ControllerBase::getControlTarget() const {
+    return _controlTarget;
+}

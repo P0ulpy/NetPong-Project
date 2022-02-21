@@ -23,6 +23,7 @@ namespace Server
         SyncableObjectType& getType();
         ISyncable* getObject();
         Client& getController();
+
     private:
         unsigned int _id;
         SyncableObjectType _type;

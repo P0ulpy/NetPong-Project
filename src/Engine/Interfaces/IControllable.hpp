@@ -13,8 +13,8 @@ namespace Engine
     class IControllable : public IUpdatable
     {
     public:
-        [[nodiscard]] virtual const sf::Vector2f& getVelocity() = 0;
-        [[nodiscard]] virtual const sf::Vector2f& getPosition() const = 0;
+        [[nodiscard]] virtual sf::Vector2f getVelocity() = 0;
+        [[nodiscard]] virtual sf::Vector2i getPosition() const = 0;
         [[nodiscard]] virtual float getRotation() const = 0;
 
         virtual void setPosition(const sf::Vector2i& position) = 0;

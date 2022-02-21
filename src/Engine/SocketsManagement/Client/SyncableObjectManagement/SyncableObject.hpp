@@ -16,15 +16,18 @@ namespace Client
     public:
 
         explicit SyncableObject(const SyncableObjectOptions& options);
+        virtual ~SyncableObject();
 
         [[nodiscard]] const unsigned int& getID() const;
         [[nodiscard]] const SyncableObjectControl& getControl() const;
         [[nodiscard]] const SyncableObjectType& getType() const;
+        [[nodiscard]] const std::string& getControllerId() const;
 
     protected:
         unsigned int _id;
         SyncableObjectControl _control;
         SyncableObjectType _type;
+        std::string _controllerId;
 
         std::mutex _mutex;
 

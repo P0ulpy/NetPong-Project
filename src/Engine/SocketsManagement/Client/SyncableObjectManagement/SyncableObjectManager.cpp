@@ -6,10 +6,16 @@
 #include "../ClientSocket.hpp"
 #include "../../../../Logger/Logger.hpp"
 #include "../../../Scenes/MainGameScene.hpp"
+#include "../../../../Game/Entities/Character.hpp"
+#include "../../../../Game/Controllers/PongBallController/NetworkPongBallController.hpp"
+#include "../../../../Game/Controllers/LocalCharacterController/LocalCharacterController.hpp"
 
 using namespace Client;
 
 constexpr unsigned int tickDelay = 30;
+
+std::map<SyncableObjectType, unsigned int> SyncableObjectManager::objectTypesInSceneUpdate;
+bool SyncableObjectManager::isGameStarted = false;
 
 SyncableObjectManager::SyncableObjectManager(ClientSocket *clientSocket)
     : _clientSocket(clientSocket)
@@ -20,6 +26,32 @@ SyncableObjectManager::SyncableObjectManager(ClientSocket *clientSocket)
 SyncableObjectManager::~SyncableObjectManager()
 {
     _syncThread.terminate();
+}
+
+std::map<int, SyncableObject *> &SyncableObjectManager::getSyncableObjects() { return _syncableObjects; }
+Character* SyncableObjectManager::getCharacter(const std::string& controllerID)
+{
+
+    for(auto& objectPair : _syncableObjects)
+    {
+        auto* obj = objectPair.second;
+        if(obj && obj->getType() == CharacterType && obj->getControllerId() == controllerID)
+            return dynamic_cast<Character*>(&dynamic_cast<Engine::ControllerBase*>(obj)->getControlTarget());
+    }
+
+    return nullptr;
+}
+
+Engine::ControllerBase* SyncableObjectManager::getCharacterController(const std::string& controllerID)
+{
+    for(auto& syncableObjects : _syncableObjects)
+    {
+        auto* obj = syncableObjects.second;
+        if(obj->getType() == CharacterType && obj->getControllerId() == controllerID)
+            return dynamic_cast<Engine::ControllerBase*>(obj);
+    }
+
+    return nullptr;
 }
 
 void SyncableObjectManager::syncThreadEntry()
@@ -40,7 +72,7 @@ void SyncableObjectManager::syncThreadEntry()
 
                 if(!object)
                 {
-                    Logger::Err("try to sync null object id :" + std::to_string(objectPair.first));
+                    //Logger::Err("try to sync null object id :" + std::to_string(objectPair.first));
                     continue;
                 }
 
@@ -68,6 +100,12 @@ void SyncableObjectManager::syncThreadEntry()
 
 void SyncableObjectManager::onSceneUpdate(sf::Packet &packet)
 {
+    SyncableObjectManager::objectTypesInSceneUpdate.clear();
+
+    packet >> SyncableObjectManager::isGameStarted;
+
+    if(!MainGameScene::getInstance()) return;
+
     while(!packet.endOfPacket())
     {
         int id = -1;
@@ -89,21 +127,38 @@ void SyncableObjectManager::onSceneUpdate(sf::Packet &packet)
 
         std::lock_guard guard(_mutex);
 
+        if(!SyncableObjectManager::objectTypesInSceneUpdate.contains(type))
+            SyncableObjectManager::objectTypesInSceneUpdate[type] = 1u;
+        else
+            SyncableObjectManager::objectTypesInSceneUpdate[type] = SyncableObjectManager::objectTypesInSceneUpdate[type] + 1u;
+
         std::stringstream debugStream;
         debugStream << "Receiving :\n{id:" << id << ", " << "type:" << type << ", control:" << control <<", data: {";
 
         if(!_syncableObjects.contains(id) || !_syncableObjects[id])
         {
-            createEntity({id, type, control, controllerID});
-        }
-
-        if(_syncableObjects[id])
-        {
-            _syncableObjects[id]->applySync(packet, debugStream);
+            createEntity({id, type, control, controllerID}, packet);
         }
         else
         {
-            //Logger::Err("Can't applySync : value in pool is nullptr id:" + std::to_string(id));
+            if(_syncableObjects[id] && control != SyncableObjectControl::Local)
+            {
+                _syncableObjects[id]->applySync(packet, debugStream);
+            }
+            else
+            {
+                switch (type)
+                {
+                    case CharacterType:
+                        LocalCharacterController::extractData(packet);
+                        break;
+                    case PongBallType:
+                        NetworkPongBallController::extractData(packet);
+                        break;
+                }
+
+                //Logger::Err("Can't applySync : value in pool is nullptr id:" + std::to_string(id));
+            }
         }
 
         debugStream << "} }";
@@ -111,15 +166,13 @@ void SyncableObjectManager::onSceneUpdate(sf::Packet &packet)
     }
 }
 
-SyncableObject* SyncableObjectManager::createEntity(SyncableObjectOptions options)
+SyncableObject* SyncableObjectManager::createEntity(const SyncableObjectOptions& options, sf::Packet& packet)
 {
     auto scene = MainGameScene::getInstance();
 
-
-
     if(!scene)
     {
-        Logger::Err("MainGameScene is not loaded, can't create syncable entity");
+        //Logger::Warn("MainGameScene is not loaded, can't create syncable entity");
         return nullptr;
     }
 
@@ -128,12 +181,25 @@ SyncableObject* SyncableObjectManager::createEntity(SyncableObjectOptions option
     switch (options.entityType)
     {
         case CharacterType:
-            newObject = scene->createPlayer(options);
+        {
+            PlayerState state = LocalCharacterController::extractData(packet);
+            newObject = scene->createPlayer(options, state);
             break;
+        }
+
+        case PongBallType :
+        {
+            PongBallState state = NetworkPongBallController::extractData(packet);
+            newObject = scene->createPongBall(options, state);
+            break;
+        }
 
         default:
             Logger::Warn("UnHandled entity creation | TYPE: " + std::to_string(options.entityType));
+            break;
     }
+
+    if(!newObject) return nullptr;
 
     _syncableObjects[options.id] = newObject;
     return newObject;

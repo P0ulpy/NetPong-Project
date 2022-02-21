@@ -6,7 +6,8 @@
 #define NETPONG_PROJECT_SYNCABLEOBJECTTYPE_HPP
 
 enum SyncableObjectType {
-    CharacterType
+    CharacterType,
+    PongBallType,
 };
 
 #endif //NETPONG_PROJECT_SYNCABLEOBJECTTYPE_HPP

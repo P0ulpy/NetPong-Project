@@ -8,9 +8,10 @@
 #include "../../../Engine/SocketsManagement/Client/ClientSocket.hpp"
 #include "../ControllerBase.hpp"
 #include "../../../Engine/SocketsManagement/Client/SyncableObjectManagement/SyncableObject.hpp"
-#include "../../../Engine/SocketsManagement/PlayerState.hpp"
+#include "../../../Engine/SocketsManagement/ObjectsStates/PlayerState.hpp"
 
 class Character;
+class PongBall;
 
 class NetworkCharacterController : public Engine::ControllerBase
 {
@@ -31,10 +32,10 @@ public:
     void applySync(sf::Packet& recievedPacketChunk, std::stringstream& debugStream) final;
 
 private:
+    Character& _character;
 
     void rotate();
     void translate(const float& deltaTime);
-    void shoot();
     [[nodiscard]] sf::Vector2f velocityPrediction() const;
 };
 

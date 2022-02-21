@@ -3,42 +3,46 @@
 //
 
 #include "LocalCharacterController.hpp"
+
+#include <utility>
 #include "../../Entities/Character.hpp"
 #include "../../Entities/PongBall.hpp"
 #include "../../../Engine/Scenes/MainGameScene.hpp"
+#include "../../Terrains/PolygonTerrain.hpp"
+#include "../../../Logger/Logger.hpp"
 
 LocalCharacterController::KeyMap::KeyMap(sf::Keyboard::Key up, sf::Keyboard::Key down, sf::Keyboard::Key left,
                                          sf::Keyboard::Key right, sf::Mouse::Button shoot)
         : up(up), down(down), left(left), right(right), shoot(shoot) {}
 
 
-LocalCharacterController::LocalCharacterController(SyncableObjectOptions options, Character &character, const KeyMap &keymap)
-    : ControllerBase(options, character)
+LocalCharacterController::LocalCharacterController(SyncableObjectOptions options, Character &character, const KeyMap &keymap, const PlayerState& playerState)
+    : ControllerBase(std::move(options), character)
     , _keyMap(keymap)
+    , _character(character)
 {
-
+    std::stringstream debugStream;
+    applySync(playerState, debugStream);
 }
 
 void LocalCharacterController::update(const float& deltaTime)
 {
-    auto& character = static_cast<Character &>(_controlTarget);
-
-    if(character.canCharacterMove())
+    if(_character.canCharacterMove())
     {
         translate(deltaTime);
     }
 
     rotate();
 
-    if (character.canCharacterShoot() && sf::Mouse::isButtonPressed(_keyMap.shoot))
+    if (_character.canCharacterShoot() && sf::Mouse::isButtonPressed(_keyMap.shoot))
         shoot();
 }
 
 float LocalCharacterController::calcRotFromMousePos(sf::Vector2i mousePos)
 {
-    sf::Vector2f curPos = _controlTarget.getPosition();
-    float dx = curPos.x - (float)mousePos.x;
-    float dy = curPos.y - (float)mousePos.y;
+    sf::Vector2i curPos = _controlTarget.getPosition();
+    int dx = curPos.x - mousePos.x;
+    int dy = curPos.y - mousePos.y;
     return (float)((atan2(dy, dx)) * (float)180.0 / 3.14);
 }
 
@@ -59,34 +63,38 @@ void LocalCharacterController::translate(const float& deltaTime)
     if (sf::Keyboard::isKeyPressed(_keyMap.down)) y = 1;
     if (sf::Keyboard::isKeyPressed(_keyMap.up)) y = -1;
 
-    static_cast<Character &>(_controlTarget).moveEntity(sf::Vector2f(x, y), deltaTime);
+    _character.moveEntity(sf::Vector2f(x, y), deltaTime);
 }
 
-void LocalCharacterController::shoot()
+PongBall* LocalCharacterController::shoot()
 {
-    if(!MainGameScene::getInstance()) return;
+    if(!MainGameScene::getInstance()) return nullptr;
 
-    auto& character = static_cast<Character &>(_controlTarget);
+    if (!_character.canCharacterMove() || !_character.canCharacterShoot()) return nullptr;
+    if (_character.isInCooldown() || _character.isReloading()) return nullptr;
+
+    Logger::Log("Shooting");
+
     auto& engine = PoPossibEngin::getInstance();
-    auto inactivePongBalls = MainGameScene::getInstance()->getInactivePongBalls();
+    auto* pongBall = _character.getOneInactivePongball();
 
-    if (!character.canCharacterMove() || !character.canCharacterShoot()) return;
-    if (inactivePongBalls.empty()) return;
-
-    if (!character.isInCooldown() && !character.isReloading())
+    if(!pongBall)
     {
-        inactivePongBalls.top()->shoot(
-                character.shootDepart(),
-                character.shootDirection(engine.getInputsManager().getMousePosition()),
-                character.getNormalAmmoColor(),
-                character.getInactiveAmmoColor()
-        );
-
-        character.ammoCount(-1);
-        character.activateCooldown(true);
-
-        inactivePongBalls.pop();
+        Logger::Err("Can't shoot, no available pongBall");
+        return nullptr;
     }
+
+    pongBall->shoot(
+            _character.shootDepart(),
+            _character.shootDirection(engine.getInputsManager().getMousePosition()),
+            _character.getNormalAmmoColor(),
+            _character.getInactiveAmmoColor()
+    );
+
+    _character.ammoCount(-1);
+    _character.activateCooldown(true);
+
+    return pongBall;
 }
 
 sf::Packet LocalCharacterController::sync(std::stringstream &debugStream)
@@ -97,36 +105,33 @@ sf::Packet LocalCharacterController::sync(std::stringstream &debugStream)
     PlayerState state = getCurrentPlayerState();
 
     packet << state.position.x << state.position.y << state.velocity.x << state.velocity.y << state.angle << state.angularVelocity;
-    debugStream << "pos: {x:" << state.position.x << ", y:" << state.position.y << "}, vel: {x:" << state.velocity.x << ", y:" << state.velocity.y << "}, angle: " << state.angle << ", angleVel: " << state.angularVelocity;
+
+    debugStream
+        << "pos: {x:" << state.position.x << ", y:"
+        << state.position.y << "}, vel: {x:" << state.velocity.x << ", y:" << state.velocity.y
+        << "}, angle: " << state.angle << ", angleVel: " << state.angularVelocity;
 
     return packet;
 }
 
 void LocalCharacterController::applySync(sf::Packet &recievedPacketChunk, std::stringstream &debugStream)
 {
-    std::lock_guard guard(_mutex);
-
-    int px, py;
-    float vx, vy;
-    float angle, angleVel;
-
-    recievedPacketChunk >> px;
-    recievedPacketChunk >> py;
-    recievedPacketChunk >> vx;
-    recievedPacketChunk >> vy;
-    recievedPacketChunk >> angle;
-    recievedPacketChunk >> angleVel;
-
-    PlayerState state {
-            {px, py},
-            {vx, vy},
-            angle,
-            angleVel
-    };
-
-    debugStream << "pos: {x:" << state.position.x << ", y:" << state.position.y << "}, vel: {x:" << state.velocity.x << ", y:" << state.velocity.y << "}, angle: " << state.angle << ", angleVel: " << state.angularVelocity;
+    PlayerState state = LocalCharacterController::extractData(recievedPacketChunk);
+    applySync(state, debugStream);
 }
+void LocalCharacterController::applySync(const PlayerState& state, std::stringstream& debugStream)
+{
+    Logger::Log("applying sync");
 
+    _controlTarget.setPosition(state.position);
+    _controlTarget.setVelocity(state.velocity);
+    _controlTarget.setRotation(state.angle);
+
+    debugStream
+        << "pos: {x:" << state.position.x << ", y:"
+        << state.position.y << "}, vel: {x:" << state.velocity.x << ", y:" << state.velocity.y
+        << "}, angle: " << state.angle << ", angleVel: " << state.angularVelocity;
+}
 
 PlayerState LocalCharacterController::getCurrentPlayerState() const
 {
@@ -137,3 +142,19 @@ PlayerState LocalCharacterController::getCurrentPlayerState() const
             0
     };
 }
+
+PlayerState LocalCharacterController::extractData(sf::Packet &recievedPacketChunk)
+{
+    PlayerState state;
+
+    recievedPacketChunk >> state.position.x;
+    recievedPacketChunk >> state.position.y;
+    recievedPacketChunk >> state.velocity.x;
+    recievedPacketChunk >> state.velocity.y;
+    recievedPacketChunk >> state.angle;
+    recievedPacketChunk >> state.angularVelocity;
+
+    return state;
+}
+
+

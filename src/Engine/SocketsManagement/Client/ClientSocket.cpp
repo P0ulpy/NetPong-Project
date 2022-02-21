@@ -2,6 +2,7 @@
 #include "../../../Logger/Logger.hpp"
 #include "PlayerSettings.hpp"
 #include "../SyncableObjectType.hpp"
+#include "../../Scenes/MainGameScene.hpp"
 
 ClientSocket::ClientSocket(ClientConnectionSettings clientConnectionSettings, PoPossibEngin* engine)
 	: _clientConnectionSettings(std::move(clientConnectionSettings))

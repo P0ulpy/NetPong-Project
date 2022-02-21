@@ -18,6 +18,7 @@ constexpr int PLAYERS_SPAWN_POINT_X_OFFSET = 75;
 
 #include "../../Game/Controllers/LocalCharacterController/LocalCharacterController.hpp"
 #include "../../Game/Controllers/NetworkCharacterController/NetworkCharacterController.hpp"
+#include "../../Game/Controllers/PongBallController/NetworkPongBallController.hpp"
 
 MainGameScene* MainGameScene::_instance = nullptr;
 
@@ -37,6 +38,12 @@ MainGameScene::MainGameScene(PoPossibEngin& poPossibEngin)
 MainGameScene::~MainGameScene()
 {
     MainGameScene::_instance = nullptr;
+
+    for(auto* controller : _controllers)
+    {
+        delete controller;
+        controller = nullptr;
+    }
 };
 
 MainGameScene *MainGameScene::getInstance() { return _instance; }
@@ -55,14 +62,8 @@ void MainGameScene::updateInputs(const float& deltaTime)
 
 void MainGameScene::initValues()
 {
-	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _pongBalls, _players);
+	_polygonTerrain = std::make_unique<PolygonTerrain>(_poPossibEngin->getRenderWindow(), _players);
 	_animator = std::make_unique<AnimatorManager>();
-
-	for (int i = 0 ; i < NUM_MAX_PONGBALL ; i++)
-	{
-		_pongBalls.emplace_back(new PongBall(_poPossibEngin->getRenderWindow(), *this));
-	}
-
 	_audioPlayer = std::make_unique<AudioPlayer>();
 	_gameManager = std::make_shared<GameManager>(this);
 }
@@ -75,32 +76,6 @@ void MainGameScene::initFonts()
 	}
 }
 
-/*void MainGameScene::makePlayerShoot(int playerIndex)
-{
-	if (playerIndex < 0 || playerIndex > _players.size() - 1 ||
-		_inactivePongBalls.empty() ||
-		!_players[playerIndex]->canCharacterMove())
-	{
-		return;
-	}
-
-	if (_players[playerIndex]->canCharacterShoot())
-	{
-		_inactivePongBalls.top()->shoot(
-			_players[playerIndex]->shootDepart(),
-			_players[playerIndex]->shootDirection(_poPossibEngin->getInputsManager().getMousePosition()),
-			_players[playerIndex]->getNormalAmmoColor(),
-			_players[playerIndex]->getInactiveAmmoColor()
-		);
-
-		_players[playerIndex]->ammoCount(-1);
-		_players[playerIndex]->activateCooldown(true);
-		getAudioPlayer()->playSound("Shoot");
-
-		_inactivePongBalls.pop();
-	}
-}*/
-
 void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 {
 	for (int currPlayerIndex = 0; currPlayerIndex < _players.size(); ++currPlayerIndex)
@@ -112,7 +87,7 @@ void MainGameScene::checkPlayerPongBallCollision(const PongBall& pongBall) const
 		{
 			_players[currPlayerIndex]->setPlayerAlive(false);
 			getAudioPlayer()->playSound("Explosion");
-			_animator->DeathAnimation(_players[currPlayerIndex]->getPosition());
+			_animator->DeathAnimation((sf::Vector2f)_players[currPlayerIndex]->getPosition());
 			_gameManager->makePlayerWin(currPlayerIndex+1);
 		}
 	}
@@ -126,15 +101,9 @@ void MainGameScene::update(const float& deltaTime)
 	_polygonTerrain->update(deltaTime);
 
     for(const auto controller : _controllers)
+    {
         controller->update(deltaTime);
-
-	for (const auto pongBall : _pongBalls)
-	{
-		pongBall->update(deltaTime);
-
-        // TODO : Server side
-		//checkPlayerPongBallCollision(*pongBall);
-	}
+    }
 
 	for (const auto player : _players)
 	{
@@ -147,11 +116,6 @@ void MainGameScene::render(sf::RenderTarget* target)
 	_gameManager->render(*target);
 	_polygonTerrain->render(*target);
 
-	for (const auto pongBall : _pongBalls)
-	{
-		pongBall->render(*target);
-	}
-
 	for (const auto player : _players)
 	{
 		player->render(*target);
@@ -160,7 +124,7 @@ void MainGameScene::render(sf::RenderTarget* target)
 	_animator->render(*target);
 }
 
-PolygonTerrain* MainGameScene::getPolygonTerrain() const { return _polygonTerrain.get(); }
+PolygonTerrain *const MainGameScene::getPolygonTerrain() const { return _polygonTerrain.get(); }
 
 void MainGameScene::displayPlayers(bool isDisplayed) const
 {
@@ -175,15 +139,6 @@ AudioPlayer* MainGameScene::getAudioPlayer() const
 {
 	return _audioPlayer.get();
 }
-void MainGameScene::hideAllPongBalls() const
-{
-	for (const auto pongBall : _pongBalls)
-	{
-		pongBall->setActive(false);
-	}
-}
-void MainGameScene::pushInactivePongBall(PongBall* pongBallToPush) { _inactivePongBalls.push(pongBallToPush); }
-std::stack<PongBall *> &MainGameScene::getInactivePongBalls() { return _inactivePongBalls; }
 
 void MainGameScene::togglePlayersMovement(bool canTheyMove) const
 {
@@ -206,7 +161,7 @@ void MainGameScene::startFirstRound() const
 
 void MainGameScene::restartRound() const
 {
-	getPolygonTerrain()->drawRandomTerrain();
+	_polygonTerrain->drawRandomTerrain();
 	setPlayersToDefaultSpawnPoints();
 
 	for (const auto player : _players)
@@ -222,13 +177,19 @@ void MainGameScene::endRound() const
 	togglePlayersMovement(false);
 }
 
-Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions options)
+void MainGameScene::hideAllPongBalls() const
+{
+    for(auto* pongBall : _polygonTerrain->getPongBalls())
+    {
+        pongBall->setActive(false);
+    }
+}
+
+Client::SyncableObject *MainGameScene::createPlayer(const SyncableObjectOptions& options, const PlayerState& playerState)
 {
     // TODO : differentiation P1 / P2
 
     Logger::Log("Creating new player id: " + std::to_string(options.id));
-
-    sf::Vector2i renderWindowSize = (sf::Vector2i)_poPossibEngin->getRenderWindow().getSize();
 
     Character* newPlayer = nullptr;
 
@@ -269,7 +230,8 @@ Client::SyncableObject *MainGameScene::createPlayer(SyncableObjectOptions option
                     sf::Keyboard::Q,
                     sf::Keyboard::D,
                     sf::Mouse::Button::Left
-            });
+            }, playerState);
+
             break;
         case Remote:
             Logger::Log("Creating NetworkCharacterController for id: " + std::to_string(options.id));
@@ -304,4 +266,21 @@ void MainGameScene::setPlayersToDefaultSpawnPoints(Character* p1, Character* p2)
 
         p2->setPosition(spawnPosition);
     }
+}
+
+Client::SyncableObject *MainGameScene::createPongBall(const SyncableObjectOptions& options, const PongBallState& pongBallState)
+{
+    auto& syncableEntieManager = _poPossibEngin->getSocketManager()->getSocketClient()->getSyncableObjectManager();
+
+    auto* character = syncableEntieManager.getCharacter(options.controllerID);
+
+    if(!character) return nullptr;
+
+    auto* newPongBall = new PongBall(_poPossibEngin->getRenderWindow(), *this);
+    auto* pongBallController = new NetworkPongBallController(options, *newPongBall, pongBallState);
+
+    character->addPongBall(newPongBall);
+    _controllers.push_back(pongBallController);
+
+    return pongBallController;
 }

@@ -94,7 +94,7 @@ void MainMenuScene::update(const float& deltaTime)
 	}
     if (_menusIndex == 4)
     {
-        if(_playerFound)
+        if(Client::SyncableObjectManager::isGameStarted)
         {
             _poPossibEngin->loadScene(SceneType::MainGame);
             _playerFound = false;

@@ -18,7 +18,8 @@ constexpr float INITIAL_SPEED = 650.f;
 
 //--- Constructors - Destructor ---
 PongBall::PongBall(const sf::RenderWindow& window, MainGameScene& mainGameScene)
-	: _mainGameScene(&mainGameScene), _polygonTerrain(mainGameScene.getPolygonTerrain())
+	: _mainGameScene(&mainGameScene)
+    , _polygonTerrain(mainGameScene.getPolygonTerrain())
 {
 	initVariables();
 	initShapes(window);
@@ -233,7 +234,6 @@ void PongBall::setActive(bool isActive)
 	{
 		_phantomBallEffect->stop();
 		resetSpeedMultiplierBonus();
-		_mainGameScene->pushInactivePongBall(this);
 	}
 }
 
@@ -367,8 +367,22 @@ bool PongBall::linePongBallCollision(float x1, float y1, float x2, float y2, sf:
 	//	return true;
 	//}
 
-
 	return false;
 }
+
+sf::Vector2f PongBall::getVelocity() { return _velocity; }
+sf::Vector2i PongBall::getPosition() const
+{
+    return {
+        (int)_ballShape.getPosition().x,
+        (int)_ballShape.getPosition().y
+    };
+}
+
+float PongBall::getRotation() const { return 0; }
+
+void PongBall::setPosition(const sf::Vector2i &position)    { _ballShape.setPosition((float)position.x, (float)position.y); }
+void PongBall::setRotation(float rot)                       { }
+void PongBall::setVelocity(const sf::Vector2f &newVelocity) { _velocity = newVelocity; }
 
 

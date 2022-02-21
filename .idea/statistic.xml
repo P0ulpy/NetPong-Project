@@ -9,6 +9,7 @@
         <option value="$PROJECT_DIR$/out" />
         <option value="$PROJECT_DIR$/vcpkg" />
         <option value="$PROJECT_DIR$/vcpkg_installed" />
+        <option value="$PROJECT_DIR$/cmake-build-release" />
       </list>
     </option>
   </component>

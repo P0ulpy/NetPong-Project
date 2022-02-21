@@ -3,13 +3,14 @@
 #include "SFML/Graphics.hpp"
 
 #include "../Entity.hpp"
+#include "../../Engine/Interfaces/IControllable.hpp"
+#include "../../Engine/SocketsManagement/ObjectsStates/PongBallState.hpp"
 
 class PolygonTerrain;
 class PhantomBallEffect;
-class PolygonCollisionResult;
 class MainGameScene;
 
-class PongBall : public Entity
+class PongBall : public Entity, public Engine::IControllable
 {
 public:
 	//Constructors - Destructors
@@ -32,6 +33,14 @@ public:
 	void shoot(sf::Vector2f position, sf::Vector2f normVelocity, const sf::Color& colorNormal = sf::Color::Green, const sf::Color& colorInactive = sf::Color::White);
 
 	//Getters - Setters
+    [[nodiscard]] sf::Vector2f getVelocity() override;
+    [[nodiscard]] sf::Vector2i getPosition() const override;
+    [[nodiscard]] float getRotation() const override;
+
+    void setPosition(const sf::Vector2i& position) override;
+    void setRotation(float rot) override;
+    void setVelocity(const sf::Vector2f& newVelocity) override;
+
 	sf::CircleShape getShape() const;
 
 	void setSpeed(float speed);
@@ -55,14 +64,12 @@ public:
 	void stopPhantomBallEffect();
 
 private:
-	//MainGameScene
 	MainGameScene* _mainGameScene;
 
 	//Ball rendering
 	bool _isActive;
 
 	sf::CircleShape _ballShape;
-
 	
 	sf::Color _ballColor;
 	sf::Color _ballInactiveColor;
