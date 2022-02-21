@@ -5,6 +5,8 @@
 #include "Scene.hpp"
 #include "../../Game/Controllers/ControllerBase.hpp"
 #include "../SocketsManagement/Client/SyncableObjectManagement/SyncableObject.hpp"
+#include "../SocketsManagement/ObjectsStates/PlayerState.hpp"
+#include "../SocketsManagement/ObjectsStates/PongBallState.hpp"
 
 class AudioPlayer;
 class GameManager;
@@ -29,26 +31,26 @@ public:
 	void update(const float& deltaTime) override;
 	void render(sf::RenderTarget* target) override;
 
-	void hideAllPongBalls() const;
 	void togglePlayersMovement(bool canTheyMove) const;
-	void pushInactivePongBall(PongBall* pongBallToPush);
+
 	void startFirstRound() const;
 	void restartRound() const;
 	void endRound() const;
 
-	//gets - Sets
-	PolygonTerrain* getPolygonTerrain() const;
+	// Get / Set
+    PolygonTerrain *const getPolygonTerrain() const;
     void displayPlayers(bool isDisplayed) const;
 	AudioPlayer* getAudioPlayer() const;
 
-    Client::SyncableObject* createPlayer(SyncableObjectOptions options);
-
-    // GET
+    Client::SyncableObject* createPlayer(const SyncableObjectOptions& options, const PlayerState& playerState);
+    Client::SyncableObject* createPongBall(const SyncableObjectOptions& options, const PongBallState& pongBallState);
 
 private:
     static MainGameScene* _instance;
 
-	std::shared_ptr<GameManager> _gameManager;
+    std::mutex _mutex;
+
+    std::shared_ptr<GameManager> _gameManager;
 	std::unique_ptr<AnimatorManager> _animator;
 	std::unique_ptr<AudioPlayer> _audioPlayer;
 
@@ -56,18 +58,17 @@ private:
     std::vector<Engine::ControllerBase*> _controllers;
 
 	//Game objects
-	std::vector<PongBall*> _pongBalls;
-	std::stack<PongBall*> _inactivePongBalls;
 	std::vector<Character*> _players;
 
 	std::unique_ptr<PolygonTerrain> _polygonTerrain;
 
+private:
 	//Font, texts and textures..
 	sf::Font _font;
 
 	void initValues();
 	void initFonts();
-	//void makePlayerShoot(int playerIndex);
+    void hideAllPongBalls() const;
 	void checkPlayerPongBallCollision(const PongBall& pongBall) const;
 
     void setPlayersToDefaultSpawnPoints(Character *p1 = nullptr, Character *p2 = nullptr) const;

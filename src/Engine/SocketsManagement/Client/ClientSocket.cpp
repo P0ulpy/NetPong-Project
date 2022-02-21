@@ -2,6 +2,7 @@
 #include "../../../Logger/Logger.hpp"
 #include "PlayerSettings.hpp"
 #include "../SyncableObjectType.hpp"
+#include "../../Scenes/MainGameScene.hpp"
 
 ClientSocket::ClientSocket(ClientConnectionSettings clientConnectionSettings, PoPossibEngin* engine)
 	: _clientConnectionSettings(std::move(clientConnectionSettings))
@@ -65,7 +66,7 @@ void ClientSocket::registerListeners()
         _syncableObjectManager.onSceneUpdate(packet);
     });
 
-	_listenThread.launch();
+    _listenThread.launch();
 }
 
 [[noreturn]] void ClientSocket::listenEvents()
@@ -92,7 +93,7 @@ void ClientSocket::registerListeners()
 		{
             eventID = (SocketEvents)eventIDInt;
 
-            Logger::Log("Firring Event : " + std::to_string(eventID));
+            //Logger::Log("Firring Event : " + std::to_string(eventID));
 
 			if (eventID >= SocketEvents::Count || eventID < 0)
 			{

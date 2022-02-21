@@ -48,6 +48,8 @@ constexpr unsigned int serverTick = 30;
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(serverTick));
 
+        if(!_isGameStarted && _clients.size() > 1) _isGameStarted = true;
+
         sf::Packet sceneState = buildSceneState();
         _serverSocket->sendToAll(SocketEvents::SceneUpdate, sceneState);
     }
@@ -57,23 +59,16 @@ sf::Packet ServerMain::buildSceneState()
 {
     sf::Packet sceneState;
 
-    for(auto* object : _syncableObjects)
+    sceneState << _isGameStarted;
+
+    for(auto& object : _syncableObjects)
     {
         sceneState << object->getId();
         sceneState << (int)object->getType();
         sceneState << object->getController().getId();
 
-        switch (object->getType())
-        {
-            case CharacterType:
-            {
-                auto& state = static_cast<Character *>(object->getObject())->state;
-                sceneState << state.position.x << state.position.y << state.velocity.x << state.velocity.y << state.angle << state.angularVelocity;
-            }
-                break;
-            default:
-                Logger::Warn("Unhandled SyncableObjectType :" + std::to_string((int)object->getType()));
-        }
+        sf::Packet objectStatePacket = object->getObject()->sync();
+        sceneState.append(objectStatePacket.getData(), objectStatePacket.getDataSize());
     }
 
     return sceneState;
@@ -102,49 +97,44 @@ void ServerMain::onSceneUpdate(sf::Packet& packet)
             return;
         }
 
-        std::stringstream debugStream;
-        debugStream << "Receiving :\n{id:" << id << ", " << "type:" << type << ", control:" << control << ", data: {";
-
+        if(_syncableObjects[id])
         {
-            int px, py;
-            float vx, vy;
-            float angle, angleVel;
-
-            packet >> px;
-            packet >> py;
-            packet >> vx;
-            packet >> vy;
-            packet >> angle;
-            packet >> angleVel;
-
-            auto* character = static_cast<Character *>(_syncableObjects[id]->getObject());
-
-            character->state = {
-                    {px, py},
-                    {vx, vy},
-                    angle, angleVel
-            };
-
-            debugStream << "pos: {x:" << px << ", y:" << py << "}, vel: {x:" << vx << ", y:" << vy << "}, angle: " << angle << ", angleVel: " << angleVel;
+            _syncableObjects[id]->getObject()->applySync(packet);
+        }
+        else
+        {
+            Logger::Err("Trying to apply synchronisation to an unknown object id :" + std::to_string(id));
         }
 
-        debugStream << "} }";
+        //std::stringstream debugStream;
+        //debugStream << "Receiving :\n{id:" << id << ", " << "type:" << type << ", control:" << control << ", data: {";
+        //debugStream << "} }";
         //Logger::Log(debugStream.str());
     }
 }
+
+constexpr int pongBallPerPlayer = 10;
 
 void ServerMain::createCharacter(Client& clientFor)
 {
     std::lock_guard lock(_mutex);
 
-    auto* character = new Character();
+    auto character = std::make_shared<Character>();
     _characters.push_back(character);
 
-    _syncableObjects.push_back(new SyncableObject(++_idIncrement, SyncableObjectType::CharacterType, character, clientFor));
+    _syncableObjects.push_back(
+            std::make_shared<SyncableObject>(++_idIncrement, SyncableObjectType::CharacterType, character.get(), clientFor));
+
+    for(int i = 0; i < pongBallPerPlayer; i++)
+    {
+        createPongBall(clientFor);
+    }
 }
 
-void ServerMain::deleteCharacter()
-{
-    std::lock_guard lock(_mutex);
+void ServerMain::createPongBall(Client& clientFor) {
+    auto pongBall = std::make_shared<PongBall>();
+    _pongBalls.push_back(pongBall);
 
+    _syncableObjects.push_back(
+            std::make_shared<SyncableObject>(++_idIncrement, SyncableObjectType::PongBallType, pongBall.get(),clientFor));
 }

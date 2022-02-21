@@ -2,6 +2,10 @@
 
 #include <cmath>
 #include "../../Utils/Utils.hpp"
+#include "../Entities/PongBall.hpp"
+#include "../../Engine/Scenes/MainGameScene.hpp"
+#include "../Terrains/PolygonTerrain.hpp"
+#include "../../Logger/Logger.hpp"
 
 constexpr float CHARAC_SPEED = 450.f;
 
@@ -16,7 +20,7 @@ constexpr int SHOOT_ZONE_RADIUS = 5 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_X = 25 * CHARAC_GLOBAL_SIZE;
 constexpr int CANON_SIZE_Y = 15 * CHARAC_GLOBAL_SIZE;
 
-Character::Character(sf::Color color)
+Character:: Character(sf::Color color)
 {
 	//Préparation du personnage
 	charac.setRadius(CHARAC_RADIUS);
@@ -94,6 +98,14 @@ void Character::update(const float& deltaTime)
 		std::abs(charac.getPosition().x) + Utils::normalize(_velocity).x * _currentSpeed * deltaTime,
 		std::abs(charac.getPosition().y) + Utils::normalize(_velocity).y * _currentSpeed * deltaTime
 	);
+
+	for (const auto pongBall : _pongBalls)
+	{
+		pongBall->update(deltaTime);
+
+		// TODO : Server side
+		//checkPlayerPongBallCollision(*pongBall);
+	}
 }
 
 void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime)
@@ -107,7 +119,7 @@ void Character::moveEntity(const sf::Vector2f& direction, const float& deltaTime
 	secondAmmo.move(dir * CHARAC_SPEED * deltaTime);
 }
 
-void Character::render(sf::RenderTarget& target)const
+void Character::render(sf::RenderTarget& target) const
 {
 	if (!_isAlive) return;
 	
@@ -122,6 +134,11 @@ void Character::render(sf::RenderTarget& target)const
 	else if (_ammos > 0)
 	{
 		target.draw(secondAmmo);
+	}
+
+    for (const auto* pongBall : _pongBalls)
+	{
+		pongBall->render(target);
 	}
 }
 
@@ -206,7 +223,7 @@ bool Character::characterCollision(float x1, float y1, float x2, float y2, sf::V
 }
 
 void Character::setVelocity(const sf::Vector2f& newVelocity) { _velocity = newVelocity; }
-const sf::Vector2f& Character::getVelocity() { return _velocity; }
+sf::Vector2f Character::getVelocity() { return _velocity; }
 
 void Character::setPosition(const sf::Vector2i& position)
 {
@@ -274,18 +291,43 @@ void Character::setPlayerAlive(bool isAlive)
     }
 }
 
+void Character::addPongBall(PongBall *pongBall)
+{
+    if(!pongBall) return;
+    if(!MainGameScene::getInstance()) return;
+
+    MainGameScene::getInstance()->getPolygonTerrain()->addPongBall(pongBall);
+    _pongBalls.push_back(pongBall);
+}
+
+PongBall *Character::getOneInactivePongball() const
+{
+    for (const auto pongBall : _pongBalls)
+    {
+        if(!pongBall->isActive())
+        {
+            pongBall->setActive(true);
+            return pongBall;
+        }
+    }
+
+    Logger::Log("ERROR Character.cpp | getOneInactivePongball() : not inactive PongBall available, return null");
+    return nullptr;
+}
+
+
 bool Character::canCharacterShoot() const                   { return !isInCooldown() && !isReloading(); }
 bool Character::canCharacterMove() const                    { return _canCharacterMove; }
 const sf::CircleShape& Character::getShape() const          { return charac; }
 const sf::RectangleShape& Character::getCanon() const       { return canon; }
 float Character::getRotation() const                        { return _rotation; }
-const sf::Vector2f &Character::getPosition() const          { return charac.getPosition(); }
+sf::Vector2i Character::getPosition() const                 { return { (int)charac.getPosition().x, (int)charac.getPosition().y }; }
 sf::Color Character::getInactiveAmmoColor() const           { return _ammoColorInactive; }
 sf::Color Character::getNormalAmmoColor() const             { return _ammoColorNormal; }
 bool Character::isInCooldown() const                        { return _cooldownActivated; }
 bool Character::isReloading() const                         { return _isReloading; }
 sf::Vector3f Character::getPositionAndRadiusCharac()        { return {charac.getPosition().x, charac.getPosition().y, charac.getGlobalBounds().width / 2}; }
 float Character::getRadius() const                          { return charac.getGlobalBounds().width / 2; }
-
+std::vector<PongBall *> Character::getPongBalls()           { return _pongBalls; }
 
 

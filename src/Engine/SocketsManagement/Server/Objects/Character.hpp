@@ -6,7 +6,8 @@
 #define NETPONG_PROJECT_CHARACTER_HPP
 
 #include "ISyncable.hpp"
-#include "../../PlayerState.hpp"
+#include "../../ObjectsStates/PlayerState.hpp"
+#include <SFML/Network/Packet.hpp>
 
 namespace Server
 {
@@ -15,6 +16,9 @@ namespace Server
     public:
         Character() = default;
         Character(PlayerState state);
+
+        sf::Packet sync() override;
+        void applySync(sf::Packet& packet) override;
 
         PlayerState state;
     };

@@ -20,6 +20,9 @@ namespace Engine
     {
     public:
         ControllerBase(SyncableObjectOptions options, Engine::IControllable& controlTarget);
+        virtual ~ControllerBase();
+
+        [[nodiscard]] Engine::IControllable& getControlTarget() const;
     protected:
         Engine::IControllable& _controlTarget;
     };

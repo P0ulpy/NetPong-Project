@@ -8,7 +8,7 @@ class PongBall;
 class PolygonTerrain
 {
 public:
-	PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBalls, const std::vector<Character*>& players);
+	PolygonTerrain(const sf::RenderWindow& window, const std::vector<Character*>& players);
 	virtual ~PolygonTerrain();
 
 	//Functions
@@ -22,6 +22,8 @@ public:
 	sf::Vector2f getPointPosition(int index) const;
 	sf::ConvexShape getShape() const;
 
+    void addPongBall(PongBall* pongBall = nullptr);
+    std::vector<PongBall*>& getPongBalls();
 private:
 	enum DrawDirection
 	{
@@ -44,7 +46,7 @@ private:
 
 	const sf::RenderWindow* _window;
 
-	const std::vector<PongBall*>& _pongBalls;
+	std::vector<PongBall*> _pongBalls;
 	const std::vector<Character*>& _players;
 
 	int _currentTerrain{ 1 };

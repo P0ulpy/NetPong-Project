@@ -12,8 +12,8 @@ constexpr int TERRAIN_NUM_EDGES = 8;
 
 constexpr int NUM_TERRAINS = 10;
 
-PolygonTerrain::PolygonTerrain(const sf::RenderWindow& window, const std::vector<PongBall*>& pongBall, const std::vector<Character*>& players)
-	:_window(&window), _pongBalls(pongBall), _players(players)
+PolygonTerrain::PolygonTerrain(const sf::RenderWindow& window, const std::vector<Character*>& players)
+	:_window(&window), _players(players)
 {
 	initShape();
 }
@@ -439,4 +439,14 @@ void PolygonTerrain::drawTerrain10() //PLUS
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, NINETY, edgeLenght2, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, ZERO, edgeLenght, currentPoint);
 	setPointAndUpdateCurrentPoint(BOTTOM_LEFT_TO_TOP_RIGHT, FORTY_FIVE, edgeLenght2, currentPoint);
+}
+
+void PolygonTerrain::addPongBall(PongBall* pongBall)
+{
+    if(pongBall) _pongBalls.push_back(pongBall);
+}
+
+std::vector<PongBall *> &PolygonTerrain::getPongBalls()
+{
+    return _pongBalls;
 }

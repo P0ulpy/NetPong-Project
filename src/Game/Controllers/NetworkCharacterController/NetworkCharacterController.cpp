@@ -4,9 +4,13 @@
 
 #include "NetworkCharacterController.hpp"
 #include "../../Entities/Character.hpp"
+#include "../../../Engine/Scenes/MainGameScene.hpp"
+#include "../../Entities/PongBall.hpp"
 
 NetworkCharacterController::NetworkCharacterController(SyncableObjectOptions options, Character& controlTarget)
-        : ControllerBase(options, controlTarget) {}
+        : ControllerBase(options, controlTarget)
+        , _character(controlTarget)
+        {}
 
 void NetworkCharacterController::update(const float& deltaTime)
 {
@@ -25,11 +29,6 @@ void NetworkCharacterController::rotate()
 void NetworkCharacterController::translate(const float &deltaTime)
 {
     _controlTarget.setVelocity(velocityPrediction());
-}
-
-void NetworkCharacterController::shoot()
-{
-
 }
 
 sf::Vector2f NetworkCharacterController::velocityPrediction() const

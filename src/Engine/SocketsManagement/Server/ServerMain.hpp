@@ -5,6 +5,7 @@
 #include "../SocketsManager.hpp"
 #include "Socket/ServerSocket.hpp"
 #include "SyncManagement/SyncableObject.hpp"
+#include "Objects/PongBall.hpp"
 
 class PoPossibEngin;
 
@@ -25,6 +26,9 @@ namespace Server
         [[nodiscard]] bool isReady() const;
 
     private:
+
+        bool _isGameStarted = false;
+
         HostSettings _hostSettings;
         ServerSocket* _serverSocket = nullptr;
         PoPossibEngin *_engine = nullptr;
@@ -36,15 +40,17 @@ namespace Server
         std::map<std::string, std::unique_ptr<Client>>& _clients;
 
         static uint64_t _idIncrement;
-        std::vector<SyncableObject*> _syncableObjects;
-        std::vector<Character*> _characters;
+        std::vector<std::shared_ptr<SyncableObject>> _syncableObjects;
+        std::vector<std::shared_ptr<Character>> _characters;
+        std::vector<std::shared_ptr<PongBall>> _pongBalls;
 
         void onSceneUpdate(sf::Packet& packet);
         sf::Packet buildSceneState();
 
-        void deleteCharacter();
         void createCharacter(Client& clientFor);
+        void createPongBall(Client& clientFor);
 
         friend ServerSocket;
+
     };
 }
