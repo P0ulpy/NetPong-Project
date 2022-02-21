@@ -35,7 +35,7 @@ bool ServerMain::isReady() const
     return _serverSocket->isReady();
 }
 
-constexpr unsigned int serverTick = 30;
+constexpr unsigned int serverTick = 10;
 
 [[noreturn]] void ServerMain::threadEntry()
 {
@@ -54,6 +54,55 @@ constexpr unsigned int serverTick = 30;
         _serverSocket->sendToAll(SocketEvents::SceneUpdate, sceneState);
     }
 }
+
+void checkPingBallCollisions()
+{
+
+}
+
+/*bool checkPlayerCollision()
+{
+    auto* mainGameScene = MainGameScene::getInstance();
+    if(!mainGameScene) return false;
+
+    auto& players = mainGameScene->getPlayers();
+
+    for (int i = 0; i < players.size(); i++)
+    {
+        auto* player = players[i];
+
+        if (_pongBall.hitPlayer(
+                (float)player->getPosition().x,
+                (float)player->getPosition().y,
+                player->getRadius(),
+                player->getNormalAmmoColor()
+        ))
+        {
+            player->setPlayerAlive(false);
+            mainGameScene->getAudioPlayer()->playSound("Explosion");
+
+            mainGameScene->getAnimatorManager()->DeathAnimation({
+                (float)player->getPosition().x,
+                (float)player->getPosition().y
+            });
+
+            mainGameScene->getGameManager()->makePlayerWin(i + 1);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool hitPlayer(float c2x, float c2y, float c2r, sf::Color color2) const
+{
+    if (_canKill && _isActive && color2 != _ballColor)
+    {
+        return Utils::circleCircleCollision(_ballShape.getPosition().x, _ballShape.getPosition().y, _ballShape.getRadius(), c2x, c2y, c2r);
+    }
+
+    return false;
+}*/
 
 sf::Packet ServerMain::buildSceneState()
 {

@@ -18,6 +18,9 @@ struct PongBallState
 
     bool enabled = false;
     bool canKill = false;
+
+    bool hit = false;
+    int hitID = -1;
 };
 
 

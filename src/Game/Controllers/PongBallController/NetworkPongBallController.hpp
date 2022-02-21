@@ -25,6 +25,8 @@ public:
 
 private:
     PongBall& _pongBall;
+
+    bool checkPlayerCollision();
 };
 
 

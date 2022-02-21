@@ -5,6 +5,12 @@
 #include "NetworkPongBallController.hpp"
 #include <utility>
 
+#include "../../../Engine/Scenes/MainGameScene.hpp"
+#include "../../../Engine/Animator/AnimatorManager.hpp"
+#include "../../Entities/Character.hpp"
+#include "../../System/Audio/AudioPlayer.hpp"
+#include "../../System/GameManager.hpp"
+
 NetworkPongBallController::NetworkPongBallController(SyncableObjectOptions options, PongBall &pongBall, const PongBallState& pongBallState)
     : ControllerBase(std::move(options), pongBall)
     , _pongBall(pongBall)
@@ -58,12 +64,47 @@ void NetworkPongBallController::applySync(const PongBallState& state, std::strin
 
 void NetworkPongBallController::update(const float &deltaTime)
 {
+    checkPlayerCollision();
+}
 
+bool NetworkPongBallController::checkPlayerCollision()
+{
+    auto* mainGameScene = MainGameScene::getInstance();
+    if(!mainGameScene) return false;
+
+    auto& players = mainGameScene->getPlayers();
+
+    for (int i = 0; i < players.size(); i++)
+    {
+        auto* player = players[i];
+
+        if (_pongBall.hitPlayer(
+                (float)player->getPosition().x,
+                (float)player->getPosition().y,
+                player->getRadius(),
+                player->getNormalAmmoColor()
+            )
+        )
+        {
+            player->setPlayerAlive(false);
+            mainGameScene->getAudioPlayer()->playSound("Explosion");
+
+            mainGameScene->getAnimatorManager()->DeathAnimation({
+                        (float)player->getPosition().x,
+                        (float)player->getPosition().y
+            });
+
+            mainGameScene->getGameManager()->makePlayerWin(i + 1);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 PongBallState NetworkPongBallController::getPongBallState()
 {
-    return PongBallState {
+    return {
         _pongBall.getPosition(),
         _pongBall.getVelocity(),
         _pongBall.isActive(),

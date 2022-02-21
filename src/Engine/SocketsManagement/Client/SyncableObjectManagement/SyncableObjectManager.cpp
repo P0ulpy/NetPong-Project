@@ -11,10 +11,9 @@
 #include "../../../../Game/Controllers/LocalCharacterController/LocalCharacterController.hpp"
 
 using namespace Client;
+constexpr unsigned int tickDelay = 10;
 
-constexpr unsigned int tickDelay = 30;
-
-std::map<SyncableObjectType, unsigned int> SyncableObjectManager::objectTypesInSceneUpdate;
+std::map<SyncableObjectType, unsigned int> SyncableObjectManager::objectTypesInSceneUpdate = std::map<SyncableObjectType, unsigned int>();
 bool SyncableObjectManager::isGameStarted = false;
 
 SyncableObjectManager::SyncableObjectManager(ClientSocket *clientSocket)
