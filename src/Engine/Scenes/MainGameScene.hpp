@@ -65,7 +65,7 @@ private:
 private:
 	//Font, texts and textures..
 	sf::Font _font;
-
+	
 	void initValues();
 	void initFonts();
     void hideAllPongBalls() const;

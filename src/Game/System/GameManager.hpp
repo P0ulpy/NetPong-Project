@@ -1,12 +1,13 @@
 #pragma once
 #include <vector>
 #include <memory>
-
+#include "SFML/Graphics.hpp"
 #include "SFML/Graphics/RenderTarget.hpp"
 
 class MainGameScene;
 class GameUI;
 class RoundStartCountdown;
+class UI;
 
 class GameManager
 {
@@ -16,7 +17,7 @@ private	:
 	int _scorePlayer1 = 0;
 	int _scorePlayer2 = 0;
 	bool _hasRoundEnded = false;
-
+	sf::Font _font;
 	int _currentRound = 0;
 	bool _isFirstRound { true };
 
@@ -24,6 +25,7 @@ private	:
 
 	std::unique_ptr<RoundStartCountdown> _roundStartCountdown;
 	std::unique_ptr<GameUI> _gameUI;
+	std::unique_ptr<UI> _UI;
 
 	void initValues();
 
