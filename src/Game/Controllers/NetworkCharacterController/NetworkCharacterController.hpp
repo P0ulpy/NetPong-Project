@@ -18,6 +18,10 @@ class NetworkCharacterController : public Engine::ControllerBase
 private:
     const float _maxNetDelta = 2.0;
     PlayerState _lastPlayerState;
+
+    sf::Vector2f _oldPosition {0,0};
+    sf::Vector2f _oldVelocity {0,0};
+
     float _netDelta = 0;
 
 public:
@@ -36,7 +40,7 @@ private:
 
     void rotate();
     void translate(const float& deltaTime);
-    [[nodiscard]] sf::Vector2f velocityPrediction() const;
+    [[nodiscard]] sf::Vector2f velocityPrediction();
 };
 
 #endif //NETPONG_PROJECT_NETWORKCHARACTERCONTROLLER_HPP

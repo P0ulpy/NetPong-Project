@@ -35,8 +35,6 @@ bool ServerMain::isReady() const
     return _serverSocket->isReady();
 }
 
-constexpr unsigned int serverTick = 30;
-
 [[noreturn]] void ServerMain::threadEntry()
 {
     Logger::SetThreadLabel("ServerMainThread");
@@ -46,7 +44,7 @@ constexpr unsigned int serverTick = 30;
 
     while (true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(serverTick));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / SERVER_TICK_RATE));
 
         if(!_isGameStarted && _clients.size() > 1) _isGameStarted = true;
 
