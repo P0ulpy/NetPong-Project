@@ -9,11 +9,16 @@
 
 namespace Server
 {
+    class SyncableObject;
+
     class ISyncable
     {
     public:
+        ISyncable() = default;
         virtual sf::Packet sync() = 0;
         virtual void applySync(sf::Packet& packet) = 0;
+
+        SyncableObject* rootObject;
     };
 }
 

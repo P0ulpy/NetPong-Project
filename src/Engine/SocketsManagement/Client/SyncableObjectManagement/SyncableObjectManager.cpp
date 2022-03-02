@@ -11,7 +11,7 @@
 #include "../../../../Game/Controllers/LocalCharacterController/LocalCharacterController.hpp"
 
 using namespace Client;
-constexpr unsigned int tickDelay = 10;
+constexpr unsigned int tickDelay = 30;
 
 std::map<SyncableObjectType, unsigned int> SyncableObjectManager::objectTypesInSceneUpdate = std::map<SyncableObjectType, unsigned int>();
 bool SyncableObjectManager::isGameStarted = false;
@@ -35,7 +35,9 @@ Character* SyncableObjectManager::getCharacter(const std::string& controllerID)
     {
         auto* obj = objectPair.second;
         if(obj && obj->getType() == CharacterType && obj->getControllerId() == controllerID)
+        {
             return dynamic_cast<Character*>(&dynamic_cast<Engine::ControllerBase*>(obj)->getControlTarget());
+        }
     }
 
     return nullptr;

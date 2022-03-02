@@ -73,8 +73,6 @@ PongBall* LocalCharacterController::shoot()
     if (!_character.canCharacterMove() || !_character.canCharacterShoot()) return nullptr;
     if (_character.isInCooldown() || _character.isReloading()) return nullptr;
 
-    Logger::Log("Shooting");
-
     auto& engine = PoPossibEngin::getInstance();
     auto* pongBall = _character.getOneInactivePongball();
 
@@ -121,8 +119,6 @@ void LocalCharacterController::applySync(sf::Packet &recievedPacketChunk, std::s
 }
 void LocalCharacterController::applySync(const PlayerState& state, std::stringstream& debugStream)
 {
-    Logger::Log("applying sync");
-
     _controlTarget.setPosition(state.position);
     _controlTarget.setVelocity(state.velocity);
     _controlTarget.setRotation(state.angle);

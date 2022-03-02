@@ -18,6 +18,7 @@ struct PlayerState
 
     float angle = 0;
     float angularVelocity = 0;
+    float radius { 18 };
 };
 
 #endif //NETPONG_PROJECT_PLAYERSTATE_HPP

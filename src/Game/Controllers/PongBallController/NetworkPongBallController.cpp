@@ -64,7 +64,7 @@ void NetworkPongBallController::applySync(const PongBallState& state, std::strin
 
 void NetworkPongBallController::update(const float &deltaTime)
 {
-    checkPlayerCollision();
+    //vcheckPlayerCollision();
 }
 
 bool NetworkPongBallController::checkPlayerCollision()

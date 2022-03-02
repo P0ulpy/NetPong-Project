@@ -56,14 +56,26 @@ void ClientSocket::registerListeners()
     {
         Logger::Log("Disconnected");
     });
+
     _eventEmitter.on(SocketEvents::NewPlayerConnected, [this](sf::Packet packet) -> void
     {
         Logger::Log("New Player connected");
     });
+
     _eventEmitter.on(SocketEvents::SceneUpdate, [this](sf::Packet packet) -> void
     {
         if(!_ready) return;
         _syncableObjectManager.onSceneUpdate(packet);
+    });
+
+    _eventEmitter.on(SocketEvents::PongBallCollision, [this](sf::Packet packet) -> void
+    {
+        if(!_ready) return;
+
+        int id = -1;
+        packet >> id;
+
+        Logger::Log("PongBallcollision id:" + std::to_string(id));
     });
 
     _listenThread.launch();

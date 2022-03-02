@@ -15,12 +15,10 @@ struct PongBallState
 
     sf::Vector2i position { sf::Vector2i(MapWidth / 2, MapHeight / 2) };
     sf::Vector2f velocity { sf::Vector2i(0, 0) };
+    float radius { 25 };
 
     bool enabled = false;
     bool canKill = false;
-
-    bool hit = false;
-    int hitID = -1;
 };
 
 

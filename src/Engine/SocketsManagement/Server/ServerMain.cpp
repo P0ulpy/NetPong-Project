@@ -35,7 +35,7 @@ bool ServerMain::isReady() const
     return _serverSocket->isReady();
 }
 
-constexpr unsigned int serverTick = 10;
+constexpr unsigned int serverTick = 30;
 
 [[noreturn]] void ServerMain::threadEntry()
 {
@@ -48,61 +48,56 @@ constexpr unsigned int serverTick = 10;
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(serverTick));
 
-        if(!_isGameStarted && _clients.size() > 1) _isGameStarted = true;
+        {
+            std::lock_guard guard(_mutex);
+            checkPingBallCollisions();
+
+            if(!_isGameStarted && _clients.size() > 1) _isGameStarted = true;
+        }
 
         sf::Packet sceneState = buildSceneState();
         _serverSocket->sendToAll(SocketEvents::SceneUpdate, sceneState);
     }
 }
 
-void checkPingBallCollisions()
+void ServerMain::checkPingBallCollisions()
 {
+    for(auto& pongBall_shared : _pongBalls)
+    {
+        auto* pongBall = pongBall_shared.get();
 
+        Character* hittedCharacter = checkPlayerCollision(pongBall);
+        if(hittedCharacter)
+        {
+            sf::Packet packet;
+            packet << hittedCharacter->rootObject->getId();
+
+            Logger::Log("Collision Server");
+
+            _serverSocket->emit(PongBallCollision, packet);
+        }
+    }
 }
 
-/*bool checkPlayerCollision()
+Character* ServerMain::checkPlayerCollision(PongBall* pongBall)
 {
-    auto* mainGameScene = MainGameScene::getInstance();
-    if(!mainGameScene) return false;
-
-    auto& players = mainGameScene->getPlayers();
-
-    for (int i = 0; i < players.size(); i++)
+    for (auto & character : _characters)
     {
-        auto* player = players[i];
+        auto* player = character.get();
 
-        if (_pongBall.hitPlayer(
-                (float)player->getPosition().x,
-                (float)player->getPosition().y,
-                player->getRadius(),
-                player->getNormalAmmoColor()
+        if (pongBall->hitPlayer(
+                (float)player->state.position.x,
+                (float)player->state.position.y,
+                player->state.radius,
+                player->rootObject->getController().getId()
         ))
         {
-            player->setPlayerAlive(false);
-            mainGameScene->getAudioPlayer()->playSound("Explosion");
-
-            mainGameScene->getAnimatorManager()->DeathAnimation({
-                (float)player->getPosition().x,
-                (float)player->getPosition().y
-            });
-
-            mainGameScene->getGameManager()->makePlayerWin(i + 1);
-            return true;
+            return player;
         }
     }
 
-    return false;
+    return nullptr;
 }
-
-bool hitPlayer(float c2x, float c2y, float c2r, sf::Color color2) const
-{
-    if (_canKill && _isActive && color2 != _ballColor)
-    {
-        return Utils::circleCircleCollision(_ballShape.getPosition().x, _ballShape.getPosition().y, _ballShape.getRadius(), c2x, c2y, c2r);
-    }
-
-    return false;
-}*/
 
 sf::Packet ServerMain::buildSceneState()
 {
@@ -168,11 +163,12 @@ void ServerMain::createCharacter(Client& clientFor)
 {
     std::lock_guard lock(_mutex);
 
-    auto character = std::make_shared<Character>();
-    _characters.push_back(character);
+    _characters.push_back(std::make_shared<Character>());
 
     _syncableObjects.push_back(
-            std::make_shared<SyncableObject>(++_idIncrement, SyncableObjectType::CharacterType, character.get(), clientFor));
+            std::make_shared<SyncableObject>(++_idIncrement, SyncableObjectType::CharacterType, _characters.back().get(), clientFor));
+
+    _characters.back()->rootObject = _syncableObjects.back().get();
 
     for(int i = 0; i < pongBallPerPlayer; i++)
     {
@@ -180,10 +176,12 @@ void ServerMain::createCharacter(Client& clientFor)
     }
 }
 
-void ServerMain::createPongBall(Client& clientFor) {
-    auto pongBall = std::make_shared<PongBall>();
-    _pongBalls.push_back(pongBall);
+void ServerMain::createPongBall(Client& clientFor)
+{
+    _pongBalls.push_back(std::make_shared<PongBall>());
 
     _syncableObjects.push_back(
-            std::make_shared<SyncableObject>(++_idIncrement, SyncableObjectType::PongBallType, pongBall.get(),clientFor));
+            std::make_shared<SyncableObject>(++_idIncrement, SyncableObjectType::PongBallType, _pongBalls.back().get(),clientFor));
+
+    _pongBalls.back()->rootObject = _syncableObjects.back().get();
 }

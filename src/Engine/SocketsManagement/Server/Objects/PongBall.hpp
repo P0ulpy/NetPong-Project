@@ -7,6 +7,8 @@
 
 #include "ISyncable.hpp"
 #include "../../ObjectsStates/PongBallState.hpp"
+#include "SFML/Graphics/Color.hpp"
+#include "../SyncManagement/SyncableObject.hpp"
 
 namespace Server
 {
@@ -14,10 +16,11 @@ namespace Server
     {
     public:
         PongBall() = default;
-        PongBall(PongBallState state);
+        explicit PongBall(PongBallState state);
 
         sf::Packet sync() override;
         void applySync(sf::Packet& packet) override;
+        [[nodiscard]] bool hitPlayer(float c2x, float c2y, float c2r, const std::string& ownerID) const;
 
         PongBallState state;
     };

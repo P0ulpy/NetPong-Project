@@ -50,6 +50,9 @@ namespace Server
         void createCharacter(Client& clientFor);
         void createPongBall(Client& clientFor);
 
+        void checkPingBallCollisions();
+        Character* checkPlayerCollision(PongBall *pongBall);
+
         friend ServerSocket;
 
     };

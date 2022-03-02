@@ -8,6 +8,7 @@ enum SocketEvents
     NewPlayerConnected,
     PlayerDisconnected,
     SceneUpdate,
+    PongBallCollision,
 
 	Count
 };

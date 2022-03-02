@@ -15,7 +15,7 @@ namespace Server
     {
     public:
         Character() = default;
-        Character(PlayerState state);
+        explicit Character(PlayerState state);
 
         sf::Packet sync() override;
         void applySync(sf::Packet& packet) override;

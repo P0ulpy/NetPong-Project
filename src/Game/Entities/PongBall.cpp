@@ -188,8 +188,6 @@ void PongBall::shoot(sf::Vector2f position, sf::Vector2f normVelocity, const sf:
 	_ballColor = colorNormal;
 	_ballInactiveColor = colorInactive;
 
-	Logger::Log("SHOOT BALL !");
-
 	setActive(true);
 }
 
